@@ -15,7 +15,7 @@ export NUPLAN_EXP_ROOT="REPLACE_WITH_EXP_DIR" # nuplan experiment absolute path 
 #   - "test14-random"
 #   - "test14-hard"
 #   - "val14"
-SPLIT="REPLACE_WITH_SPLIT"  # e.g., "val14"
+SPLIT="val14"  # e.g., "val14"
 
 # Challenge type
 # Options: 
