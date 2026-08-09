@@ -1,0 +1,140 @@
+{
+  "supervised": {
+    "run_dir": "tmp/closed_loop_eval/exp/simulation/closed_loop_nonreactive_agents/hdp-paper-supervised-e14-cl3-retry1",
+    "scenario_count": 3,
+    "successful_simulations": 3,
+    "failed_simulations": 0,
+    "means": {
+      "score": 0.9421218020605405,
+      "no_ego_at_fault_collisions": 1.0,
+      "drivable_area_compliance": 1.0,
+      "ego_is_making_progress": 1.0,
+      "driving_direction_compliance": 1.0,
+      "ego_progress_along_expert_route": 0.814852698774282,
+      "time_to_collision_within_bound": 1.0,
+      "speed_limit_compliance": 0.9999213347743097,
+      "ego_is_comfortable": 1.0,
+      "trajectory_runtime_mean_s": 0.20476952328537745,
+      "simulation_duration_s": 34.756139912332095
+    },
+    "scenarios": [
+      {
+        "scenario": "08764235932a5530",
+        "scenario_type": "stationary_in_traffic",
+        "log_name": "2021.06.07.12.54.00_veh-35_01843_02314",
+        "score": 0.8950884755811379,
+        "no_ego_at_fault_collisions": 1.0,
+        "drivable_area_compliance": 1.0,
+        "ego_is_making_progress": 1.0,
+        "driving_direction_compliance": 1.0,
+        "ego_progress_along_expert_route": 0.6642831218596414,
+        "time_to_collision_within_bound": 1.0,
+        "speed_limit_compliance": 1.0,
+        "ego_is_comfortable": 1.0,
+        "trajectory_runtime_mean_s": 0.1997560805355155,
+        "simulation_duration_s": 33.30551427701721
+      },
+      {
+        "scenario": "134f95eed3775e22",
+        "scenario_type": "high_magnitude_speed",
+        "log_name": "2021.06.08.14.35.24_veh-26_02555_03004",
+        "score": 0.9999410010807323,
+        "no_ego_at_fault_collisions": 1.0,
+        "drivable_area_compliance": 1.0,
+        "ego_is_making_progress": 1.0,
+        "driving_direction_compliance": 1.0,
+        "ego_progress_along_expert_route": 1.0,
+        "time_to_collision_within_bound": 1.0,
+        "speed_limit_compliance": 0.9997640043229291,
+        "ego_is_comfortable": 1.0,
+        "trajectory_runtime_mean_s": 0.2208837993945395,
+        "simulation_duration_s": 37.83092175098136
+      },
+      {
+        "scenario": "263da852dba35cac",
+        "scenario_type": "traversing_traffic_light_intersection",
+        "log_name": "2021.07.24.23.50.16_veh-17_01696_02071",
+        "score": 0.9313359295197514,
+        "no_ego_at_fault_collisions": 1.0,
+        "drivable_area_compliance": 1.0,
+        "ego_is_making_progress": 1.0,
+        "driving_direction_compliance": 1.0,
+        "ego_progress_along_expert_route": 0.7802749744632046,
+        "time_to_collision_within_bound": 1.0,
+        "speed_limit_compliance": 1.0,
+        "ego_is_comfortable": 1.0,
+        "trajectory_runtime_mean_s": 0.1936686899260773,
+        "simulation_duration_s": 33.13198370899772
+      }
+    ]
+  },
+  "rl": {
+    "run_dir": "tmp/closed_loop_eval/exp/simulation/closed_loop_nonreactive_agents/hdp-paper-rl-final-cl3",
+    "scenario_count": 3,
+    "successful_simulations": 3,
+    "failed_simulations": 0,
+    "means": {
+      "score": 0.9495339536627968,
+      "no_ego_at_fault_collisions": 1.0,
+      "drivable_area_compliance": 1.0,
+      "ego_is_making_progress": 1.0,
+      "driving_direction_compliance": 1.0,
+      "ego_progress_along_expert_route": 0.8385734762747341,
+      "time_to_collision_within_bound": 1.0,
+      "speed_limit_compliance": 0.9999189693077694,
+      "ego_is_comfortable": 1.0,
+      "trajectory_runtime_mean_s": 0.22028171746133696,
+      "simulation_duration_s": 36.73720336266948
+    },
+    "scenarios": [
+      {
+        "scenario": "08764235932a5530",
+        "scenario_type": "stationary_in_traffic",
+        "log_name": "2021.06.07.12.54.00_veh-35_01843_02314",
+        "score": 0.9078782876877676,
+        "no_ego_at_fault_collisions": 1.0,
+        "drivable_area_compliance": 1.0,
+        "ego_is_making_progress": 1.0,
+        "driving_direction_compliance": 1.0,
+        "ego_progress_along_expert_route": 0.7052105206008563,
+        "time_to_collision_within_bound": 1.0,
+        "speed_limit_compliance": 1.0,
+        "ego_is_comfortable": 1.0,
+        "trajectory_runtime_mean_s": 0.21080751637514092,
+        "simulation_duration_s": 35.11729420701158
+      },
+      {
+        "scenario": "134f95eed3775e22",
+        "scenario_type": "high_magnitude_speed",
+        "log_name": "2021.06.08.14.35.24_veh-26_02555_03004",
+        "score": 0.999939226980827,
+        "no_ego_at_fault_collisions": 1.0,
+        "drivable_area_compliance": 1.0,
+        "ego_is_making_progress": 1.0,
+        "driving_direction_compliance": 1.0,
+        "ego_progress_along_expert_route": 1.0,
+        "time_to_collision_within_bound": 1.0,
+        "speed_limit_compliance": 0.9997569079233081,
+        "ego_is_comfortable": 1.0,
+        "trajectory_runtime_mean_s": 0.24589148305525266,
+        "simulation_duration_s": 40.77235057999496
+      },
+      {
+        "scenario": "263da852dba35cac",
+        "scenario_type": "traversing_traffic_light_intersection",
+        "log_name": "2021.07.24.23.50.16_veh-17_01696_02071",
+        "score": 0.9407843463197956,
+        "no_ego_at_fault_collisions": 1.0,
+        "drivable_area_compliance": 1.0,
+        "ego_is_making_progress": 1.0,
+        "driving_direction_compliance": 1.0,
+        "ego_progress_along_expert_route": 0.810509908223346,
+        "time_to_collision_within_bound": 1.0,
+        "speed_limit_compliance": 1.0,
+        "ego_is_comfortable": 1.0,
+        "trajectory_runtime_mean_s": 0.20414615295361727,
+        "simulation_duration_s": 34.32196530100191
+      }
+    ]
+  }
+}

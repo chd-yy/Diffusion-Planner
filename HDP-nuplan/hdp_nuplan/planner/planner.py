@@ -54,6 +54,7 @@ class HyperDiffusionPlanner(AbstractPlanner):
         self._ema_enabled = enable_ema
         self._device = device
 
+        # nuPlan 侧切换到 HDP 独立模型；对应名称和配置入口也同步改变。
         self._planner = Hyper_Diffusion_Planner(config)
 
         self.data_processor = DataProcessor(config)
@@ -65,7 +66,7 @@ class HyperDiffusionPlanner(AbstractPlanner):
         Inherited.
         """
         return "hyper_diffusion_planner"
-    
+
     def observation_type(self) -> Type[Observation]:
         """
         Inherited.
@@ -106,6 +107,8 @@ class HyperDiffusionPlanner(AbstractPlanner):
 
     def outputs_to_trajectory(self, outputs: Dict[str, torch.Tensor], ego_state_history: Deque[EgoState]) -> List[InterpolatableState]:    
 
+        # HDP 的 prediction 语义是 [B, future_len, 4]，不同于原实现的
+        # [B, 1 + predicted_neighbor_num, future_len, 4]；因此这里的输出索引是接口差异的关键位置。
         predictions = outputs['prediction'][0, 0].detach().cpu().numpy().astype(np.float64) # T, 4
         heading = np.arctan2(predictions[:, 3], predictions[:, 2])[..., None]
         predictions = np.concatenate([predictions[..., :2], heading], axis=-1) 
@@ -128,4 +131,3 @@ class HyperDiffusionPlanner(AbstractPlanner):
         )
 
         return trajectory
-    

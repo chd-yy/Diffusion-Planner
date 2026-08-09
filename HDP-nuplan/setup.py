@@ -11,7 +11,8 @@ setuptools.setup(
     name="hdp_nuplan",
     version="1.0.0",
     author="Yinan Zheng, Tianyi Tan @ Tsinghua AIR",
-    packages=["hdp_nuplan"],
+    # 自动包含 model/data_process/rl 等子包；否则新增的 RL 模块不会进入非 editable 安装。
+    packages=setuptools.find_packages(),
     package_dir={"": "."},
     classifiers=[
         "Programming Language :: Python :: 3.9",

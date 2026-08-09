@@ -1,16 +1,26 @@
 import abc
 import torch
+# 【HDP 与原 Diffusion-Planner 的区别：参数化转换类型注解】HDP 为新增的
+# expand_dim()/transform() 引入 Tensor、Optional、List 和 Union；原版没有这些导入。
 from torch import Tensor
 from typing import Optional, List, Union
 
 
 STD_MIN = 1e-6
+# 【HDP 与原 Diffusion-Planner 的区别：sub-VP 实现移除】原版还定义了
+# subVPSDE_exp，但其 __init__ 首行直接 raise NotImplementedError，实际无法实例化；
+# HDP 删除了该类，因此当前 STD_MIN 在本文件内保留但没有被可执行代码使用。
 
 
+# 【HDP 与原 Diffusion-Planner 的区别：广播辅助函数】HDP 新增该函数，为统一的
+# x_start/noise/v/score 转换把 batch 级 alpha/sigma 扩展到参考轨迹张量的维数。
 def expand_dim(x: torch.Tensor, ref: torch.Tensor):
+    # 将按 batch 给出的 alpha/sigma 扩展为可与轨迹张量广播的形状。
     return x.reshape(*x.shape, *([1] * (ref.ndim - x.ndim)))
 
 
+# 【实现核对：公共 SDE 逻辑一致】SDE 抽象类全部接口，以及 VPSDE_linear 原有的
+# __init__、T、sde、marginal_prob、diffusion_coeff、marginal_prob_std 均与原版逐语句相同。
 class SDE(abc.ABC):
     """SDE abstract class. Functions are designed for a mini-batch of inputs."""
 
@@ -111,6 +121,8 @@ class VPSDE_linear(SDE):
         return mean, std
     
     def marginal_alpha(self, t):
+        # 【HDP 与原 Diffusion-Planner 的区别：显式 alpha 接口】原版只在
+        # marginal_prob 内部计算 alpha(t)；HDP 单独暴露它，供 transform() 参数化转换。
         mean_log_coeff = -0.25 * t ** 2 * \
             (self._beta_max - self._beta_min) - 0.5 * self._beta_min * t
         return torch.exp(mean_log_coeff)
@@ -127,8 +139,17 @@ class VPSDE_linear(SDE):
         return std
 
     def transform(self, pattern, input: Tensor, t: Tensor, x_t: Optional[Tensor]) -> Union[Tensor, List[Tensor]]:
+        # 【HDP 与原 Diffusion-Planner 的区别：统一参数化转换】HDP 新增转换入口，
+        # 支持以 "source->target" 在 x_start、noise、v、score 之间转换；原版 SDE
+        # 没有该方法，只在 loss/model_wrapper 的局部逻辑中处理部分参数化。
 
         src, tgt = pattern.split("->")
+
+        # 输入和目标参数化类型相同时不需要执行中间转换，直接返回原 Tensor。
+        # 例如 x_start->x_start 若先绕行 x_start->noise->x_start，两个分母中的
+        # 1e-6 会引入不必要的数值误差，也会增加额外计算。
+        if src == tgt:
+            return input
 
         alpha_t = expand_dim(self.marginal_alpha(t), input)
         sigma_t = expand_dim(self.marginal_prob_std(t), input)

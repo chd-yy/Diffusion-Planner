@@ -1,0 +1,578 @@
+{
+    "args_file": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/args.json",
+    "checkpoint_dir": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30",
+    "pattern": "model_epoch_*.pth",
+    "data_list": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_val_balanced_1000_seed3407_v1/diffusion_planner_validation.json",
+    "samples": 1000,
+    "repeats": 3,
+    "seed": 3407,
+    "checkpoint_count": 20,
+    "best_checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_5_trainloss_1.5426.pth",
+    "best_metrics": {
+        "ego_planning_loss": 0.04572091894845168,
+        "ego_planning_hybrid_loss": 7.367598666826884,
+        "loss": 0.7824807968735695
+    },
+    "ranked": [
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_5_trainloss_1.5426.pth",
+            "epoch": 5,
+            "train_loss": 1.5425525903701782,
+            "metrics": {
+                "ego_planning_loss": 0.04572091894845168,
+                "ego_planning_hybrid_loss": 7.367598666826884,
+                "loss": 0.7824807968735695
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.045124231770634654,
+                    "ego_planning_hybrid_loss": 7.100219871044159,
+                    "loss": 0.7551462312936783
+                },
+                {
+                    "ego_planning_loss": 0.045768287375569344,
+                    "ego_planning_hybrid_loss": 7.288962460041046,
+                    "loss": 0.7746645414233208
+                },
+                {
+                    "ego_planning_loss": 0.04627023769915104,
+                    "ego_planning_hybrid_loss": 7.713613669395447,
+                    "loss": 0.8176316179037094
+                }
+            ],
+            "rank": 1
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_16_trainloss_0.8950.pth",
+            "epoch": 16,
+            "train_loss": 0.8949583768844604,
+            "metrics": {
+                "ego_planning_loss": 0.04198497459059581,
+                "ego_planning_hybrid_loss": 7.485646883117656,
+                "loss": 0.7905496744196862
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04192395949736238,
+                    "ego_planning_hybrid_loss": 7.3698355348259215,
+                    "loss": 0.778907520122826
+                },
+                {
+                    "ego_planning_loss": 0.041620192497968674,
+                    "ego_planning_hybrid_loss": 7.169923165038228,
+                    "loss": 0.7586125247962773
+                },
+                {
+                    "ego_planning_loss": 0.042410771776456385,
+                    "ego_planning_hybrid_loss": 7.9171819494888185,
+                    "loss": 0.8341289783399553
+                }
+            ],
+            "rank": 2
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_14_trainloss_0.9782.pth",
+            "epoch": 14,
+            "train_loss": 0.9781650900840759,
+            "metrics": {
+                "ego_planning_loss": 0.04229824505746365,
+                "ego_planning_hybrid_loss": 7.528291656255722,
+                "loss": 0.7951274268652001
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04095927686989308,
+                    "ego_planning_hybrid_loss": 7.1569878548979755,
+                    "loss": 0.7566580829024315
+                },
+                {
+                    "ego_planning_loss": 0.04247796381264925,
+                    "ego_planning_hybrid_loss": 7.3661052120924,
+                    "loss": 0.7790885003358126
+                },
+                {
+                    "ego_planning_loss": 0.04345749448984861,
+                    "ego_planning_hybrid_loss": 8.06178190177679,
+                    "loss": 0.8496356973573566
+                }
+            ],
+            "rank": 3
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_13_trainloss_1.0009.pth",
+            "epoch": 13,
+            "train_loss": 1.0008525848388672,
+            "metrics": {
+                "ego_planning_loss": 0.04411504865251481,
+                "ego_planning_hybrid_loss": 7.557658489088218,
+                "loss": 0.7998809065595269
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.043645817564800383,
+                    "ego_planning_hybrid_loss": 7.396374969363213,
+                    "loss": 0.7832833261340857
+                },
+                {
+                    "ego_planning_loss": 0.044096179101616145,
+                    "ego_planning_hybrid_loss": 7.3955455950498585,
+                    "loss": 0.7836507465988397
+                },
+                {
+                    "ego_planning_loss": 0.04460314929112792,
+                    "ego_planning_hybrid_loss": 7.881054902851582,
+                    "loss": 0.8327086469456554
+                }
+            ],
+            "rank": 4
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_9_trainloss_1.2392.pth",
+            "epoch": 9,
+            "train_loss": 1.239182710647583,
+            "metrics": {
+                "ego_planning_loss": 0.044704326915244265,
+                "ego_planning_hybrid_loss": 7.628122961084048,
+                "loss": 0.807516633267204
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04433180150389671,
+                    "ego_planning_hybrid_loss": 7.484649231553077,
+                    "loss": 0.7927967336177826
+                },
+                {
+                    "ego_planning_loss": 0.044600560281425713,
+                    "ego_planning_hybrid_loss": 7.423397787570954,
+                    "loss": 0.7869403459876776
+                },
+                {
+                    "ego_planning_loss": 0.045180618960410354,
+                    "ego_planning_hybrid_loss": 7.976321864128113,
+                    "loss": 0.8428128201961518
+                }
+            ],
+            "rank": 5
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_12_trainloss_1.0371.pth",
+            "epoch": 12,
+            "train_loss": 1.037100076675415,
+            "metrics": {
+                "ego_planning_loss": 0.042171316742897036,
+                "ego_planning_hybrid_loss": 7.678447882393996,
+                "loss": 0.8100161157399416
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.0413271387591958,
+                    "ego_planning_hybrid_loss": 7.3599187664985655,
+                    "loss": 0.7773190268725156
+                },
+                {
+                    "ego_planning_loss": 0.0424413235001266,
+                    "ego_planning_hybrid_loss": 7.585874609708786,
+                    "loss": 0.8010287951529026
+                },
+                {
+                    "ego_planning_loss": 0.042745487969368695,
+                    "ego_planning_hybrid_loss": 8.089550270974636,
+                    "loss": 0.8517005251944065
+                }
+            ],
+            "rank": 6
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_15_trainloss_0.9792.pth",
+            "epoch": 15,
+            "train_loss": 0.9792245030403137,
+            "metrics": {
+                "ego_planning_loss": 0.04231610094755888,
+                "ego_planning_hybrid_loss": 7.749640065828959,
+                "loss": 0.8172801198934515
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.0413257900075987,
+                    "ego_planning_hybrid_loss": 7.538623932123184,
+                    "loss": 0.7951881964355707
+                },
+                {
+                    "ego_planning_loss": 0.042653294568881395,
+                    "ego_planning_hybrid_loss": 7.539953497827053,
+                    "loss": 0.7966486504226923
+                },
+                {
+                    "ego_planning_loss": 0.04296921826619655,
+                    "ego_planning_hybrid_loss": 8.17034276753664,
+                    "loss": 0.8600035128220915
+                }
+            ],
+            "rank": 7
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_10_trainloss_1.1294.pth",
+            "epoch": 10,
+            "train_loss": 1.129373550415039,
+            "metrics": {
+                "ego_planning_loss": 0.046823403193925826,
+                "ego_planning_hybrid_loss": 7.734259321570396,
+                "loss": 0.8202493498176336
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04626050304621458,
+                    "ego_planning_hybrid_loss": 7.522284336924553,
+                    "loss": 0.7984889495819807
+                },
+                {
+                    "ego_planning_loss": 0.04667048404924572,
+                    "ego_planning_hybrid_loss": 7.5899117815494535,
+                    "loss": 0.8056616690158844
+                },
+                {
+                    "ego_planning_loss": 0.04753922248631716,
+                    "ego_planning_hybrid_loss": 8.090581846237182,
+                    "loss": 0.8565974308550358
+                }
+            ],
+            "rank": 8
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_11_trainloss_1.0773.pth",
+            "epoch": 11,
+            "train_loss": 1.0773084163665771,
+            "metrics": {
+                "ego_planning_loss": 0.04478541928653915,
+                "ego_planning_hybrid_loss": 7.768370621999104,
+                "loss": 0.8216224907388291
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04389732270874083,
+                    "ego_planning_hybrid_loss": 7.534585255920887,
+                    "loss": 0.7973558563888073
+                },
+                {
+                    "ego_planning_loss": 0.04476662542112172,
+                    "ego_planning_hybrid_loss": 7.68958252876997,
+                    "loss": 0.8137248863577843
+                },
+                {
+                    "ego_planning_loss": 0.045692309729754924,
+                    "ego_planning_hybrid_loss": 8.080944081306457,
+                    "loss": 0.8537867294698953
+                }
+            ],
+            "rank": 9
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_4_trainloss_1.9000.pth",
+            "epoch": 4,
+            "train_loss": 1.8999768495559692,
+            "metrics": {
+                "ego_planning_loss": 0.049144131538768614,
+                "ego_planning_hybrid_loss": 7.791990355809529,
+                "loss": 0.8283431788682938
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04891415825486183,
+                    "ego_planning_hybrid_loss": 7.624623231887817,
+                    "loss": 0.8113764955997467
+                },
+                {
+                    "ego_planning_loss": 0.048577122800052164,
+                    "ego_planning_hybrid_loss": 7.625710489273072,
+                    "loss": 0.8111481832265854
+                },
+                {
+                    "ego_planning_loss": 0.04994111356139183,
+                    "ego_planning_hybrid_loss": 8.1256373462677,
+                    "loss": 0.8625048577785492
+                }
+            ],
+            "rank": 10
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_19_trainloss_0.8756.pth",
+            "epoch": 19,
+            "train_loss": 0.8756190538406372,
+            "metrics": {
+                "ego_planning_loss": 0.04662812754325568,
+                "ego_planning_hybrid_loss": 7.862544624209403,
+                "loss": 0.8328826012598971
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.047623350921086965,
+                    "ego_planning_hybrid_loss": 7.936275338709354,
+                    "loss": 0.8412508987262846
+                },
+                {
+                    "ego_planning_loss": 0.046181255496572704,
+                    "ego_planning_hybrid_loss": 7.5820929144322875,
+                    "loss": 0.8043905532881618
+                },
+                {
+                    "ego_planning_loss": 0.04607977621210739,
+                    "ego_planning_hybrid_loss": 8.06926561948657,
+                    "loss": 0.8530063517652452
+                }
+            ],
+            "rank": 11
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_8_trainloss_1.2464.pth",
+            "epoch": 8,
+            "train_loss": 1.2463799715042114,
+            "metrics": {
+                "ego_planning_loss": 0.0452812249896427,
+                "ego_planning_hybrid_loss": 7.95127275454998,
+                "loss": 0.8404085114051899
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04449377427622676,
+                    "ego_planning_hybrid_loss": 7.655664076685905,
+                    "loss": 0.8100601912140847
+                },
+                {
+                    "ego_planning_loss": 0.04566961164772511,
+                    "ego_planning_hybrid_loss": 7.820419823884964,
+                    "loss": 0.827711605206132
+                },
+                {
+                    "ego_planning_loss": 0.04568028904497624,
+                    "ego_planning_hybrid_loss": 8.377734363079071,
+                    "loss": 0.883453737795353
+                }
+            ],
+            "rank": 12
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_20_trainloss_0.8478.pth",
+            "epoch": 20,
+            "train_loss": 0.8477855324745178,
+            "metrics": {
+                "ego_planning_loss": 0.047902676646287244,
+                "ego_planning_hybrid_loss": 8.069361339415112,
+                "loss": 0.8548388248433669
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04838290844578296,
+                    "ego_planning_hybrid_loss": 8.050135477080941,
+                    "loss": 0.8533964683674276
+                },
+                {
+                    "ego_planning_loss": 0.04793553055776283,
+                    "ego_planning_hybrid_loss": 7.9065880910158155,
+                    "loss": 0.8385943462327122
+                },
+                {
+                    "ego_planning_loss": 0.04738959093531594,
+                    "ego_planning_hybrid_loss": 8.251360450148583,
+                    "loss": 0.872525659929961
+                }
+            ],
+            "rank": 13
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_7_trainloss_1.3210.pth",
+            "epoch": 7,
+            "train_loss": 1.321031928062439,
+            "metrics": {
+                "ego_planning_loss": 0.045858376262088614,
+                "ego_planning_hybrid_loss": 8.120429130752882,
+                "loss": 0.8579013082782426
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.044448312908411024,
+                    "ego_planning_hybrid_loss": 7.593786596417427,
+                    "loss": 0.8038269867897033
+                },
+                {
+                    "ego_planning_loss": 0.04618590813875199,
+                    "ego_planning_hybrid_loss": 8.031380843162536,
+                    "loss": 0.8493240090310573
+                },
+                {
+                    "ego_planning_loss": 0.04694090773910284,
+                    "ego_planning_hybrid_loss": 8.736119952678681,
+                    "loss": 0.9205529290139676
+                }
+            ],
+            "rank": 14
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_17_trainloss_0.9259.pth",
+            "epoch": 17,
+            "train_loss": 0.9259035587310791,
+            "metrics": {
+                "ego_planning_loss": 0.04415036336084207,
+                "ego_planning_hybrid_loss": 8.149439531907438,
+                "loss": 0.8590943254604936
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04448591371299699,
+                    "ego_planning_hybrid_loss": 8.191429038271307,
+                    "loss": 0.8636288269143552
+                },
+                {
+                    "ego_planning_loss": 0.04346499900892377,
+                    "ego_planning_hybrid_loss": 7.790363501057029,
+                    "loss": 0.8225013621374965
+                },
+                {
+                    "ego_planning_loss": 0.04450017736060545,
+                    "ego_planning_hybrid_loss": 8.466526056393981,
+                    "loss": 0.8911527873296291
+                }
+            ],
+            "rank": 15
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_18_trainloss_0.8773.pth",
+            "epoch": 18,
+            "train_loss": 0.8772878050804138,
+            "metrics": {
+                "ego_planning_loss": 0.044189338688893874,
+                "ego_planning_hybrid_loss": 8.186831352209051,
+                "loss": 0.8628724938289573
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.044383675052784385,
+                    "ego_planning_hybrid_loss": 8.1915542871356,
+                    "loss": 0.8635391244962811
+                },
+                {
+                    "ego_planning_loss": 0.04434101632423699,
+                    "ego_planning_hybrid_loss": 7.982717799603939,
+                    "loss": 0.8426128161549569
+                },
+                {
+                    "ego_planning_loss": 0.04384332468966022,
+                    "ego_planning_hybrid_loss": 8.386221969887615,
+                    "loss": 0.8824655408356339
+                }
+            ],
+            "rank": 16
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_6_trainloss_1.3970.pth",
+            "epoch": 6,
+            "train_loss": 1.3969762325286865,
+            "metrics": {
+                "ego_planning_loss": 0.04803707189857959,
+                "ego_planning_hybrid_loss": 8.306632034222284,
+                "loss": 0.8787002867758275
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.0474609190672636,
+                    "ego_planning_hybrid_loss": 7.966386520624161,
+                    "loss": 0.8440995823442936
+                },
+                {
+                    "ego_planning_loss": 0.048282543540000916,
+                    "ego_planning_hybrid_loss": 8.236574215888977,
+                    "loss": 0.8719399736523629
+                },
+                {
+                    "ego_planning_loss": 0.048367753088474276,
+                    "ego_planning_hybrid_loss": 8.716935366153717,
+                    "loss": 0.9200613043308258
+                }
+            ],
+            "rank": 17
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_3_trainloss_1.3460.pth",
+            "epoch": 3,
+            "train_loss": 1.3459922075271606,
+            "metrics": {
+                "ego_planning_loss": 0.06182456442713738,
+                "ego_planning_hybrid_loss": 10.297451090971629,
+                "loss": 1.0915696909427643
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.06190838062763214,
+                    "ego_planning_hybrid_loss": 10.289288887023925,
+                    "loss": 1.0908372930288315
+                },
+                {
+                    "ego_planning_loss": 0.061125686690211296,
+                    "ego_planning_hybrid_loss": 10.160896693706512,
+                    "loss": 1.0772153663635253
+                },
+                {
+                    "ego_planning_loss": 0.06243962596356869,
+                    "ego_planning_hybrid_loss": 10.442167692184448,
+                    "loss": 1.106656413435936
+                }
+            ],
+            "rank": 18
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_2_trainloss_2.3905.pth",
+            "epoch": 2,
+            "train_loss": 2.3905022144317627,
+            "metrics": {
+                "ego_planning_loss": 0.10507365151246388,
+                "ego_planning_hybrid_loss": 15.436563958485921,
+                "loss": 1.6487300752003986
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.10553846532106399,
+                    "ego_planning_hybrid_loss": 15.495257205963135,
+                    "loss": 1.6550642156600952
+                },
+                {
+                    "ego_planning_loss": 0.10380259469151497,
+                    "ego_planning_hybrid_loss": 15.200303791046142,
+                    "loss": 1.6238330001831054
+                },
+                {
+                    "ego_planning_loss": 0.1058798945248127,
+                    "ego_planning_hybrid_loss": 15.614130878448487,
+                    "loss": 1.6672930097579957
+                }
+            ],
+            "rank": 19
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_1_trainloss_3.7471.pth",
+            "epoch": 1,
+            "train_loss": 3.747051239013672,
+            "metrics": {
+                "ego_planning_loss": 0.41589099073410035,
+                "ego_planning_hybrid_loss": 75.22993331654867,
+                "loss": 7.938884420712789
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.41707162284851074,
+                    "ego_planning_hybrid_loss": 75.58359560394287,
+                    "loss": 7.975431247711182
+                },
+                {
+                    "ego_planning_loss": 0.41470347666740415,
+                    "ego_planning_hybrid_loss": 75.15422861480712,
+                    "loss": 7.930126473426819
+                },
+                {
+                    "ego_planning_loss": 0.4158978726863861,
+                    "ego_planning_hybrid_loss": 74.951975730896,
+                    "loss": 7.911095541000366
+                }
+            ],
+            "rank": 20
+        }
+    ]
+}

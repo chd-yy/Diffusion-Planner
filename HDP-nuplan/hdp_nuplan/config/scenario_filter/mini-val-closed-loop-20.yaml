@@ -1,0 +1,43 @@
+_target_: nuplan.planning.scenario_builder.scenario_filter.ScenarioFilter
+_convert_: "all"
+
+# 20 个 token 先经过 NuPlan remove_invalid_goals 校验，再保证同日志场景至少间隔 20 秒。
+# 完整选择依据和日志覆盖记录在 config/mini_splits/mini_val_closed_loop_20_selection.json。
+scenario_types: null
+scenario_tokens:
+  - "b2c0d1c5589e540f"  # following_lane_with_slow_lead
+  - "08764235932a5530"  # stationary_in_traffic；原固定 3 场景
+  - "c016e450b2e55365"  # high_magnitude_speed
+  - "2da316803b1d561d"  # traversing_traffic_light_intersection
+  - "134f95eed3775e22"  # high_magnitude_speed；原固定 3 场景
+  - "55aa63dd46f45899"  # stationary_in_traffic
+  - "14fc7781eb495ebc"  # on_pickup_dropoff
+  - "effdcf393ad55760"  # near_long_vehicle
+  - "e88fc19066bd5a43"  # traversing_traffic_light_intersection
+  - "53dcab93303a5a9d"  # on_pickup_dropoff
+  - "3713735b94cf5a7b"  # traversing_pickup_dropoff
+  - "263da852dba35cac"  # traversing_traffic_light_intersection；原固定 3 场景
+  - "2c39fd38e6ef545c"  # near_multiple_vehicles
+  - "a8230c2b8db55256"  # unknown
+  - "8e14661429aa5776"  # stationary
+  - "ded4a8bcecea5b3f"  # stationary
+  - "1c13c54a7fe956ce"  # stationary
+  - "36b0447fd8235d0c"  # traversing_crosswalk
+  - "1fb0bb88f9d35d59"  # following_lane_without_lead
+  - "08dd79a302275f09"  # traversing_intersection
+
+# token 已唯一定位场景，不依赖本机 splitter 的日志路径布局。
+log_names: null
+map_names: null
+
+num_scenarios_per_type: null
+limit_total_scenarios: null
+timestamp_threshold_s: null
+ego_displacement_minimum_m: null
+ego_start_speed_threshold: null
+ego_stop_speed_threshold: null
+speed_noise_tolerance: null
+
+expand_scenarios: false
+remove_invalid_goals: true
+shuffle: false

@@ -1,0 +1,46 @@
+{
+    "args_file": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/args.json",
+    "checkpoint_dir": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22",
+    "pattern": "model_epoch_10_trainloss_0.1380.pth",
+    "data_list": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_val_balanced_1000_seed3407_v1/diffusion_planner_validation.json",
+    "samples": 1000,
+    "repeats": 3,
+    "seed": 3407,
+    "checkpoint_count": 1,
+    "best_checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_10_trainloss_0.1380.pth",
+    "best_metrics": {
+        "ego_planning_loss": 0.04131271372859677,
+        "ego_planning_hybrid_loss": 7.79477615571022,
+        "loss": 0.119260474289457
+    },
+    "ranked": [
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_10_trainloss_0.1380.pth",
+            "epoch": 10,
+            "train_loss": 0.1379815638065338,
+            "metrics": {
+                "ego_planning_loss": 0.04131271372859677,
+                "ego_planning_hybrid_loss": 7.79477615571022,
+                "loss": 0.119260474289457
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.0404235766120255,
+                    "ego_planning_hybrid_loss": 7.4297510771751405,
+                    "loss": 0.11472108639031649
+                },
+                {
+                    "ego_planning_loss": 0.041377887651324274,
+                    "ego_planning_hybrid_loss": 7.6517367169857025,
+                    "loss": 0.117895253919065
+                },
+                {
+                    "ego_planning_loss": 0.04213667692244053,
+                    "ego_planning_hybrid_loss": 8.302840672969818,
+                    "loss": 0.12516508255898953
+                }
+            ],
+            "rank": 1
+        }
+    ]
+}

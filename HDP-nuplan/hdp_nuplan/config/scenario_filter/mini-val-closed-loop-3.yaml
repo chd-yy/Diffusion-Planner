@@ -1,0 +1,25 @@
+_target_: nuplan.planning.scenario_builder.scenario_filter.ScenarioFilter
+_convert_: "all"
+
+# 三个 token 全部来自固定 seed=3407 的官方 mini-val 缓存，并选择了不同场景类型。
+scenario_types: null
+scenario_tokens:
+  - "134f95eed3775e22"  # high_magnitude_speed
+  - "08764235932a5530"  # stationary_in_traffic
+  - "263da852dba35cac"  # traversing_traffic_light_intersection
+
+# token 已能唯一定位场景；不再依赖机器上 nuPlan splitter 的日志路径布局。
+log_names: null
+map_names: null
+
+num_scenarios_per_type: null
+limit_total_scenarios: null
+timestamp_threshold_s: null
+ego_displacement_minimum_m: null
+ego_start_speed_threshold: null
+ego_stop_speed_threshold: null
+speed_noise_tolerance: null
+
+expand_scenarios: false
+remove_invalid_goals: true
+shuffle: false

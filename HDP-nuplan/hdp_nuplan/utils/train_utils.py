@@ -6,6 +6,80 @@ import io
 import os
 import json
 
+
+def load_encoder_warm_start(model, checkpoint_path):
+    """只加载同名且同形状的 encoder tensor，并返回完整审计报告。"""
+    checkpoint = torch.load(checkpoint_path, map_location="cpu")
+    if isinstance(checkpoint, dict) and "ema_state_dict" in checkpoint:
+        source_name = "ema_state_dict"
+        source_state = checkpoint[source_name]
+    elif isinstance(checkpoint, dict) and "model" in checkpoint:
+        source_name = "model"
+        source_state = checkpoint[source_name]
+    elif isinstance(checkpoint, dict):
+        source_name = "root_state_dict"
+        source_state = checkpoint
+    else:
+        raise TypeError(f"Unsupported checkpoint type: {type(checkpoint).__name__}")
+
+    source_state = {
+        (key[len("module."):] if key.startswith("module.") else key): value
+        for key, value in source_state.items()
+    }
+    target_state = model.state_dict()
+    loaded = {}
+    missing = []
+    shape_mismatch = []
+
+    for key, target_value in target_state.items():
+        if not key.startswith("encoder."):
+            continue
+        if key not in source_state:
+            missing.append(key)
+            continue
+        source_value = source_state[key]
+        if source_value.shape != target_value.shape:
+            shape_mismatch.append(
+                {
+                    "key": key,
+                    "source_shape": list(source_value.shape),
+                    "target_shape": list(target_value.shape),
+                }
+            )
+            continue
+        loaded[key] = source_value
+
+    source_encoder_keys = {
+        key for key in source_state if key.startswith("encoder.")
+    }
+    unexpected = sorted(source_encoder_keys - set(loaded) - set(missing))
+
+    merged_state = dict(target_state)
+    merged_state.update(loaded)
+    model.load_state_dict(merged_state, strict=True)
+
+    return {
+        "checkpoint_path": str(checkpoint_path),
+        "source_state": source_name,
+        "loaded_tensor_count": len(loaded),
+        "loaded_parameter_count": int(sum(value.numel() for value in loaded.values())),
+        "target_encoder_tensor_count": sum(
+            key.startswith("encoder.") for key in target_state
+        ),
+        "missing_keys": sorted(missing),
+        "shape_mismatches": shape_mismatch,
+        "unexpected_source_encoder_keys": unexpected,
+        "decoder_tensor_count_loaded": sum(
+            key.startswith("decoder.") for key in loaded
+        ),
+    }
+
+
+def set_encoder_trainable(model, trainable):
+    """切换 HDP encoder 的梯度，用于 warm-start 后分阶段解冻。"""
+    for parameter in model.encoder.parameters():
+        parameter.requires_grad_(trainable)
+
 def openjson(path):
        value  = fileio.get_text(path)
        dict = json.loads(value)
@@ -113,5 +187,4 @@ def resume_model(path: str, model, optimizer, scheduler, ema, device):
         print('no ema shadow found')
 
     return model, optimizer, scheduler, init_epoch, wandb_id, ema
-
 

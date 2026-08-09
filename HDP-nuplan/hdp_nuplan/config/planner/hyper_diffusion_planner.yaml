@@ -1,4 +1,5 @@
 hyper_diffusion_planner:
+  # HDP 使用独立的 planner 类和配置对象，不再加载 diffusion_planner 的 guidance 配置。
   _target_: hdp_nuplan.planner.planner.HyperDiffusionPlanner
   _convert_: "all"
 
@@ -7,8 +8,6 @@ hyper_diffusion_planner:
     _convert_: "all"
 
     args_file: ???
-
-    guidance_fn: null
   ckpt_path: ???
 
   past_trajectory_sampling:

@@ -1,5 +1,7 @@
 from typing import Dict
 import torch
+# 【HDP 与原 Diffusion-Planner 的唯一区别：包命名空间】DPM-Solver 模块导入路径
+# 从 diffusion_planner.* 改为 hdp_nuplan.*；dpm_sampler 的可执行 AST 完全一致。
 import hdp_nuplan.model.diffusion_utils.dpm_solver_pytorch as dpm
 
 

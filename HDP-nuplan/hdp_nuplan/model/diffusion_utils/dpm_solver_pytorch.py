@@ -1,3 +1,6 @@
+# 【实现核对：与原 Diffusion-Planner 完全一致】忽略两边已有 docstring/注释后，
+# 本文件所有类、函数、参数、公式、求解步骤和返回值的可执行 AST 完全相同。
+# HDP 没有修改 DPM-Solver 本体；当前差异来自 sampling 调用参数和 SDE/模型参数化。
 import torch
 
 

@@ -1,0 +1,130 @@
+{
+    "args_file": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_pilot_1000_seed3407_v1/training_log/hdp-mini-rl-pilot-1000-reward-v2-detachfix-from-10k-epoch10/2026-08-08-11:31:39/args.json",
+    "checkpoint_dir": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_pilot_1000_seed3407_v1/training_log/hdp-mini-rl-pilot-1000-reward-v2-detachfix-from-10k-epoch10/2026-08-08-11:31:39",
+    "pattern": "model_epoch_*.pth",
+    "data_list": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_val_balanced_1000_seed3407_v1/diffusion_planner_validation.json",
+    "samples": 1000,
+    "repeats": 3,
+    "seed": 3407,
+    "checkpoint_count": 4,
+    "best_checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_pilot_1000_seed3407_v1/training_log/hdp-mini-rl-pilot-1000-reward-v2-detachfix-from-10k-epoch10/2026-08-08-11:31:39/model_epoch_2_trainloss_0.0480.pth",
+    "best_metrics": {
+        "ego_planning_loss": 0.04110210310791929,
+        "ego_planning_hybrid_loss": 7.786909316221873,
+        "loss": 0.11897119466463725
+    },
+    "ranked": [
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_pilot_1000_seed3407_v1/training_log/hdp-mini-rl-pilot-1000-reward-v2-detachfix-from-10k-epoch10/2026-08-08-11:31:39/model_epoch_2_trainloss_0.0480.pth",
+            "epoch": 2,
+            "train_loss": 0.04804650308936834,
+            "metrics": {
+                "ego_planning_loss": 0.04110210310791929,
+                "ego_planning_hybrid_loss": 7.786909316221873,
+                "loss": 0.11897119466463725
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.040094705484807494,
+                    "ego_planning_hybrid_loss": 7.37647087097168,
+                    "loss": 0.11385941243171692
+                },
+                {
+                    "ego_planning_loss": 0.04119932769984007,
+                    "ego_planning_hybrid_loss": 7.6614302849769595,
+                    "loss": 0.11781362888216973
+                },
+                {
+                    "ego_planning_loss": 0.04201227613911033,
+                    "ego_planning_hybrid_loss": 8.32282679271698,
+                    "loss": 0.1252405426800251
+                }
+            ],
+            "rank": 1
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_pilot_1000_seed3407_v1/training_log/hdp-mini-rl-pilot-1000-reward-v2-detachfix-from-10k-epoch10/2026-08-08-11:31:39/model_epoch_3_trainloss_0.0222.pth",
+            "epoch": 3,
+            "train_loss": 0.022183567194268106,
+            "metrics": {
+                "ego_planning_loss": 0.04100248950844009,
+                "ego_planning_hybrid_loss": 7.867574259281159,
+                "loss": 0.1196782307724158
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.03979749346151948,
+                    "ego_planning_hybrid_loss": 7.382053302288055,
+                    "loss": 0.11361802541464568
+                },
+                {
+                    "ego_planning_loss": 0.041152285121381284,
+                    "ego_planning_hybrid_loss": 7.771127045631409,
+                    "loss": 0.11886355432122946
+                },
+                {
+                    "ego_planning_loss": 0.04205768994241953,
+                    "ego_planning_hybrid_loss": 8.449542429924012,
+                    "loss": 0.12655311258137225
+                }
+            ],
+            "rank": 2
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_pilot_1000_seed3407_v1/training_log/hdp-mini-rl-pilot-1000-reward-v2-detachfix-from-10k-epoch10/2026-08-08-11:31:39/model_epoch_4_trainloss_0.0186.pth",
+            "epoch": 4,
+            "train_loss": 0.018567717645317314,
+            "metrics": {
+                "ego_planning_loss": 0.04120264774436752,
+                "ego_planning_hybrid_loss": 8.052558635314305,
+                "loss": 0.12172823242594799
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.03978238514810801,
+                    "ego_planning_hybrid_loss": 7.489147882461548,
+                    "loss": 0.114673862144351
+                },
+                {
+                    "ego_planning_loss": 0.04140690306574106,
+                    "ego_planning_hybrid_loss": 7.985441768884659,
+                    "loss": 0.12126131934672595
+                },
+                {
+                    "ego_planning_loss": 0.042418655019253494,
+                    "ego_planning_hybrid_loss": 8.68308625459671,
+                    "loss": 0.129249515786767
+                }
+            ],
+            "rank": 3
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_pilot_1000_seed3407_v1/training_log/hdp-mini-rl-pilot-1000-reward-v2-detachfix-from-10k-epoch10/2026-08-08-11:31:39/model_epoch_5_trainloss_0.0168.pth",
+            "epoch": 5,
+            "train_loss": 0.016829230450093748,
+            "metrics": {
+                "ego_planning_loss": 0.04168169437473019,
+                "ego_planning_hybrid_loss": 8.31963451174895,
+                "loss": 0.12487803720807035
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04004602232947946,
+                    "ego_planning_hybrid_loss": 7.680897013664246,
+                    "loss": 0.11685498943924903
+                },
+                {
+                    "ego_planning_loss": 0.04193365963175893,
+                    "ego_planning_hybrid_loss": 8.278405433297158,
+                    "loss": 0.1247177117317915
+                },
+                {
+                    "ego_planning_loss": 0.04306540116295218,
+                    "ego_planning_hybrid_loss": 8.999601088285447,
+                    "loss": 0.13306141045317055
+                }
+            ],
+            "rank": 4
+        }
+    ]
+}

@@ -1,0 +1,378 @@
+{
+    "args_file": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/args.json",
+    "checkpoint_dir": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22",
+    "pattern": "model_epoch_*.pth",
+    "data_list": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_val_balanced_1000_seed3407_v1/diffusion_planner_validation.json",
+    "samples": 1000,
+    "repeats": 1,
+    "seed": 3407,
+    "checkpoint_count": 20,
+    "best_checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_10_trainloss_0.1380.pth",
+    "best_metrics": {
+        "ego_planning_loss": 0.04042339725792408,
+        "ego_planning_hybrid_loss": 7.4296167917251585,
+        "loss": 0.11471956355124711
+    },
+    "ranked": [
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_10_trainloss_0.1380.pth",
+            "epoch": 10,
+            "train_loss": 0.1379815638065338,
+            "metrics": {
+                "ego_planning_loss": 0.04042339725792408,
+                "ego_planning_hybrid_loss": 7.4296167917251585,
+                "loss": 0.11471956355124711
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04042339725792408,
+                    "ego_planning_hybrid_loss": 7.4296167917251585,
+                    "loss": 0.11471956355124711
+                }
+            ],
+            "rank": 1
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_5_trainloss_0.1995.pth",
+            "epoch": 5,
+            "train_loss": 0.19948916137218475,
+            "metrics": {
+                "ego_planning_loss": 0.04159387749433517,
+                "ego_planning_hybrid_loss": 7.585308290481567,
+                "loss": 0.11744695970416069
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04159387749433517,
+                    "ego_planning_hybrid_loss": 7.585308290481567,
+                    "loss": 0.11744695970416069
+                }
+            ],
+            "rank": 2
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_6_trainloss_0.1803.pth",
+            "epoch": 6,
+            "train_loss": 0.1802874356508255,
+            "metrics": {
+                "ego_planning_loss": 0.0413219782859087,
+                "ego_planning_hybrid_loss": 7.71381515789032,
+                "loss": 0.11846012805402278
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.0413219782859087,
+                    "ego_planning_hybrid_loss": 7.71381515789032,
+                    "loss": 0.11846012805402278
+                }
+            ],
+            "rank": 3
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_9_trainloss_0.1438.pth",
+            "epoch": 9,
+            "train_loss": 0.14379091560840607,
+            "metrics": {
+                "ego_planning_loss": 0.04173934914544225,
+                "ego_planning_hybrid_loss": 7.834193066596985,
+                "loss": 0.1200812778621912
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04173934914544225,
+                    "ego_planning_hybrid_loss": 7.834193066596985,
+                    "loss": 0.1200812778621912
+                }
+            ],
+            "rank": 4
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_7_trainloss_0.1709.pth",
+            "epoch": 7,
+            "train_loss": 0.1708655059337616,
+            "metrics": {
+                "ego_planning_loss": 0.042180305238813165,
+                "ego_planning_hybrid_loss": 8.211210592508316,
+                "loss": 0.12429241017252207
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.042180305238813165,
+                    "ego_planning_hybrid_loss": 8.211210592508316,
+                    "loss": 0.12429241017252207
+                }
+            ],
+            "rank": 5
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_18_trainloss_0.1083.pth",
+            "epoch": 18,
+            "train_loss": 0.10828759521245956,
+            "metrics": {
+                "ego_planning_loss": 0.04416523742955178,
+                "ego_planning_hybrid_loss": 8.106239296317101,
+                "loss": 0.12522762858122588
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04416523742955178,
+                    "ego_planning_hybrid_loss": 8.106239296317101,
+                    "loss": 0.12522762858122588
+                }
+            ],
+            "rank": 6
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_8_trainloss_0.1553.pth",
+            "epoch": 8,
+            "train_loss": 0.15531805157661438,
+            "metrics": {
+                "ego_planning_loss": 0.04229285592213273,
+                "ego_planning_hybrid_loss": 8.34002430677414,
+                "loss": 0.12569309703260662
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04229285592213273,
+                    "ego_planning_hybrid_loss": 8.34002430677414,
+                    "loss": 0.12569309703260662
+                }
+            ],
+            "rank": 7
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_20_trainloss_0.1046.pth",
+            "epoch": 20,
+            "train_loss": 0.10463730245828629,
+            "metrics": {
+                "ego_planning_loss": 0.04389824449457228,
+                "ego_planning_hybrid_loss": 8.313309887856246,
+                "loss": 0.12703134060185403
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04389824449457228,
+                    "ego_planning_hybrid_loss": 8.313309887856246,
+                    "loss": 0.12703134060185403
+                }
+            ],
+            "rank": 8
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_11_trainloss_0.1396.pth",
+            "epoch": 11,
+            "train_loss": 0.13962188363075256,
+            "metrics": {
+                "ego_planning_loss": 0.043915840897709134,
+                "ego_planning_hybrid_loss": 8.38204990696907,
+                "loss": 0.12773633794486522
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.043915840897709134,
+                    "ego_planning_hybrid_loss": 8.38204990696907,
+                    "loss": 0.12773633794486522
+                }
+            ],
+            "rank": 9
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_12_trainloss_0.1253.pth",
+            "epoch": 12,
+            "train_loss": 0.1252715140581131,
+            "metrics": {
+                "ego_planning_loss": 0.04336044388264418,
+                "ego_planning_hybrid_loss": 8.450977012872697,
+                "loss": 0.12787021335959434
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04336044388264418,
+                    "ego_planning_hybrid_loss": 8.450977012872697,
+                    "loss": 0.12787021335959434
+                }
+            ],
+            "rank": 10
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_14_trainloss_0.1193.pth",
+            "epoch": 14,
+            "train_loss": 0.1192934587597847,
+            "metrics": {
+                "ego_planning_loss": 0.042326434552669524,
+                "ego_planning_hybrid_loss": 8.593803956747054,
+                "loss": 0.12826447313278913
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.042326434552669524,
+                    "ego_planning_hybrid_loss": 8.593803956747054,
+                    "loss": 0.12826447313278913
+                }
+            ],
+            "rank": 11
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_13_trainloss_0.1283.pth",
+            "epoch": 13,
+            "train_loss": 0.12834666669368744,
+            "metrics": {
+                "ego_planning_loss": 0.04262716357409954,
+                "ego_planning_hybrid_loss": 8.62776998090744,
+                "loss": 0.12890486065670848
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04262716357409954,
+                    "ego_planning_hybrid_loss": 8.62776998090744,
+                    "loss": 0.12890486065670848
+                }
+            ],
+            "rank": 12
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_19_trainloss_0.1027.pth",
+            "epoch": 19,
+            "train_loss": 0.10271022468805313,
+            "metrics": {
+                "ego_planning_loss": 0.0449499992672354,
+                "ego_planning_hybrid_loss": 8.404793812274933,
+                "loss": 0.1289979351311922
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.0449499992672354,
+                    "ego_planning_hybrid_loss": 8.404793812274933,
+                    "loss": 0.1289979351311922
+                }
+            ],
+            "rank": 13
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_4_trainloss_0.2484.pth",
+            "epoch": 4,
+            "train_loss": 0.24844194948673248,
+            "metrics": {
+                "ego_planning_loss": 0.04572965613007546,
+                "ego_planning_hybrid_loss": 8.535184289932252,
+                "loss": 0.13108149838447572
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04572965613007546,
+                    "ego_planning_hybrid_loss": 8.535184289932252,
+                    "loss": 0.13108149838447572
+                }
+            ],
+            "rank": 14
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_16_trainloss_0.1106.pth",
+            "epoch": 16,
+            "train_loss": 0.11057323217391968,
+            "metrics": {
+                "ego_planning_loss": 0.044954785205423835,
+                "ego_planning_hybrid_loss": 8.815579614520074,
+                "loss": 0.13311057939380408
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.044954785205423835,
+                    "ego_planning_hybrid_loss": 8.815579614520074,
+                    "loss": 0.13311057939380408
+                }
+            ],
+            "rank": 15
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_15_trainloss_0.1210.pth",
+            "epoch": 15,
+            "train_loss": 0.12103653699159622,
+            "metrics": {
+                "ego_planning_loss": 0.04554281398747116,
+                "ego_planning_hybrid_loss": 9.00187862586975,
+                "loss": 0.1355615975819528
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04554281398747116,
+                    "ego_planning_hybrid_loss": 9.00187862586975,
+                    "loss": 0.1355615975819528
+                }
+            ],
+            "rank": 16
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_17_trainloss_0.1119.pth",
+            "epoch": 17,
+            "train_loss": 0.1118573322892189,
+            "metrics": {
+                "ego_planning_loss": 0.04662992694042623,
+                "ego_planning_hybrid_loss": 9.00635903251171,
+                "loss": 0.1366935150511563
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04662992694042623,
+                    "ego_planning_hybrid_loss": 9.00635903251171,
+                    "loss": 0.1366935150511563
+                }
+            ],
+            "rank": 17
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_3_trainloss_0.1868.pth",
+            "epoch": 3,
+            "train_loss": 0.18676099181175232,
+            "metrics": {
+                "ego_planning_loss": 0.05593872132897377,
+                "ego_planning_hybrid_loss": 10.83664349746704,
+                "loss": 0.16430515417456626
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.05593872132897377,
+                    "ego_planning_hybrid_loss": 10.83664349746704,
+                    "loss": 0.16430515417456626
+                }
+            ],
+            "rank": 18
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_2_trainloss_0.3564.pth",
+            "epoch": 2,
+            "train_loss": 0.3563883900642395,
+            "metrics": {
+                "ego_planning_loss": 0.10276361054182052,
+                "ego_planning_hybrid_loss": 18.11756083679199,
+                "loss": 0.2839392157793045
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.10276361054182052,
+                    "ego_planning_hybrid_loss": 18.11756083679199,
+                    "loss": 0.2839392157793045
+                }
+            ],
+            "rank": 19
+        },
+        {
+            "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_1_trainloss_0.5834.pth",
+            "epoch": 1,
+            "train_loss": 0.5834305286407471,
+            "metrics": {
+                "ego_planning_loss": 0.4094129796028137,
+                "ego_planning_hybrid_loss": 80.12832684326172,
+                "loss": 1.2106962275505067
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.4094129796028137,
+                    "ego_planning_hybrid_loss": 80.12832684326172,
+                    "loss": 1.2106962275505067
+                }
+            ],
+            "rank": 20
+        }
+    ]
+}

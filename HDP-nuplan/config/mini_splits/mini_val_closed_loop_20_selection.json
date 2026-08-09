@@ -1,0 +1,51 @@
+{
+    "seed": 3407,
+    "target_scenarios": 20,
+    "source_manifest": "tmp/mini_val_balanced_1000_seed3407_v1/diffusion_planner_validation.json",
+    "selection_rules": {
+        "preserve_fixed_three": true,
+        "require_nuplan_mission_goal": true,
+        "minimum_same_log_start_separation_s": 20.0,
+        "prefer_non_stationary_and_non_unknown_types": true,
+        "balance_across_eligible_logs": true
+    },
+    "valid_goal_audit": {
+        "valid_val1k_scenarios": 492,
+        "total_val1k_scenarios": 1000,
+        "eligible_log_count": 8,
+        "valid_candidates_per_log": {
+            "2021.06.07.12.54.00_veh-35_01843_02314": 83,
+            "2021.06.07.18.53.26_veh-26_00005_00427": 0,
+            "2021.06.08.12.54.54_veh-26_04262_04732": 40,
+            "2021.06.08.14.35.24_veh-26_02555_03004": 52,
+            "2021.06.08.16.31.33_veh-38_01589_02072": 66,
+            "2021.07.24.20.37.45_veh-17_00015_00375": 61,
+            "2021.07.24.23.50.16_veh-17_01696_02071": 54,
+            "2021.08.09.17.55.59_veh-28_00021_00307": 72,
+            "2021.08.24.13.12.55_veh-45_00386_00472": 0,
+            "2021.10.05.07.10.04_veh-52_01442_01802": 64
+        }
+    },
+    "selected": [
+        {"token": "b2c0d1c5589e540f", "scenario_type": "following_lane_with_slow_lead", "log_name": "2021.06.07.12.54.00_veh-35_01843_02314", "start_time_s": 1623086821.9, "source": "val1k-valid-goal"},
+        {"token": "08764235932a5530", "scenario_type": "stationary_in_traffic", "log_name": "2021.06.07.12.54.00_veh-35_01843_02314", "start_time_s": 1623086864.4, "source": "fixed3"},
+        {"token": "c016e450b2e55365", "scenario_type": "high_magnitude_speed", "log_name": "2021.06.08.12.54.54_veh-26_04262_04732", "start_time_s": 1623175725.3, "source": "val1k-valid-goal"},
+        {"token": "2da316803b1d561d", "scenario_type": "traversing_traffic_light_intersection", "log_name": "2021.06.08.12.54.54_veh-26_04262_04732", "start_time_s": 1623175818.8, "source": "val1k-valid-goal"},
+        {"token": "134f95eed3775e22", "scenario_type": "high_magnitude_speed", "log_name": "2021.06.08.14.35.24_veh-26_02555_03004", "start_time_s": 1623180047.7, "source": "fixed3"},
+        {"token": "55aa63dd46f45899", "scenario_type": "stationary_in_traffic", "log_name": "2021.06.08.14.35.24_veh-26_02555_03004", "start_time_s": 1623180101.3, "source": "val1k-valid-goal"},
+        {"token": "14fc7781eb495ebc", "scenario_type": "on_pickup_dropoff", "log_name": "2021.06.08.16.31.33_veh-38_01589_02072", "start_time_s": 1623186040.5, "source": "val1k-valid-goal"},
+        {"token": "effdcf393ad55760", "scenario_type": "near_long_vehicle", "log_name": "2021.06.08.16.31.33_veh-38_01589_02072", "start_time_s": 1623186197.7, "source": "val1k-valid-goal"},
+        {"token": "e88fc19066bd5a43", "scenario_type": "traversing_traffic_light_intersection", "log_name": "2021.07.24.20.37.45_veh-17_00015_00375", "start_time_s": 1627159248.5, "source": "val1k-valid-goal"},
+        {"token": "53dcab93303a5a9d", "scenario_type": "on_pickup_dropoff", "log_name": "2021.07.24.20.37.45_veh-17_00015_00375", "start_time_s": 1627159285.9, "source": "val1k-valid-goal"},
+        {"token": "3713735b94cf5a7b", "scenario_type": "traversing_pickup_dropoff", "log_name": "2021.07.24.20.37.45_veh-17_00015_00375", "start_time_s": 1627159321.4, "source": "val1k-valid-goal"},
+        {"token": "263da852dba35cac", "scenario_type": "traversing_traffic_light_intersection", "log_name": "2021.07.24.23.50.16_veh-17_01696_02071", "start_time_s": 1627172435.3, "source": "fixed3"},
+        {"token": "2c39fd38e6ef545c", "scenario_type": "near_multiple_vehicles", "log_name": "2021.07.24.23.50.16_veh-17_01696_02071", "start_time_s": 1627172486.7, "source": "val1k-valid-goal"},
+        {"token": "a8230c2b8db55256", "scenario_type": "unknown", "log_name": "2021.07.24.23.50.16_veh-17_01696_02071", "start_time_s": 1627172564.7, "source": "val1k-valid-goal"},
+        {"token": "8e14661429aa5776", "scenario_type": "stationary", "log_name": "2021.08.09.17.55.59_veh-28_00021_00307", "start_time_s": 1628531946.3, "source": "val1k-valid-goal"},
+        {"token": "ded4a8bcecea5b3f", "scenario_type": "stationary", "log_name": "2021.08.09.17.55.59_veh-28_00021_00307", "start_time_s": 1628532008.1, "source": "val1k-valid-goal"},
+        {"token": "1c13c54a7fe956ce", "scenario_type": "stationary", "log_name": "2021.08.09.17.55.59_veh-28_00021_00307", "start_time_s": 1628532037.9, "source": "val1k-valid-goal"},
+        {"token": "36b0447fd8235d0c", "scenario_type": "traversing_crosswalk", "log_name": "2021.10.05.07.10.04_veh-52_01442_01802", "start_time_s": 1633419427.7, "source": "val1k-valid-goal"},
+        {"token": "1fb0bb88f9d35d59", "scenario_type": "following_lane_without_lead", "log_name": "2021.10.05.07.10.04_veh-52_01442_01802", "start_time_s": 1633419459.2, "source": "val1k-valid-goal"},
+        {"token": "08dd79a302275f09", "scenario_type": "traversing_intersection", "log_name": "2021.10.05.07.10.04_veh-52_01442_01802", "start_time_s": 1633419501.2, "source": "val1k-valid-goal"}
+    ]
+}

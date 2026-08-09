@@ -1,0 +1,29 @@
+{
+  "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_pilot_1000_seed3407_v1/training_log/hdp-mini-supervised-pilot-1000/2026-07-31-23:40:13/latest.pth",
+  "data_list": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_val_pilot_100_seed3407_v1/diffusion_planner_validation.json",
+  "samples": 100,
+  "repeats": 3,
+  "seed": 3407,
+  "metrics": {
+    "ego_planning_loss": 0.3946557426452637,
+    "ego_planning_hybrid_loss": 77.66573432922364,
+    "loss": 1.1713130720456444
+  },
+  "per_repeat": [
+    {
+      "ego_planning_loss": 0.39055108904838565,
+      "ego_planning_hybrid_loss": 76.6376268005371,
+      "loss": 1.156927342414856
+    },
+    {
+      "ego_planning_loss": 0.3978242981433868,
+      "ego_planning_hybrid_loss": 78.43854049682618,
+      "loss": 1.1822097039222716
+    },
+    {
+      "ego_planning_loss": 0.39559184074401854,
+      "ego_planning_hybrid_loss": 77.92103569030762,
+      "loss": 1.1748021697998048
+    }
+  ]
+}

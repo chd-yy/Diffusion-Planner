@@ -11,6 +11,7 @@ class StateNormalizer:
     @classmethod
     def from_json(cls, args):
         data = openjson(args.normalization_file_path)
+        # HDP 只归一化自车目标；原实现还按 predicted_neighbor_num 复制邻车统计量。
         mean = [data["ego"]["mean"]]
         std = [data["ego"]["std"]]
         return cls(mean, std)
@@ -53,7 +54,11 @@ class ObservationNormalizer:
                 continue
             mask = torch.sum(torch.ne(data[k], 0), dim=-1) == 0
             try:
-                norm_data[k] = (data[k] - torch.tensor(v["mean"]).to(data[k].device)) / torch.tensor(v["std"]).to(data[k].device)
+                # v 在 from_json/Config 中已经转换为 Tensor，直接迁移设备即可；
+                # 避免 torch.tensor(Tensor) 的重复构造告警。
+                mean = torch.as_tensor(v["mean"], device=data[k].device)
+                std = torch.as_tensor(v["std"], device=data[k].device)
+                norm_data[k] = (data[k] - mean) / std
             except Exception as e:
                 raise RuntimeError(f"Error processing key '{k}': {str(e)}") from e
             norm_data[k][mask] = 0

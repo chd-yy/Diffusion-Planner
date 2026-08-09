@@ -1,3 +1,8 @@
+import os
+import tempfile
+import traceback
+from pathlib import Path
+
 import numpy as np
 from tqdm import tqdm
 
@@ -45,6 +50,8 @@ class DataProcessor(object):
         '''
         ego
         '''
+        # HDP 推理阶段真正读取历史自车状态，用于计算当前 vx/vy、加速度等运动学量；
+        # 原 Diffusion-Planner 在此处直接使用全零 ego_current_state。
         ego_state_history = list(history_buffer.ego_states)
         ego_state = history_buffer.current_state[0]
         ego_coords = Point2D(ego_state.rear_axle.x, ego_state.rear_axle.y)
@@ -56,6 +63,7 @@ class DataProcessor(object):
             time_stamps_past = np.array([state.time_point.time_us for state in ego_state_history], dtype=np.int64)
             ego_current_state = calculate_additional_ego_states(ego_agent_past, time_stamps_past)
         else:
+            # 历史不足时保留与模型输入维度一致的零速度回退状态。
             ego_agent_past = None
             ego_current_state = np.array([0., 0., 1., 0., 0., 0., 0., 0., 0., 0.], dtype=np.float32)
 
@@ -83,6 +91,7 @@ class DataProcessor(object):
 
 
         data = {"neighbor_agents_past": neighbor_agents_past[:, -21:],
+                # 该状态现在包含真实运动学量，供 DiT 的速度条件和数据归一化使用。
                 "ego_current_state": ego_current_state,
                 "static_objects": static_objects}
         data.update(vector_map)
@@ -91,86 +100,174 @@ class DataProcessor(object):
         return data
 
     # Use for data preprocess
-    def work(self, scenarios):
+    def work(self, scenarios, skip_existing=False):
+        """逐场景处理并返回审计结果，单个坏场景不会打断整个分片。"""
+        result = {
+            "selected_scenarios": len(scenarios),
+            "processed": 0,
+            "skipped_existing": 0,
+            "reprocessed_invalid": 0,
+            "failed": 0,
+            "completed_files": [],
+            "failures": [],
+        }
 
-        for scenario in tqdm(scenarios):
-            map_name = scenario._map_name
-            token = scenario.token
-            map_api = scenario.map_api
+        for scenario in tqdm(scenarios, desc="NuPlan preprocessing", unit="scenario"):
+            output_name = self.output_name(scenario)
+            output_path = Path(self._save_dir) / output_name
 
-            '''
-            ego & agents past
-            '''
-            ego_state = scenario.initial_ego_state
-            ego_coords = Point2D(ego_state.rear_axle.x, ego_state.rear_axle.y)
-            anchor_ego_state = np.array([ego_state.rear_axle.x, ego_state.rear_axle.y, ego_state.rear_axle.heading], dtype=np.float64)
-            ego_agent_past, time_stamps_past = get_ego_past_array_from_scenario(scenario, self.num_past_poses, self.past_time_horizon)
+            if skip_existing and output_path.is_file():
+                if self._is_readable_npz(output_path):
+                    result["skipped_existing"] += 1
+                    result["completed_files"].append(output_name)
+                    continue
+                result["reprocessed_invalid"] += 1
 
-            present_tracked_objects = scenario.initial_tracked_objects.tracked_objects
-            past_tracked_objects = [
-                tracked_objects.tracked_objects
-                for tracked_objects in scenario.get_past_tracked_objects(
-                    iteration=0, time_horizon=self.past_time_horizon, num_samples=self.num_past_poses
+            try:
+                data = self.process_scenario(scenario)
+                self.save_to_disk(self._save_dir, data)
+                result["processed"] += 1
+                result["completed_files"].append(output_name)
+            except Exception as error:  # 每个场景独立失败，分片中的后续场景仍继续。
+                result["failed"] += 1
+                result["failures"].append(
+                    {
+                        "output_file": output_name,
+                        "log_name": str(getattr(scenario, "log_name", "")),
+                        "map_name": str(getattr(scenario, "_map_name", "")),
+                        "scenario_type": str(getattr(scenario, "scenario_type", "")),
+                        "token": str(getattr(scenario, "token", "")),
+                        "exception_type": type(error).__name__,
+                        "message": str(error),
+                        "traceback": traceback.format_exc(),
+                    }
                 )
-            ]
-            sampled_past_observations = past_tracked_objects + [present_tracked_objects]
-            neighbor_agents_past, neighbor_agents_types = \
-                sampled_tracked_objects_to_array_list(sampled_past_observations)
-            static_objects, static_objects_types = sampled_static_objects_to_array_list(present_tracked_objects)
 
-            ego_agent_past, neighbor_agents_past, neighbor_indices, static_objects = \
-                agent_past_process(ego_agent_past, neighbor_agents_past, neighbor_agents_types, self.num_agents, static_objects, static_objects_types, self.num_static, self.max_ped_bike, anchor_ego_state)
-            '''
-            Map
-            '''
-            route_roadblock_ids = scenario.get_route_roadblock_ids()
-            traffic_light_data = list(scenario.get_traffic_light_status_at_iteration(0))
+        result["completed_files"] = sorted(set(result["completed_files"]))
+        return result
 
-            if route_roadblock_ids != ['']:
-                route_roadblock_ids = route_roadblock_correction(
-                    ego_state, map_api, route_roadblock_ids
-                )
+    @staticmethod
+    def output_name(scenario):
+        """与训练 manifest 约定一致的场景文件名。"""
+        return f"{scenario._map_name}_{scenario.token}.npz"
 
-            coords, traffic_light_data, speed_limit, lane_route = get_neighbor_vector_set_map(
-                map_api, self._map_features, ego_coords, self._radius, traffic_light_data
+    @staticmethod
+    def _is_readable_npz(path):
+        """断点续跑时只跳过能够完整打开的 NPZ。"""
+        try:
+            with np.load(path, allow_pickle=False) as data:
+                return bool(data.files)
+        except (OSError, ValueError, EOFError):
+            return False
+
+    def process_scenario(self, scenario):
+        """把一个 NuPlan Scenario 转换成尚未落盘的数据字典。"""
+        map_name = scenario._map_name
+        token = scenario.token
+        map_api = scenario.map_api
+
+        '''
+        ego & agents past
+        '''
+        ego_state = scenario.initial_ego_state
+        ego_coords = Point2D(ego_state.rear_axle.x, ego_state.rear_axle.y)
+        anchor_ego_state = np.array([ego_state.rear_axle.x, ego_state.rear_axle.y, ego_state.rear_axle.heading], dtype=np.float64)
+        ego_agent_past, time_stamps_past = get_ego_past_array_from_scenario(scenario, self.num_past_poses, self.past_time_horizon)
+
+        present_tracked_objects = scenario.initial_tracked_objects.tracked_objects
+        past_tracked_objects = [
+            tracked_objects.tracked_objects
+            for tracked_objects in scenario.get_past_tracked_objects(
+                iteration=0, time_horizon=self.past_time_horizon, num_samples=self.num_past_poses
+            )
+        ]
+        sampled_past_observations = past_tracked_objects + [present_tracked_objects]
+        neighbor_agents_past, neighbor_agents_types = \
+            sampled_tracked_objects_to_array_list(sampled_past_observations)
+        static_objects, static_objects_types = sampled_static_objects_to_array_list(present_tracked_objects)
+
+        ego_agent_past, neighbor_agents_past, neighbor_indices, static_objects = \
+            agent_past_process(ego_agent_past, neighbor_agents_past, neighbor_agents_types, self.num_agents, static_objects, static_objects_types, self.num_static, self.max_ped_bike, anchor_ego_state)
+        '''
+        Map
+        '''
+        route_roadblock_ids = scenario.get_route_roadblock_ids()
+        traffic_light_data = list(scenario.get_traffic_light_status_at_iteration(0))
+
+        if route_roadblock_ids != ['']:
+            route_roadblock_ids = route_roadblock_correction(
+                ego_state, map_api, route_roadblock_ids
             )
 
-            vector_map = map_process(route_roadblock_ids, anchor_ego_state, coords, traffic_light_data, speed_limit, lane_route, self._map_features, self._max_elements, self._max_points)
+        coords, traffic_light_data, speed_limit, lane_route = get_neighbor_vector_set_map(
+            map_api, self._map_features, ego_coords, self._radius, traffic_light_data
+        )
 
-            '''
-            ego & agents future
-            '''
-            ego_agent_future = get_ego_future_array_from_scenario(scenario, ego_state, self.num_future_poses, self.future_time_horizon)
+        vector_map = map_process(route_roadblock_ids, anchor_ego_state, coords, traffic_light_data, speed_limit, lane_route, self._map_features, self._max_elements, self._max_points)
 
-            present_tracked_objects = scenario.initial_tracked_objects.tracked_objects
-            future_tracked_objects = [
-                tracked_objects.tracked_objects
-                for tracked_objects in scenario.get_future_tracked_objects(
-                    iteration=0, time_horizon=self.future_time_horizon, num_samples=self.num_future_poses
-                )
-            ]
+        '''
+        ego & agents future
+        '''
+        ego_agent_future = get_ego_future_array_from_scenario(scenario, ego_state, self.num_future_poses, self.future_time_horizon)
 
-            sampled_future_observations = [present_tracked_objects] + future_tracked_objects
-            future_tracked_objects_array_list, _ = sampled_tracked_objects_to_array_list(sampled_future_observations)
-            neighbor_agents_future = agent_future_process(anchor_ego_state, future_tracked_objects_array_list, self.num_agents, neighbor_indices)
+        present_tracked_objects = scenario.initial_tracked_objects.tracked_objects
+        future_tracked_objects = [
+            tracked_objects.tracked_objects
+            for tracked_objects in scenario.get_future_tracked_objects(
+                iteration=0, time_horizon=self.future_time_horizon, num_samples=self.num_future_poses
+            )
+        ]
+
+        sampled_future_observations = [present_tracked_objects] + future_tracked_objects
+        future_tracked_objects_array_list, _ = sampled_tracked_objects_to_array_list(sampled_future_observations)
+        neighbor_agents_future = agent_future_process(anchor_ego_state, future_tracked_objects_array_list, self.num_agents, neighbor_indices)
 
 
-            '''
-            ego current
-            '''
-            ego_current_state = calculate_additional_ego_states(ego_agent_past, time_stamps_past)
+        '''
+        ego current
+        '''
+        ego_current_state = calculate_additional_ego_states(ego_agent_past, time_stamps_past)
 
-            # gather data
-            data = {"map_name": map_name, "token": token, "ego_current_state": ego_current_state, "ego_agent_future": ego_agent_future,
-                    "neighbor_agents_past": neighbor_agents_past, "neighbor_agents_future": neighbor_agents_future, "static_objects": static_objects}
-            data.update(vector_map)
+        # gather data
+        data = {
+            "map_name": map_name,
+            "log_name": scenario.log_name,
+            "scenario_type": scenario.scenario_type,
+            "token": token,
+            "ego_current_state": ego_current_state,
+            "ego_agent_future": ego_agent_future,
+            "neighbor_agents_past": neighbor_agents_past,
+            "neighbor_agents_future": neighbor_agents_future,
+            "static_objects": static_objects,
+        }
+        data.update(vector_map)
 
-            self.save_to_disk(self._save_dir, data)
+        return data
 
     def save_to_disk(self, dir, data):
-        np.savez(f"{dir}/{data['map_name']}_{data['token']}.npz", **data)
+        """原子写 NPZ，进程中断时不会留下看似完整的半文件。"""
+        output_dir = Path(dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        output_path = output_dir / f"{data['map_name']}_{data['token']}.npz"
+        descriptor, temporary_name = tempfile.mkstemp(
+            dir=str(output_dir),
+            prefix=f".{output_path.name}.",
+            suffix=".tmp",
+        )
+        temporary_path = Path(temporary_name)
+        try:
+            with os.fdopen(descriptor, "wb") as file:
+                np.savez(file, **data)
+                file.flush()
+                os.fsync(file.fileno())
+            os.replace(temporary_path, output_path)
+        except BaseException:
+            temporary_path.unlink(missing_ok=True)
+            raise
         
         
+# 以下辅助函数是 HDP 新增的原始 nuPlan -> npz 预处理/适配器校验入口，
+# 不属于当前 Diffusion-Planner 的常规 DataProcessor 推理链路。
 def get_filter_parameters(num_scenarios_per_type=None, limit_total_scenarios=None, shuffle=True, scenario_tokens=None, log_names=None):
     scenario_types = None
     map_names = None
@@ -233,6 +330,7 @@ def summarize_npz(npz_path):
 
 
 def compare_observation_adapter(processor, scenario, npz_path, atol=1e-5):
+    # 用已保存的 npz 与 observation_adapter 输出逐项比对，便于验证 HDP 的输入改造。
     history_buffer = build_history_buffer(processor, scenario)
     traffic_light_data = list(scenario.get_traffic_light_status_at_iteration(0))
     route_roadblock_ids = scenario.get_route_roadblock_ids()

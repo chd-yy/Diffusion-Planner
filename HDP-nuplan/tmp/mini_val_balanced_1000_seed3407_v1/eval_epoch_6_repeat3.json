@@ -1,0 +1,29 @@
+{
+  "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-mini-supervised-balanced10k-warmstart/2026-08-01-01:56:22/model_epoch_6_trainloss_0.1803.pth",
+  "data_list": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_val_balanced_1000_seed3407_v1/diffusion_planner_validation.json",
+  "samples": 1000,
+  "repeats": 3,
+  "seed": 3407,
+  "metrics": {
+    "ego_planning_loss": 0.04245064876725276,
+    "ego_planning_hybrid_loss": 8.046530733585358,
+    "loss": 0.12291595464944839
+  },
+  "per_repeat": [
+    {
+      "ego_planning_loss": 0.0413219782859087,
+      "ego_planning_hybrid_loss": 7.71381515789032,
+      "loss": 0.11846012805402278
+    },
+    {
+      "ego_planning_loss": 0.042706420250236986,
+      "ego_planning_hybrid_loss": 7.950057120800018,
+      "loss": 0.12220699003338814
+    },
+    {
+      "ego_planning_loss": 0.043323547765612605,
+      "ego_planning_hybrid_loss": 8.475719922065736,
+      "loss": 0.12808074586093426
+    }
+  ]
+}
