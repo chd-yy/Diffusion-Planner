@@ -49,11 +49,16 @@
 | `hdp_nuplan/data_process/run_utils.py` | JSON 原子写入、SHA256、日志名校验与去重 |
 | `hdp_nuplan/data_process/sampling.py` | 抽样前按最终 NPZ 名稳定去重 |
 | `scripts/build_preprocessing_plan.py` | 把完整日志清单切分为 shard，并精确分配总场景目标 |
+| `scripts/download_nuplan_log_subset.py` | 从 NuPlan v1.1 城市 ZIP 中按日志做 HTTP Range 下载，并校验 SQLite 与 SHA256 |
 | `scripts/run_preprocessing_shard.py` | 根据计划执行指定 shard；适合云平台 array job |
+| `scripts/run_preprocessing_range.py` | 多 worker 互斥滚动执行下载、预处理、强校验、报告归档和 raw 回收，并保存恢复状态 |
 | `scripts/merge_preprocessing_shards.py` | 合并成功 shard，检查重复并生成总 manifest |
 | `scripts/audit_dataset_splits.py` | 检查 train/val 是否共享 log 或 NPZ |
 | `scripts/validate_processed_cache.py` | 增加对 `shard_x/cache/*.npz` 嵌套 manifest 的验证 |
 | `tests/test_preprocessing_pipeline.py` | 覆盖失败隔离、续跑、分片、合并和泄漏检查 |
+| `tests/test_nuplan_subset_download.py` | 覆盖带点日志名、索引和下载报告等按日志下载行为 |
+| `tests/test_preprocessing_range.py` | 覆盖 worker 分工、范围选择、报告先归档及精确 raw 清理 |
+| `requirements_data_download.txt` | 固定按 ZIP 成员下载所需的 `remotezip` 版本 |
 
 ## 4. 改造后的执行流程
 
@@ -124,6 +129,24 @@ shard_00000/cache/us-nv-las-vegas-strip_xxx.npz
 ```
 
 训练时把 `data_dir` 设置为所有 `shard_*` 的共同根目录即可。现有 `DiffusionPlannerData` 使用 `os.path.join(data_dir, file_name)`，可以直接读取这种嵌套路径，不需要把百万个 NPZ 摊平到一个目录。
+
+### 5.6 官方日志可能没有可用 Scenario
+
+真实 train 数据验证发现，合法且 SQLite 完整的 DB 也可能因为 NuPlan 官方 scene 边界条件而生成 0 个 Scenario。默认仍使用严格模式，防止错误路径或缺失数据被静默跳过；正式处理已核验的官方 split 时需显式传入：
+
+```text
+--allow_empty_logs
+```
+
+此时抽样器会把空日志记录到 `empty_logs`，并在其余有效日志间重新分配 shard 的完整目标数。报告中的字段含义为：
+
+```text
+log_count            请求并参与 split 审计的全部日志数
+selected_log_count   实际贡献 NPZ 的日志数
+empty_log_count      ScenarioBuilder 返回 0 个 Scenario 的日志数
+```
+
+空日志仍留在完整 `log_names` 中用于 train/val 泄漏审计，但不会伪造进 `selected_per_log`。
 
 ## 6. 本地计划生成验证
 
@@ -282,7 +305,8 @@ $PY "$PROJECT/HDP-nuplan/scripts/run_preprocessing_shard.py" \
   --data_path /local-nvme/nuplan-v1.1/splits/trainval \
   --map_path /local-nvme/nuplan-maps-v1.0 \
   --output_root /local-nvme/processed/nuplan_train_100k \
-  --checksum_mode manifest
+  --checksum_mode manifest \
+  --allow_empty_logs
 ```
 
 云平台 array job 中只需要把 `--shard_index 0` 替换为平台提供的数组任务编号。`launch.json` 会保存该 shard 的实际命令，便于复盘。
@@ -305,19 +329,24 @@ $PY "$PROJECT/HDP-nuplan/scripts/run_preprocessing_shard.py" \
 ```bash
 $PY "$PROJECT/HDP-nuplan/scripts/merge_preprocessing_shards.py" \
   --shards_root /local-nvme/processed/nuplan_train_100k \
+  --plan /local-nvme/nuplan/plans/nuplan_train_100k/preprocessing_plan.json \
   --output_manifest /local-nvme/processed/nuplan_train_100k/train_manifest.json \
   --output_report /local-nvme/processed/nuplan_train_100k/train_merged_report.json
 ```
 
 默认要求：
 
-- 每个 shard 的 `status=complete`；
-- manifest 数量与 processing report 一致；
+- shard 目录集合与计划精确一致，不能缺失或混入计划外 shard；
+- 每个 shard 的 `status=complete` 且 `failed=0`；
+- shard 日志、场景目标和 manifest 数量与原计划精确一致；
 - shard 之间没有重复日志；
 - shard 之间没有重复 NPZ；
-- manifest 引用的本地文件真实存在。
+- cache 与 manifest 的 NPZ 集合精确一致；
+- 每个 shard 的强校验报告存在且哈希仍匹配；
+- 默认重新核对 `checksums.json` 中所有元数据和 NPZ 的 SHA256；
+- 最终 shard、日志和 NPZ 总数分别等于计划中的 264、13,180 和 100,000。
 
-只在对象存储控制节点没有下载 NPZ 时，才使用 `--no_verify_files`。正式训练机合并不要关闭文件验证。
+正式训练机合并不要使用 `--no_verify_files` 或 `--no_verify_checksums`。合并失败时不会生成新的正式 manifest，应先修复具体 shard，再重新执行。
 
 ### 9.5 train/val 泄漏审计
 
@@ -342,9 +371,11 @@ $PY "$PROJECT/HDP-nuplan/scripts/validate_processed_cache.py" \
   --manifest /local-nvme/processed/nuplan_train_100k/train_manifest.json \
   --sampling_report /local-nvme/processed/nuplan_train_100k/train_merged_report.json \
   --expected_count 100000 \
-  --expected_log_count 13180 \
+  --expected_log_count <train_merged_report中的selected_log_count> \
   --output /local-nvme/processed/nuplan_train_100k/cache_validation_report.json
 ```
+
+这里不能再硬编码 `13180`。`--expected_log_count` 验证的是实际出现在 NPZ 中的日志数；官方清单中可能存在合法空日志。完整 split 日志数仍应检查 `train_merged_report.json` 的 `log_count=13180`，二者用途不同。
 
 ## 10. 云端存储顺序
 
@@ -361,21 +392,131 @@ $PY "$PROJECT/HDP-nuplan/scripts/validate_processed_cache.py" \
 
 训练前再把处理后的 shard 批量同步到 GPU 实例本地 NVMe。不要让 PyTorch DataLoader 直接通过 S3/FUSE 随机读取几十万或上百万个小 NPZ，否则请求延迟会成为主要瓶颈。
 
-## 11. 尚未完成的事项与边界
+## 11. 首个官方 50-log 云端门禁实测
 
-本次已完成本地代码改造和 mini 实跑，但没有在本地伪装完成以下工作：
+云端环境：AutoDL RTX 4090，数据盘 `/root/autodl-tmp`。
+
+计划配置：
+
+```text
+train logs：13,180
+logs_per_shard：50
+shards：264
+total scenarios：100,000
+seed：3407
+```
+
+`shard_00000` 的 50 个 DB 通过 NuPlan 官方公开的 `motional-nuplan` S3 城市 ZIP 按成员下载，执行 SQLite `quick_check`，结果：
+
+```text
+下载：50/50 DB
+下载数据：8,341,491,712 bytes，约 7.77 GiB
+下载耗时：2,307.856 秒
+损坏或缺失：0
+```
+
+第一次预处理发现其中两个 DB 各只有 4 个 scene。NuPlan 官方查询要求有效 scene 满足 `row_num >= 3 AND row_num < n.cnt - 1`，因此二者返回 0 个 Scenario；这不是下载损坏。启用显式 `--allow_empty_logs` 后结果为：
+
+```text
+请求日志：50
+有效日志：48
+空日志：2
+目标/成功 NPZ：400/400
+失败：0
+wall time：3 分 11.78 秒
+峰值 RSS：976,036 KB
+NPZ 总大小：62,995,484 bytes
+```
+
+原命令第二次执行：
+
+```text
+processed=0
+skipped=400
+failed=0
+wall time=7.76 秒
+```
+
+单 shard 和合并根目录两次缓存验证均通过：400 个 NPZ 字段齐全、shape 正确、没有非有限值，manifest 无重复、无缺失、无额外文件。48 个有效日志各贡献 8～11 个场景；合并报告仍保存 50 个请求日志和 2 个空日志。
+
+随后用合并 manifest 做了 400 场景、batch size 8、1 epoch 的监督训练门禁：
+
+```text
+50/50 batch 完成
+encoder warm-start：151/151 tensors
+epoch train loss：12.1730
+checkpoint 可读取且包含 EMA、optimizer 和 scheduler
+退出码：0
+```
+
+本地与云端完整测试分别为：
+
+```text
+44 passed, 15 warnings
+```
+
+完整命令、绝对路径、故障过程和 checkpoint 位置见：
+
+```text
+HDP-nuplan/doc_hdp_nuplan/AutoDL全量训练部署操作日志.md
+```
+
+### 11.1 跨城市 4-shard 补充门禁
+
+首个 Las Vegas shard 通过后，选择纯 Pittsburgh `shard_00152`、纯 Singapore `shard_00175`、纯 Boston `shard_00197`，避免相邻 shard 仍全部来自 `vegas_1` 而漏掉跨城市问题。
+
+四 shard 合计结果：
+
+```text
+请求日志：200
+有效日志：190
+空日志：10
+计划/实际 NPZ：1,500/1,500
+处理失败：0
+NPZ 总大小：236,211,544 bytes
+合并缓存校验：passed
+```
+
+分城市空日志：Las Vegas 2、Pittsburgh 1、Singapore 0、Boston 7。这验证了 `--allow_empty_logs` 必须显式记录和重新分配目标，不能假设所有官方 DB 都能生成 Scenario。
+
+Boston 下载中出现一次 HTTP Range 连接数分钟无 I/O 且不退出。保留 17 个完整 DB、删除唯一 67,108,864-byte 未完成临时文件后，从断点成功续跑。为此下载器新增：
+
+```text
+连接超时：10 秒
+socket read 空闲超时：60 秒
+member 重试：3 次
+重试间隔：5 秒
+失败 member 重开 RemoteZip/HTTP 连接
+报告 retry_count/download_attempts
+```
+
+新增超时重试回归测试后，本地与云端完整测试均为 `45 passed`。合并后的 1,500 场景还完成 1 epoch、187 batch 的监督训练门禁，loss `9.4630`，checkpoint 可读取。
+
+因此 4-shard 工程门禁已通过，可以进入 100k 滚动预处理；完整命令、日志路径、每 shard 耗时、峰值内存与故障处理见 `AutoDL全量训练部署操作日志.md` 第 21～22 节。
+
+四份 `download_report.json` 复制到对应 processed shard 并逐份确认 SHA256 一致后，已删除四个明确的临时 `trainval` 目录。raw 占用降为 112K，数据盘可用空间从 146G 增加到 159G；1,500 个 NPZ、全部报告、日志和 checkpoint 均保留。由此“处理并校验后删除可恢复 raw DB”的空间回收步骤也已实跑通过。
+
+### 11.2 100k 滚动任务已启动
+
+新增 `run_preprocessing_range.py`，按 `shard_index % 3` 将 264 个 shard 均分给三个互斥 worker，每个 88 个。执行器实时强校验已有 shard，只有下载、预处理、缓存验证、下载报告归档及 SHA256 核对全部通过后才删除该 shard 的 `trainval`；新下载前还要求数据盘至少剩余 20 GiB。
+
+真实 `shard_00000` 跳过测试通过，完整项目测试更新为本地/云端分别 `49 passed`。随后启动三个 `nohup` worker，PID 为 17454、17455、17456。首次状态显示 worker 0 已跳过 shard 00000 并进入 shard 00003，worker 1/2 分别进入 shard 00001/00002，三个状态均为 running。完整命令、state/log 路径和恢复语义见 `AutoDL全量训练部署操作日志.md` 第 25 节。
+
+## 12. 尚未完成的事项与边界
+
+本次已完成本地代码改造、mini 实跑和首个官方 50-log 云端门禁，但没有把以下工作描述为已完成：
 
 - 尚未下载和预处理官方完整 train 数据。
-- 尚未验证特定云厂商的对象存储命令、array job 环境变量和临时盘挂载路径。
-- 尚未测量 50/100 个完整 train log 在云 CPU 实例上的峰值内存和吞吐。
+- 尚未验证对象存储上传命令和 AutoDL 之外平台的 array job 环境变量。
+- 已实测四城市 4 shard 的并行下载、串并行重叠预处理与磁盘峰值；尚未实测连续 264 shard 的无人值守任务。
 - `DataProcessor.work()` 仍为单进程逐 Scenario 特征提取；先用多 shard/多任务并行扩展。只有在云端基准确认 CPU 利用率不足后，再考虑进程池化单 shard，避免 NuPlan map/DB 对象的进程序列化风险。
 
-因此，下一步不是立即启动 13,180 日志全量任务，而是租一台 CPU 实例执行以下门槛实验：
+因此，下一步不是立即启动 13,180 日志全量任务，而是在当前 AutoDL 实例继续执行以下门槛实验：
 
-1. 50 log、约 400 Scenario 的一个 shard。
-2. 同一 shard 中断后重跑，确认跳过计数和对象存储上传。
-3. 4 个 shard 并行，观察内存、NVMe、DB 读取和地图加载。
-4. 合并并验证约 1,600 Scenario。
-5. 通过后再执行 100k；100k 监督训练和评测通过后，再扩大到 500k。
+1. 四城市 200 log、1,500 Scenario 门禁已完成，不重复执行。
+2. 归档各 shard 下载报告后删除已验证的临时 raw DB，验证空间回收。
+3. 按 shard 滚动执行剩余 train 计划，持续合并和验证到 100k。
+4. 单独生成官方 val 数据并执行 train/val 日志与 NPZ 泄漏审计。
+5. 100k 监督训练和评测通过后，再决定是否扩大到 500k。
 
 这条顺序能够先验证云端基础设施和数据正确性，再投入大规模租赁费用。

@@ -21,6 +21,7 @@ from typing import Dict, Optional, Tuple
 
 # PyTorch 用于所有轨迹、距离、奖励的张量计算。
 import torch
+import torch.nn.functional as F
 
 
 # ----------------------------------------------------------------------
@@ -160,6 +161,32 @@ class NuPlanRewardConfig:
     progress_guard_weight: float = 0.0
     # route-aligned progress 已除以 progress_normalization；0.2 对应默认 2 m。
     progress_guard_stop_tolerance: float = 0.2
+
+    # 【NuPlan 小数据适配，非论文原式】方向约束代价权重。
+    #
+    # 默认 0 保持论文 Eq. (25) 和历史实验不变；显式设置正值后，从
+    # multi-reward 中扣除 direction_cost，防止只优化 lane/progress 时产生
+    # “仍靠近车道中心线，但运动方向或车头方向与路线相反”的 reward hacking。
+    direction_guard_weight: float = 0.0
+
+    # 方向余弦低于 margin 的部分才产生代价。0 表示只惩罚超过 90 度的
+    # 反向运动/朝向；取值范围必须为 [-1, 1]。
+    direction_motion_cosine_margin: float = 0.0
+    direction_heading_cosine_margin: float = 0.0
+
+    # direction_cost 中运动方向和车头方向两个分量的相对权重。
+    direction_motion_weight: float = 1.0
+    direction_heading_weight: float = 1.0
+
+    # 位移过小时运动方向不稳定，因此不参与 motion direction 统计，单位为米。
+    direction_min_displacement: float = 1e-3
+
+    # 【对齐 NuPlan 官方 driving_direction_compliance】官方指标统计过去 1 秒
+    # 沿车道 baseline 的累计进度；反向超过 2 m 记为部分违规，超过 6 m 记为
+    # 完全违规。这里用相同时间窗和阈值构造可连续排序的代理 cost。
+    direction_time_horizon: float = 1.0
+    direction_compliance_threshold: float = 2.0
+    direction_violation_threshold: float = 6.0
 
     # 【NuPlan 适配】论文只说明 TTC/THW/OCC 使用速度自适应 shaping，
     # 未公开具体阈值。以下参数全部开放，便于后续通过验证集标定。
@@ -971,6 +998,175 @@ class NuPlanTensorRewardScorer:
             backward_cost[batch_idx] = torch.relu(-signed_motion).mean(dim=-1)
 
         return progress, backward_cost
+
+    def _direction_metrics(
+        self,
+        trajectories: torch.Tensor,
+        route_lanes: torch.Tensor,
+    ) -> Tuple[
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+    ]:
+        """计算候选轨迹相对路线切向的方向指标，所有输出均为 ``[B,G]``。
+
+        返回值依次为：
+
+        1. ``direction_cost``：运动与航向违规的加权平均，范围 ``[0,1]``；
+        2. ``motion_alignment``：有效位移方向与路线切向的平均余弦；
+        3. ``heading_alignment``：车头方向与路线切向的平均余弦；
+        4. ``reverse_fraction``：有符号位移为负的时间步比例；
+        5. ``min_progress_in_1s``：滑动时间窗内最小有符号累计进度，单位米；
+        6. ``compliance_score_approx``：按 NuPlan 2 m/6 m 阈值近似的 1/0.5/0 分。
+
+        无有效 route 时使用 ego 局部坐标系正 x 方向作为回退切向，保证异常
+        cache 仍能得到有限指标。静止时间步不参与 motion_alignment 和
+        reverse_fraction，避免停车场景因数值噪声被误判为逆向。
+        """
+        batch_size, group_size, horizon, _ = trajectories.shape
+        cfg = self.config
+
+        origin = torch.zeros_like(trajectories[:, :, :1, :2])
+        displacement = torch.diff(
+            torch.cat([origin, trajectories[..., :2]], dim=-2), dim=-2
+        )
+        displacement_norm = torch.linalg.vector_norm(displacement, dim=-1)
+        motion_valid = displacement_norm > float(cfg.direction_min_displacement)
+        motion_direction = displacement / displacement_norm.clamp_min(1e-6)[..., None]
+
+        # [cos(yaw), sin(yaw)] 可能在异常候选中接近零；只对有效航向归一化。
+        heading = trajectories[..., 2:4]
+        heading_norm = torch.linalg.vector_norm(heading, dim=-1)
+        heading_valid = heading_norm > 1e-6
+        heading_direction = heading / heading_norm.clamp_min(1e-6)[..., None]
+
+        # 默认回退到 ego 局部正 x 方向。
+        tangent = torch.zeros_like(displacement)
+        tangent[..., 0] = 1.0
+
+        route_xy = route_lanes[..., :2].reshape(batch_size, -1, 2)
+        route_vector = route_lanes[..., 2:4].reshape(batch_size, -1, 2)
+        route_valid = torch.any(route_lanes[..., :4] != 0, dim=-1).reshape(
+            batch_size, -1
+        )
+        route_valid = route_valid & (
+            torch.linalg.vector_norm(route_vector, dim=-1) > 1e-6
+        )
+
+        for batch_idx in range(batch_size):
+            valid_points = route_xy[batch_idx][route_valid[batch_idx]]
+            valid_vectors = route_vector[batch_idx][route_valid[batch_idx]]
+            if valid_points.numel() == 0:
+                continue
+
+            candidate_points = trajectories[batch_idx, :, :, :2].reshape(-1, 2)
+            nearest_index = torch.cdist(candidate_points, valid_points).argmin(dim=-1)
+            tangent[batch_idx] = self._normalize_direction(
+                valid_vectors[nearest_index]
+            ).reshape(group_size, horizon, 2)
+
+        motion_cosine = torch.sum(motion_direction * tangent, dim=-1)
+        heading_cosine = torch.sum(heading_direction * tangent, dim=-1)
+        signed_motion = torch.sum(displacement * tangent, dim=-1)
+
+        motion_denominator = motion_valid.sum(dim=-1).clamp_min(1)
+        heading_denominator = heading_valid.sum(dim=-1).clamp_min(1)
+        motion_alignment = (
+            torch.where(motion_valid, motion_cosine, torch.zeros_like(motion_cosine))
+            .sum(dim=-1)
+            / motion_denominator
+        )
+        heading_alignment = (
+            torch.where(
+                heading_valid, heading_cosine, torch.zeros_like(heading_cosine)
+            ).sum(dim=-1)
+            / heading_denominator
+        )
+        reverse_fraction = (
+            ((motion_cosine < 0) & motion_valid).sum(dim=-1) / motion_denominator
+        )
+
+        # 对 cosine∈[-1,1] 使用 margin-aware 归一化，使每个分量严格落在 [0,1]。
+        motion_margin = float(cfg.direction_motion_cosine_margin)
+        heading_margin = float(cfg.direction_heading_cosine_margin)
+        motion_cost_per_step = (
+            torch.relu(motion_margin - motion_cosine)
+            / max(motion_margin + 1.0, 1e-6)
+        ).clamp(0, 1)
+        heading_cost_per_step = (
+            torch.relu(heading_margin - heading_cosine)
+            / max(heading_margin + 1.0, 1e-6)
+        ).clamp(0, 1)
+        motion_cosine_cost = (
+            torch.where(
+                motion_valid,
+                motion_cost_per_step,
+                torch.zeros_like(motion_cost_per_step),
+            ).sum(dim=-1)
+            / motion_denominator
+        )
+
+        # NuPlan 官方实现按过去 time_horizon 秒累计 baseline progress。其
+        # n_horizon 切片包含当前帧，因此稳定阶段实际覆盖 n_horizon+1 个采样点。
+        # 使用左侧补零的 unfold，可为每个规划点得到同长度的滑窗累计进度。
+        n_horizon = max(
+            int(round(float(cfg.direction_time_horizon) / float(cfg.dt))), 1
+        )
+        window_size = min(n_horizon + 1, horizon)
+        window_progress = F.pad(
+            signed_motion, (window_size - 1, 0)
+        ).unfold(-1, window_size, 1).sum(dim=-1)
+        min_progress_in_window = window_progress.min(dim=-1).values
+        max_negative_progress = torch.relu(-min_progress_in_window)
+
+        compliance_threshold = max(
+            float(cfg.direction_compliance_threshold), 1e-6
+        )
+        violation_threshold = max(
+            float(cfg.direction_violation_threshold), compliance_threshold + 1e-6
+        )
+        # 从发生反向运动开始连续增加，达到官方 2 m 部分违规阈值时饱和为 1。
+        # 与只在越过阈值后才惩罚相比，这能在候选尚未违规时提供预防性排序信号。
+        progress_window_cost = (
+            max_negative_progress / compliance_threshold
+        ).clamp(0, 1)
+        motion_cost = torch.maximum(motion_cosine_cost, progress_window_cost)
+        compliance_score_approx = torch.where(
+            max_negative_progress < compliance_threshold,
+            torch.ones_like(max_negative_progress),
+            torch.where(
+                max_negative_progress < violation_threshold,
+                torch.full_like(max_negative_progress, 0.5),
+                torch.zeros_like(max_negative_progress),
+            ),
+        )
+        heading_cost = (
+            torch.where(
+                heading_valid,
+                heading_cost_per_step,
+                torch.zeros_like(heading_cost_per_step),
+            ).sum(dim=-1)
+            / heading_denominator
+        )
+
+        motion_weight = float(cfg.direction_motion_weight)
+        heading_weight = float(cfg.direction_heading_weight)
+        total_weight = max(motion_weight + heading_weight, 1e-6)
+        direction_cost = (
+            motion_weight * motion_cost + heading_weight * heading_cost
+        ) / total_weight
+
+        return (
+            direction_cost.clamp(0, 1),
+            motion_alignment.clamp(-1, 1),
+            heading_alignment.clamp(-1, 1),
+            reverse_fraction.clamp(0, 1),
+            min_progress_in_window,
+            compliance_score_approx,
+        )
 
     # ------------------------------------------------------------------
     # 舒适性代价
@@ -1936,11 +2132,19 @@ class NuPlanTensorRewardScorer:
             trajectories, lane_source, ego_future
         )
 
-        # 旧指标主要用于 reward hacking/运动退化诊断；progress guard 只有在
-        # 显式设置非零权重时才作为 NuPlan 小数据适配加入论文三项奖励。
+        # 旧指标主要用于 reward hacking/运动退化诊断；progress/direction guard
+        # 只有在显式设置非零权重时才作为 NuPlan 小数据适配加入论文三项奖励。
         progress, backward_cost = self._route_motion_metrics(
             trajectories, route_lanes
         )
+        (
+            direction_cost,
+            motion_alignment,
+            heading_alignment,
+            reverse_fraction,
+            min_progress_in_1s,
+            direction_compliance_score_approx,
+        ) = self._direction_metrics(trajectories, route_lanes)
         progress_guard_reward = self._progress_guard_reward(
             trajectories,
             ego_future,
@@ -1954,6 +2158,7 @@ class NuPlanTensorRewardScorer:
             + cfg.follow_weight * follow_reward
             + cfg.lane_weight * lane_reward
             + cfg.progress_guard_weight * progress_guard_reward
+            - cfg.direction_guard_weight * direction_cost
         )
 
         route_cost = self._route_cost(trajectories, route_lanes)
@@ -1975,6 +2180,14 @@ class NuPlanTensorRewardScorer:
             "lane_reward_mask": lane_mask,
             "progress_guard_reward": progress_guard_reward,
             "progress": progress,
+            "direction_cost": direction_cost,
+            "motion_alignment": motion_alignment,
+            "heading_alignment": heading_alignment,
+            "reverse_fraction": reverse_fraction,
+            "min_progress_in_1s": min_progress_in_1s,
+            "direction_compliance_score_approx": (
+                direction_compliance_score_approx
+            ),
             "no_collision": no_collision,
             "collision_cost": collision_cost,
             "route_cost": route_cost,

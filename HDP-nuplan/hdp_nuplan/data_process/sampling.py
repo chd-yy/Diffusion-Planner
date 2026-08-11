@@ -23,14 +23,15 @@ def deduplicate_scenarios(scenarios):
     return list(unique.values()), len(scenarios) - len(unique)
 
 
-def select_scenarios_balanced_by_log(scenarios, log_names, total_scenarios, seed):
+def select_scenarios_balanced_by_log(
+    scenarios,
+    log_names,
+    total_scenarios,
+    seed,
+    allow_empty_logs=False,
+):
     """为每个日志提供基础配额，再从剩余唯一场景中随机补足总量。"""
     expected_logs = list(dict.fromkeys(log_names))
-    if total_scenarios < len(expected_logs):
-        raise ValueError(
-            f"total_scenarios={total_scenarios} is smaller than the "
-            f"number of requested logs={len(expected_logs)}"
-        )
 
     # 同一 lidar token 可能带多个 scenario tag；按最终 NPZ 文件名去重，避免静默覆盖。
     unique_scenarios, duplicate_count = deduplicate_scenarios(scenarios)
@@ -40,8 +41,16 @@ def select_scenarios_balanced_by_log(scenarios, log_names, total_scenarios, seed
         grouped[scenario.log_name].append(scenario)
 
     missing_logs = sorted(set(expected_logs) - set(grouped))
-    if missing_logs:
+    if missing_logs and not allow_empty_logs:
         raise RuntimeError(f"No scenarios found for requested logs: {missing_logs}")
+    eligible_logs = [log_name for log_name in expected_logs if log_name in grouped]
+    if not eligible_logs:
+        raise RuntimeError("No scenarios found for any requested log")
+    if total_scenarios < len(eligible_logs):
+        raise ValueError(
+            f"total_scenarios={total_scenarios} is smaller than the "
+            f"number of eligible logs={len(eligible_logs)}"
+        )
     if len(unique_scenarios) < total_scenarios:
         raise RuntimeError(
             f"Only {len(unique_scenarios)} unique scenarios are available, "
@@ -52,10 +61,12 @@ def select_scenarios_balanced_by_log(scenarios, log_names, total_scenarios, seed
     for items in grouped.values():
         rng.shuffle(items)
 
-    base_quota = total_scenarios // len(expected_logs)
+    # 官方 train 清单可能含少于 5 个 scene 的短 DB。NuPlan Builder 对这类 DB 返回
+    # 0 Scenario；显式允许时，只在实际有候选的日志之间重新均衡总目标。
+    base_quota = total_scenarios // len(eligible_logs)
     selected = []
     remaining = []
-    for log_name in expected_logs:
+    for log_name in eligible_logs:
         items = grouped[log_name]
         take = min(base_quota, len(items))
         selected.extend(items[:take])
@@ -83,12 +94,16 @@ def select_scenarios_balanced_by_log(scenarios, log_names, total_scenarios, seed
         "unique_scenarios": len(unique_scenarios),
         "duplicate_output_names_removed": duplicate_count,
         "requested_log_count": len(expected_logs),
+        "eligible_log_count": len(eligible_logs),
+        "empty_log_count": len(missing_logs),
+        "empty_logs": missing_logs,
         "base_quota_per_log": base_quota,
         "available_per_log": {
-            log_name: len(grouped[log_name]) for log_name in expected_logs
+            log_name: len(grouped[log_name]) for log_name in eligible_logs
         },
+        # 这里只记录真正产生 NPZ 的日志，确保缓存验证器能与 NPZ 元数据精确比较。
         "selected_per_log": {
-            log_name: selected_counts[log_name] for log_name in expected_logs
+            log_name: selected_counts[log_name] for log_name in eligible_logs
         },
     }
     return selected, report

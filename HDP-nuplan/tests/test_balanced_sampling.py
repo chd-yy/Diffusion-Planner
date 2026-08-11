@@ -63,3 +63,31 @@ def test_balanced_sampling_rejects_too_few_scenarios_for_log_coverage():
             total_scenarios=1,
             seed=1,
         )
+
+
+def test_balanced_sampling_requires_explicit_permission_for_empty_logs():
+    with pytest.raises(RuntimeError, match="No scenarios found"):
+        select_scenarios_balanced_by_log(
+            make_scenarios("log-a", 10),
+            ["log-a", "short-empty-log"],
+            total_scenarios=8,
+            seed=1,
+        )
+
+
+def test_balanced_sampling_reports_empty_logs_and_preserves_total_target():
+    selected, report = select_scenarios_balanced_by_log(
+        make_scenarios("log-a", 10) + make_scenarios("log-b", 10),
+        ["log-a", "short-empty-log", "log-b"],
+        total_scenarios=12,
+        seed=1,
+        allow_empty_logs=True,
+    )
+
+    assert len(selected) == 12
+    assert report["requested_log_count"] == 3
+    assert report["eligible_log_count"] == 2
+    assert report["empty_log_count"] == 1
+    assert report["empty_logs"] == ["short-empty-log"]
+    assert report["base_quota_per_log"] == 6
+    assert report["selected_per_log"] == {"log-a": 6, "log-b": 6}

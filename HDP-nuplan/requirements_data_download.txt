@@ -1,0 +1,2 @@
+# 云端按日志从官方 NuPlan ZIP 中做 HTTP Range 抽取；训练和推理不依赖该包。
+remotezip==0.12.3

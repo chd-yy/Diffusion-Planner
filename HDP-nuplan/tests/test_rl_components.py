@@ -130,6 +130,91 @@ class RlComponentTest(unittest.TestCase):
         self.assertAlmostEqual(guard[0, 1].item(), 1.0, places=6)
         self.assertAlmostEqual(guard[0, 2].item(), 1.0, places=6)
 
+    def test_direction_cost_distinguishes_forward_reverse_and_stationary(self):
+        horizon = 8
+        route = torch.zeros(1, 1, horizon, 12)
+        route[0, 0, :, 0] = torch.arange(1, horizon + 1, dtype=torch.float32)
+        route[0, 0, :, 2] = 1.0
+
+        trajectories = torch.zeros(1, 3, horizon, 4)
+        # 候选 0：沿 route 正向行驶且车头朝前。
+        trajectories[0, 0, :, 0] = torch.arange(
+            1, horizon + 1, dtype=torch.float32
+        )
+        trajectories[0, 0, :, 2] = 1.0
+        # 候选 1：沿 route 反向行驶且车头朝后。
+        trajectories[0, 1, :, 0] = -torch.arange(
+            1, horizon + 1, dtype=torch.float32
+        )
+        trajectories[0, 1, :, 2] = -1.0
+        # 候选 2：原地停车但车头朝前，不能被误判为逆向运动。
+        trajectories[0, 2, :, 2] = 1.0
+
+        scorer = NuPlanTensorRewardScorer(NuPlanRewardConfig())
+        (
+            cost,
+            motion_alignment,
+            heading_alignment,
+            reverse_fraction,
+            min_progress_in_1s,
+            compliance_score,
+        ) = scorer._direction_metrics(trajectories, route)
+
+        self.assertAlmostEqual(cost[0, 0].item(), 0.0, places=6)
+        self.assertAlmostEqual(motion_alignment[0, 0].item(), 1.0, places=6)
+        self.assertAlmostEqual(heading_alignment[0, 0].item(), 1.0, places=6)
+        self.assertAlmostEqual(reverse_fraction[0, 0].item(), 0.0, places=6)
+        self.assertAlmostEqual(min_progress_in_1s[0, 0].item(), 1.0, places=6)
+        self.assertAlmostEqual(compliance_score[0, 0].item(), 1.0, places=6)
+
+        self.assertAlmostEqual(cost[0, 1].item(), 1.0, places=6)
+        self.assertAlmostEqual(motion_alignment[0, 1].item(), -1.0, places=6)
+        self.assertAlmostEqual(heading_alignment[0, 1].item(), -1.0, places=6)
+        self.assertAlmostEqual(reverse_fraction[0, 1].item(), 1.0, places=6)
+        self.assertAlmostEqual(min_progress_in_1s[0, 1].item(), -8.0, places=6)
+        self.assertAlmostEqual(compliance_score[0, 1].item(), 0.0, places=6)
+
+        self.assertAlmostEqual(cost[0, 2].item(), 0.0, places=6)
+        self.assertAlmostEqual(reverse_fraction[0, 2].item(), 0.0, places=6)
+        self.assertAlmostEqual(min_progress_in_1s[0, 2].item(), 0.0, places=6)
+        self.assertAlmostEqual(compliance_score[0, 2].item(), 1.0, places=6)
+
+    def test_direction_guard_changes_reward_only_when_enabled(self):
+        horizon = 8
+        route = torch.zeros(1, 1, horizon, 12)
+        route[0, 0, :, 0] = torch.arange(1, horizon + 1, dtype=torch.float32)
+        route[0, 0, :, 2] = 1.0
+        trajectories = torch.zeros(1, 2, horizon, 4)
+        trajectories[0, 0, :, 0] = torch.arange(
+            1, horizon + 1, dtype=torch.float32
+        )
+        trajectories[0, 0, :, 2] = 1.0
+        trajectories[0, 1, :, 0] = -torch.arange(
+            1, horizon + 1, dtype=torch.float32
+        )
+        trajectories[0, 1, :, 2] = -1.0
+        common_inputs = dict(
+            trajectories=trajectories,
+            neighbors_future=torch.zeros(1, 0, horizon, 4),
+            neighbor_mask=torch.zeros(1, 0, horizon, dtype=torch.bool),
+            route_lanes=route,
+            static_objects=torch.zeros(1, 0, 10),
+            lanes=route,
+        )
+
+        reward_without_guard, details = NuPlanTensorRewardScorer(
+            NuPlanRewardConfig(direction_guard_weight=0.0)
+        )(**common_inputs)
+        reward_with_guard, guarded_details = NuPlanTensorRewardScorer(
+            NuPlanRewardConfig(direction_guard_weight=2.0)
+        )(**common_inputs)
+
+        expected = reward_without_guard - 2.0 * details["direction_cost"]
+        torch.testing.assert_close(reward_with_guard, expected)
+        torch.testing.assert_close(
+            guarded_details["direction_cost"], details["direction_cost"]
+        )
+
     def test_paper_follow_reward_prefers_safe_gap_to_tailgating(self):
         horizon = 20
         time = torch.arange(1, horizon + 1, dtype=torch.float32) * 0.1

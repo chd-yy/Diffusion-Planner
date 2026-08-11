@@ -25,12 +25,18 @@ HIGHER_IS_BETTER = {
     "reward",
     "progress",
     "no_collision",
+    "motion_alignment",
+    "heading_alignment",
+    "direction_compliance_score_approx",
 }
 LOWER_IS_BETTER = {
     "collision_cost",
     "route_cost",
     "comfort_cost",
     "backward_cost",
+    "direction_cost",
+    "reverse_fraction",
+    "min_progress_in_1s",
     "imitation_cost",
     "ade_m",
     "fde_m",
@@ -74,6 +80,12 @@ def parse_args() -> argparse.Namespace:
         default=None,
         type=float,
         help="Override the args.json progress guard weight for reward diagnostics.",
+    )
+    parser.add_argument(
+        "--reward-direction-guard-weight",
+        default=None,
+        type=float,
+        help="Override the args.json direction guard weight for reward diagnostics.",
     )
     parser.add_argument("--low-speed-threshold", default=0.5, type=float)
     parser.add_argument("--device", default="cuda", choices=["cpu", "cuda"])
@@ -149,6 +161,33 @@ def reward_config_from_args(config: Config) -> NuPlanRewardConfig:
         ),
         progress_guard_stop_tolerance=getattr(
             config, "reward_progress_guard_stop_tolerance", 0.2
+        ),
+        direction_guard_weight=getattr(
+            config, "reward_direction_guard_weight", 0.0
+        ),
+        direction_motion_cosine_margin=getattr(
+            config, "reward_direction_motion_cosine_margin", 0.0
+        ),
+        direction_heading_cosine_margin=getattr(
+            config, "reward_direction_heading_cosine_margin", 0.0
+        ),
+        direction_motion_weight=getattr(
+            config, "reward_direction_motion_weight", 1.0
+        ),
+        direction_heading_weight=getattr(
+            config, "reward_direction_heading_weight", 1.0
+        ),
+        direction_min_displacement=getattr(
+            config, "reward_direction_min_displacement", 1e-3
+        ),
+        direction_time_horizon=getattr(
+            config, "reward_direction_time_horizon", 1.0
+        ),
+        direction_compliance_threshold=getattr(
+            config, "reward_direction_compliance_threshold", 2.0
+        ),
+        direction_violation_threshold=getattr(
+            config, "reward_direction_violation_threshold", 6.0
         ),
         risk_speed_reference=getattr(config, "reward_risk_speed_reference", 15.0),
         ttc_safe_low_speed=getattr(config, "reward_ttc_safe_low_speed", 2.0),
@@ -426,6 +465,10 @@ def main() -> None:
         if args.reward_progress_guard_weight < 0:
             raise ValueError("reward progress guard weight must be non-negative")
         reward_config.progress_guard_weight = args.reward_progress_guard_weight
+    if args.reward_direction_guard_weight is not None:
+        if args.reward_direction_guard_weight < 0:
+            raise ValueError("reward direction guard weight must be non-negative")
+        reward_config.direction_guard_weight = args.reward_direction_guard_weight
     scorer = NuPlanTensorRewardScorer(reward_config)
 
     dataset = DiffusionPlannerData(

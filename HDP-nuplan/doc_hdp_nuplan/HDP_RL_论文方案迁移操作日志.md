@@ -828,3 +828,373 @@ SHA-256: 4da0a2f800913174e12e7b73725c8715b053d943f53500a3d3e42b20a0db7c91
 本次固定 20 场景 NuPlan 官方 `closed_loop_nonreactive_agents` 门禁判定为 **通过**：RL 在安全、TTC、可行驶区域、行驶方向和舒适性均不退化的前提下，将路线进度提高 `6.256%`，使闭环总分提高 `1.196%`。这与离线阶段“恢复 progress 且不增加碰撞”的方向一致。
 
 边界：20 个 mini-val 固定场景仍是小样本，且 challenge 中邻车为 non-reactive；该结果可以作为完整项目经历中的受控闭环正收益证据，但不能外推为完整 NuPlan benchmark、reactive closed-loop 或实车结论。下一步不应继续在这 20 个场景上调参，应扩大到独立且更多的闭环场景，防止对固定门禁集合过拟合。
+
+## 19. 在新 11,040 数据上验证论文 RL 正收益
+
+时间：2026-08-11。
+
+### 19.1 实验问题重新定义
+
+本轮唯一主要问题改为：
+
+```text
+从 target-matched 11,040 新数据训练出的论文一致监督模型出发，
+执行第 18 节已经获得正收益的 RL 方法后，闭环指标能否相对其自身监督起点提高？
+```
+
+因此，旧 `omega=0.01` balanced 10k epoch 10 只保留为历史排行榜参考，不再作为是否允许进入
+RL 的直接门禁。新实验的因果比较必须是同一条模型链：
+
+```text
+target-matched 11,040 supervised（omega=0.1）
+                    ↓ 从选中的监督 checkpoint 启动 RL
+target-matched 11,040 RL（omega=0.1）
+```
+
+不能把既有 target-matched 11,040 `omega=0.01` checkpoint 直接当作论文一致起点，也不能把新
+监督模型直接与旧论文 RL checkpoint 的绝对分数差解释为 RL 收益。
+
+### 19.2 受控变量与判定标准
+
+监督阶段复用第 11 节论文实验配置，只把训练集从 balanced 10k 换为 target-matched 11,040：
+
+| 项目 | 本轮值 |
+|---|---:|
+| code commit | `720025446c0cb86bb236e4903454864db0b71153` |
+| train samples | 11,040 |
+| seed | 3407 |
+| batch size | 8 |
+| epochs | 20 |
+| learning rate | `5e-4` |
+| warm-up | 2 epochs |
+| hybrid loss weight | `0.1` |
+| encoder initialization | 发布版 `checkpoints/model.pth` |
+| encoder frozen | 前 3 epochs |
+| EMA | true |
+
+数据与初始化证据：
+
+```text
+manifest SHA-256: 808d3b170d7067785e2120d7f4cffd81b427bdbae6f7fc62c9a634e5206e8bac
+normalization SHA-256: c36ccb9807a64fe75ea3f43c1b169a076e6824f194512e09d46788a8a0158a5a
+encoder checkpoint SHA-256: 7a441df91ebe1c912d8262010c40486da24f425f757e2b4228072e251ab67d45
+cache validation: passed；11,040 个 manifest 条目；11,040 个唯一 NPZ；train/val 日志重叠为 0
+```
+
+监督训练完成后，先用独立 val1k 对全部 checkpoint 排名并复测候选，再在固定 20 场景获取 RL
+前基线。监督模型不要求先超过历史旧 10k；本轮要验证的是 RL 的配对增量。RL 正收益硬门禁为：
+
+1. `RL overall score > paired supervised overall score`；
+2. expert-route progress 应提高；
+3. no-at-fault collision、TTC、drivable-area compliance 不得下降；
+4. 两侧必须使用完全相同的场景 token、challenge、仿真环境和聚合脚本；
+5. 若只提高训练 reward 或 open-loop loss，而固定 20 场景不提高，不判为 RL 正收益。
+
+### 19.3 云端启动准备与第一次连接结果
+
+计划使用实验名 `hdp-paper-supervised-targetmatch11040-omega0p1-e20`，避免与此前名字中含义容易
+混淆的 `omega01` 写法重名。预定命令为：
+
+```bash
+screen -dmS hdp11040_paper_sup bash -lc '
+  cd /root/autodl-tmp/workspace/Diffusion-Planner
+  set -o pipefail
+  CUDA_VISIBLE_DEVICES=0 \
+  /root/autodl-tmp/conda_envs/diffusion_planner/bin/python \
+  -m torch.distributed.run \
+    --nnodes 1 \
+    --nproc-per-node 1 \
+    --standalone \
+    HDP-nuplan/train_predictor.py \
+    --name hdp-paper-supervised-targetmatch11040-omega0p1-e20 \
+    --save_dir /root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20 \
+    --train_set /root/autodl-tmp/workspace/Diffusion-Planner/HDP-nuplan/tmp/mini_train_targetmatch_11040_seed3407_v1/cache \
+    --train_set_list /root/autodl-tmp/workspace/Diffusion-Planner/HDP-nuplan/tmp/mini_train_targetmatch_11040_seed3407_v1/diffusion_planner_training.json \
+    --normalization_file_path /root/autodl-tmp/workspace/Diffusion-Planner/HDP-nuplan/normalization.json \
+    --batch_size 8 \
+    --train_epochs 20 \
+    --save_utd 1 \
+    --num_workers 4 \
+    --learning_rate 0.0005 \
+    --warm_up_epoch 2 \
+    --planning_hybrid_loss 0.1 \
+    --encoder_pretrained_model_path /root/autodl-tmp/workspace/Diffusion-Planner/checkpoints/model.pth \
+    --freeze_encoder_epochs 3 \
+    --diffusion_model_type x_start \
+    --diffusion_supervision_type x_start \
+    --use_data_augment true \
+    --augment_prob 0.5 \
+    --use_ema true \
+    --use_wandb false \
+    --ddp true \
+    --seed 3407 \
+    --pin-mem \
+    2>&1 | tee /root/autodl-tmp/logs/hdp_targetmatch_11040_paper_omega0p1_e20.log
+  rc=${PIPESTATUS[0]}
+  printf "%s\\n" "$rc" | tee /root/autodl-tmp/logs/hdp_targetmatch_11040_paper_omega0p1_e20.exit
+  exit "$rc"
+'
+```
+
+2026-08-11 首次连接 `connect.cqa1.seetacloud.com:11156` 返回 `Connection refused`，因此该命令
+尚未在云端执行，也没有产生半启动实验。必须在实例恢复 SSH 后重新检查 GPU、11,040 缓存数量、
+磁盘、现有训练进程、代码 commit 和目标目录不存在，全部通过后才能启动。
+
+### 19.4 云端恢复、验收与正式启动
+
+同日再次连接成功。启动前只读验收结果：
+
+```text
+host: autodl-container-b8e548a0d5-61312194
+GPU: NVIDIA GeForce RTX 4090 24GB，启动前显存 1 MiB、利用率 0%
+data disk: 170GB，总可用 111GB
+Python: 3.9.25
+NPZ: 11,040
+已有训练/评测进程: 0
+已有 screen: 0
+目标实验目录: 不存在
+```
+
+云端工程是归档解压目录，没有 `.git`，所以不能用 `git rev-parse` 证明版本；改为比较训练入口、
+loss、epoch 实现的 SHA-256。本地与云端三份文件逐字节一致：
+
+```text
+cc31d257b3ae89b6048626fcca0f90eaf8672c0bc8b9fcd0cbf89a0a2183a8cf  HDP-nuplan/train_predictor.py
+eb94be2a052f8a8f9f6a5cd66cdeaf20e7c8601fbc63c93584185f349ba44d09  HDP-nuplan/hdp_nuplan/loss.py
+41e04381a20dffd3da34425c0a3dfdedc3d0290f4abf54ba19d60e6b728fb10e  HDP-nuplan/hdp_nuplan/train_epoch.py
+```
+
+训练前执行全部测试：`56 passed, 15 warnings in 4.22s`，退出码 0；warning 均为第三方包的弃用
+提示，不是测试失败。
+
+随后执行第 19.3 节命令，正式启动成功：
+
+```text
+screen: hdp11040_paper_sup
+启动时间: 2026-08-11 00:15:30 CST
+run_dir: /root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/
+         hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/
+log: /root/autodl-tmp/logs/hdp_targetmatch_11040_paper_omega0p1_e20.log
+exit: /root/autodl-tmp/logs/hdp_targetmatch_11040_paper_omega0p1_e20.exit
+```
+
+启动后日志确认 `Dataset Prepared: 11040`、encoder `151/151` 张量加载成功、epoch 1 encoder 为
+冻结状态，并进入 `1380` batch 的训练循环。保存的 `args.json` 已逐项读取，确认
+`planning_hybrid_loss=0.1`，而不是旧实验的 `0.01`。
+
+另启动 `hdp11040_paper_eval` watcher。它在训练期间只每 30 秒检查退出码；训练成功后自动对全部
+checkpoint 执行独立 val1k、3 repeats 排名：
+
+```text
+screen: hdp11040_paper_eval
+evaluation output: /root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/evaluation/
+                   mini_val_1000_checkpoint_ranking_repeat3.json
+evaluation log: /root/autodl-tmp/logs/hdp_targetmatch_11040_paper_omega0p1_val1k_repeat3.log
+evaluation exit: /root/autodl-tmp/logs/hdp_targetmatch_11040_paper_omega0p1_val1k_repeat3.exit
+```
+
+watcher 不会自动启动 RL。val1k 排名完成后仍需检查候选，再用固定 20 场景建立配对监督基线。
+
+首轮训练完成后的落盘验收：
+
+```text
+epoch 1 train loss: 3.8623
+checkpoint: model_epoch_1_trainloss_3.8623.pth
+checkpoint size: 67,417,699 bytes
+next state: Epoch 2/20，training exit 文件尚未生成
+```
+
+首轮 loss 与第 11 节 balanced 10k 论文监督实验的 `3.7471` 同一量级；日志无 NaN、Traceback
+或提前退出。这里只判断训练链路正常，不根据单轮训练 loss 判断最终模型优劣。
+
+冻结/解冻检查随后通过：
+
+```text
+epoch 1: encoder trainable=False，train loss=3.8623
+epoch 2: encoder trainable=False，train loss=2.6349
+epoch 3: encoder trainable=False，train loss=1.4178
+epoch 4: encoder trainable=True，显存由约 927 MiB 增至约 1,803 MiB
+```
+
+显存增长来自 encoder 梯度与优化器状态开始参与训练，证明 `freeze_encoder_epochs=3` 不是只写入
+参数文件而未执行。前台验收到 `2026-08-11 00:24:53 CST` 时，5 个 checkpoint 已落盘并进入
+epoch 6；训练与评测 watcher 均保持运行。随后停止的只是本地 SSH 前台轮询，不是云端两个 screen。
+
+### 19.5 监督训练完成与 val1k 自动排名
+
+2026-08-11 01:01 CST 复核：监督训练和自动 val1k 排名均已完成，两个退出码均为 0；20 个 epoch
+对应的 20 个 checkpoint 全部落盘，GPU 已空闲。最后七轮训练 loss 为：
+
+```text
+epoch 14: 1.1029    epoch 15: 1.0895    epoch 16: 1.1276
+epoch 17: 1.0685    epoch 18: 1.0702    epoch 19: 0.9356
+epoch 20: 0.9882
+```
+
+独立 val1k、每个 checkpoint 3 repeats 的前五名为：
+
+| 排名 | epoch | train loss | mean val total loss |
+|---:|---:|---:|---:|
+| 1 | 10 | 1.2008 | 0.613795605 |
+| 2 | 14 | 1.1029 | 0.619970966 |
+| 3 | 9 | 1.3176 | 0.631156356 |
+| 4 | 15 | 1.0895 | 0.635913728 |
+| 5 | 13 | 1.1211 | 0.640057264 |
+
+epoch 10 的三次 total loss 为 `0.659980163、0.565663225、0.615743427`，均值为
+`0.613795605`。因此当前第一候选是 epoch 10，而不是 train loss 最低的 epoch 19，也不是最后
+epoch。证据哈希：
+
+```text
+0b179619534f9e26e2d498ac954c889587fd170cd019547c77fc8eedcb73f16c  model_epoch_10_trainloss_1.2008.pth
+2a3b0349586ba64838b143fc1883992ce9025b3caf4886453dbab05d000691b9  args.json
+79540a1a54d71e1e812d538816041d3fe34d26d3cc8113733ca1c6665a2295cc  mini_val_1000_checkpoint_ranking_repeat3.json
+```
+
+当前尚未启动 RL。下一步是把 epoch 10 与 `args.json` 下载到本地并校验哈希，在固定 20 场景上
+获取这一个监督模型的 RL 前基线；之后才能从同一 epoch 10 checkpoint 启动论文 RL。
+
+### 19.6 epoch 10 下载与配对监督闭环基线
+
+下载到本地：
+
+```text
+tmp/targetmatch_11040_paper_omega0p1_eval/checkpoints/model_epoch_10_trainloss_1.2008.pth
+tmp/targetmatch_11040_paper_omega0p1_eval/checkpoints/args.json
+tmp/targetmatch_11040_paper_omega0p1_eval/open_loop/mini_val_1000_checkpoint_ranking_repeat3.json
+```
+
+三个文件的本地 SHA-256 与第 19.5 节云端值完全一致。随后在产生历史基线的本机环境，用
+`mini-val-closed-loop-20`、`closed_loop_nonreactive_agents`、seed 0、sequential worker 运行：
+
+```bash
+env \
+  NUPLAN_EXP_ROOT=/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/targetmatch_11040_paper_omega0p1_eval/closed_loop \
+  DIFFUSION_PLANNER_PYTHON=/home/yanjun/NewDisk/conda_envs/diffusion_planner/bin/python \
+  CUDA_VISIBLE_DEVICES=0 \
+bash HDP-nuplan/scripts/run_mini_closed_loop.sh \
+  hdp-paper-targetmatch11040-omega0p1-e10-cl20 \
+  /home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/targetmatch_11040_paper_omega0p1_eval/checkpoints/args.json \
+  /home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/targetmatch_11040_paper_omega0p1_eval/checkpoints/model_epoch_10_trainloss_1.2008.pth \
+  mini-val-closed-loop-20 \
+  hdp
+```
+
+运行耗时约 16 分 12 秒，`20/20` 成功、`0` 失败，出现 3 次两侧共有的 `route_list empty`
+warning。监督基线为：
+
+| 指标 | supervised epoch 10 |
+|---|---:|
+| overall score | 0.703840943 |
+| expert-route progress | 0.653433099 |
+| no-at-fault collision | 0.900000 |
+| TTC within bound | 0.800000 |
+| drivable-area compliance | 0.950000 |
+| ego is making progress | 0.900000 |
+| driving-direction compliance | 1.000000 |
+| comfort | 1.000000 |
+| speed-limit compliance | 0.999991224 |
+
+该模型低于历史旧 10k，但本轮检验的是从它自身出发的 RL 配对增量，因此仍是有效起点。
+
+### 19.7 从新 11,040 固定抽取 RL rollout 1k
+
+没有复用旧 `mini_train_pilot_1000`。从 target-matched 11,040 manifest 内按新训练集目标城市比例
+无放回抽样，seed 固定为 3407：
+
+| 城市 | 数量 |
+|---|---:|
+| Las Vegas | 700 |
+| Singapore | 100 |
+| Boston | 100 |
+| Pittsburgh | 100 |
+
+结果为 1,000 条唯一记录、0 缺失；其中 905 条属于旧 balanced 10k，95 条来自新增 1,040。
+DataLoader 冒烟读取成功，返回 11 个场景张量和 1 个文件名元数据。只生成子集 manifest，不复制
+1,000 个 NPZ；训练时 `train_set` 仍指向完整 11,040 cache，`train_set_list` 只允许读取这 1,000
+条。证据：
+
+```text
+e50911179b71c327e6c9ba2081f9d94be1520b65f1529b7dd913bf1bee617255  diffusion_planner_training.json
+2a5d4c6adeb368a35d337ba1f7c8435048ca9c209d14699d2786016a32575af7  selection_report.json
+```
+
+### 19.8 配对 RL 训练
+
+云端确认 GPU 空闲、无旧 RL 进程、目标目录不存在，并确认 `train_predictor_rl.py`、
+`train_epoch_rl.py`、RL loss 和 reward 四个核心文件与本地哈希一致。沿用第 16.2 节正收益参数，
+只替换监督起点与 rollout manifest：
+
+```text
+supervised start: target-matched 11,040 omega=0.1 epoch 10
+rollout set: 第 19.7 节固定 1,000 条
+batch size: 2
+learning rate: 4e-7
+group size: 32
+rollout steps: 6
+buffer size: 1024
+rollout/update epochs: 2
+update steps: 500
+center reward weights: true
+expert anchor: 0
+progress guard weight: 5
+encoder frozen: true
+deterministic update: true
+```
+
+训练于 `2026-08-11 01:42:48 CST` 启动并正常退出。结果：
+
+```text
+buffer size: 1000
+update steps: 500
+active group fraction: 0.999
+reward std mean: 0.0587204
+regression weight mean: -1.11e-9
+final centered loss: -0.0299900
+```
+
+最终 EMA checkpoint：
+
+```text
+tmp/targetmatch_11040_paper_omega0p1_eval/checkpoints/model_epoch_2_trainloss_-0.0300.pth
+SHA-256: 45207884470e1674b0fde7d5e2612598e7f800b2704e1232014978f0292e5df8
+```
+
+### 19.9 固定 20 场景 RL 前后最终配对
+
+RL 侧只替换 checkpoint，继续使用监督侧同一个 `args.json`、20 个 token、seed、challenge、环境和
+聚合脚本。RL 侧耗时约 16 分 16 秒，同样为 `20/20` 成功、`0` 失败，并在完全相同的 3 个场景
+出现 route warning。
+
+| 指标 | supervised | RL | RL - supervised | 相对变化 |
+|---|---:|---:|---:|---:|
+| overall score | 0.703840943 | 0.704483158 | +0.000642215 | +0.091244% |
+| expert-route progress | 0.653433099 | 0.676960608 | +0.023527509 | +3.600599% |
+| no-at-fault collision | 0.900000 | 0.900000 | 0 | 0% |
+| TTC within bound | 0.800000 | 0.850000 | +0.050000 | +6.250000% |
+| drivable-area compliance | 0.950000 | 0.950000 | 0 | 0% |
+| ego is making progress | 0.900000 | 0.900000 | 0 | 0% |
+| driving-direction compliance | 1.000000 | 0.975000 | -0.025000 | -2.500000% |
+| comfort | 1.000000 | 1.000000 | 0 | 0% |
+| speed-limit compliance | 0.999991224 | 0.999990815 | -0.000000409 | -0.000041% |
+
+逐场景配对：route progress 为 15 个提高、5 个不变、0 个下降；overall score 为 10 个提高、9 个
+不变、1 个下降。两个主要变化为：
+
+1. `high_magnitude_speed` 场景 `134f95eed3775e22`：TTC 从 0 升至 1，score
+   `0.650149 → 0.974248`；
+2. `following_lane_without_lead` 场景 `1fb0bb88f9d35d59`：progress 仍提高
+   `0.446678 → 0.466607`，但 driving direction 从 1 降至 0.5，使 score
+   `0.827087 → 0.416657`。
+
+最终结论：按第 19.2 节预先声明的三项安全门禁（collision、TTC、drivable area），本轮实现了
+平均正收益；但 overall 仅提高 `0.091%`，且一个场景出现明显方向合规退化，因此只能称为
+**带方向副作用的弱正收益**，不能称为全面或稳健提升。下一轮优先修复 driving-direction guard，
+而不是继续放大 progress reward。
+
+完整逐场景报告：
+
+```text
+tmp/targetmatch_11040_paper_omega0p1_eval/supervised_vs_rl_mini_val_20.json
+SHA-256: 8ec8e1ee9fd99cf7f83996acddad0d9c7b45cf9fde43cb606a75243467178b50
+```

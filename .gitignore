@@ -10,3 +10,16 @@ image*
 exp/
 cache/
 checkpoints/
+
+# IDE/Jupyter 自动生成的临时文件。
+.ipynb_checkpoints/
+
+# 论文编译产物（源文件应放在 paper/ 下、build/ 外）。
+paper/build/
+
+# HDP-nuPlan 实验产生的大文件和运行日志；保留可复现的 JSON 报告。
+HDP-nuplan/tmp/**/*.pth
+HDP-nuplan/tmp/**/*.db
+HDP-nuplan/tmp/**/*.log
+HDP-nuplan/tmp/**/*.exit
+HDP-nuplan/tmp/**/exp/

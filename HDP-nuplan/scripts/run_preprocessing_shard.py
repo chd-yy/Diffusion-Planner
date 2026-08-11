@@ -35,6 +35,7 @@ def build_command(args, shard):
         "--checksum_mode", args.checksum_mode,
         "--skip_existing", str(args.skip_existing).lower(),
         "--fail_on_error", str(args.fail_on_error).lower(),
+        "--allow_empty_logs", str(args.allow_empty_logs).lower(),
     ]
     command.extend(args.extra_args)
     return shard_dir, command
@@ -50,6 +51,7 @@ def main():
     parser.add_argument("--checksum_mode", choices=["manifest", "files"], default="manifest")
     parser.add_argument("--skip_existing", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--fail_on_error", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--allow_empty_logs", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("extra_args", nargs=argparse.REMAINDER)
     args = parser.parse_args()
 

@@ -1,0 +1,46 @@
+{
+    "args_file": "/root/autodl-tmp/reference/old10k_epoch10/args.json",
+    "checkpoint_dir": "/root/autodl-tmp/reference/old10k_epoch10",
+    "pattern": "model_epoch_10_trainloss_0.1380.pth",
+    "data_list": "/root/autodl-tmp/workspace/Diffusion-Planner/HDP-nuplan/tmp/mini_val_balanced_1000_seed3407_v1/diffusion_planner_validation.json",
+    "samples": 1000,
+    "repeats": 3,
+    "seed": 3407,
+    "checkpoint_count": 1,
+    "best_checkpoint": "/root/autodl-tmp/reference/old10k_epoch10/model_epoch_10_trainloss_0.1380.pth",
+    "best_metrics": {
+        "ego_planning_loss": 0.04164061677083373,
+        "ego_planning_hybrid_loss": 8.159039513031642,
+        "loss": 0.12323100992540519
+    },
+    "ranked": [
+        {
+            "checkpoint": "/root/autodl-tmp/reference/old10k_epoch10/model_epoch_10_trainloss_0.1380.pth",
+            "epoch": 10,
+            "train_loss": 0.1379815638065338,
+            "metrics": {
+                "ego_planning_loss": 0.04164061677083373,
+                "ego_planning_hybrid_loss": 8.159039513031642,
+                "loss": 0.12323100992540519
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04280783150345087,
+                    "ego_planning_hybrid_loss": 8.519949111938477,
+                    "loss": 0.12800731997191905
+                },
+                {
+                    "ego_planning_loss": 0.04084791366010904,
+                    "ego_planning_hybrid_loss": 7.743232052803039,
+                    "loss": 0.11828023292124272
+                },
+                {
+                    "ego_planning_loss": 0.04126610514894128,
+                    "ego_planning_hybrid_loss": 8.213937374353408,
+                    "loss": 0.12340547688305378
+                }
+            ],
+            "rank": 1
+        }
+    ]
+}

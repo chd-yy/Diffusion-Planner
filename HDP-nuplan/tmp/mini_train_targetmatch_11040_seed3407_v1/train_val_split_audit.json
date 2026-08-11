@@ -1,0 +1,11 @@
+{
+    "status": "passed",
+    "train_log_count": 473,
+    "val_log_count": 10,
+    "train_manifest_count": 11040,
+    "val_manifest_count": 1000,
+    "overlapping_log_count": 0,
+    "overlapping_logs": [],
+    "overlapping_npz_count": 0,
+    "overlapping_npz": []
+}

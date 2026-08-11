@@ -550,6 +550,31 @@ def get_args():
     parser.add_argument(
         "--reward_progress_guard_stop_tolerance", default=0.2, type=float
     )
+    # 【NuPlan 小数据适配，非论文原式】路线方向约束。默认权重 0 完全保持
+    # 历史实验；显式开启后，惩罚候选轨迹的反向位移和反向车头朝向。
+    parser.add_argument("--reward_direction_guard_weight", default=0.0, type=float)
+    parser.add_argument(
+        "--reward_direction_motion_cosine_margin", default=0.0, type=float
+    )
+    parser.add_argument(
+        "--reward_direction_heading_cosine_margin", default=0.0, type=float
+    )
+    parser.add_argument(
+        "--reward_direction_motion_weight", default=1.0, type=float
+    )
+    parser.add_argument(
+        "--reward_direction_heading_weight", default=1.0, type=float
+    )
+    parser.add_argument(
+        "--reward_direction_min_displacement", default=1e-3, type=float
+    )
+    parser.add_argument("--reward_direction_time_horizon", default=1.0, type=float)
+    parser.add_argument(
+        "--reward_direction_compliance_threshold", default=2.0, type=float
+    )
+    parser.add_argument(
+        "--reward_direction_violation_threshold", default=6.0, type=float
+    )
 
     # 【NuPlan 适配】论文没有公开 TTC/THW/OCC shaping 的具体阈值，
     # 因此作为命令行参数写入 args.json，保证实验可以准确复现。
@@ -622,10 +647,39 @@ def get_args():
         args.reward_follow_weight,
         args.reward_lane_weight,
         args.reward_progress_guard_weight,
+        args.reward_direction_guard_weight,
     ) < 0:
-        raise ValueError("multi-reward 及 progress guard 权重不能为负数")
+        raise ValueError(
+            "multi-reward、progress guard 及 direction guard 权重不能为负数"
+        )
     if args.reward_progress_guard_stop_tolerance <= 0:
         raise ValueError("reward_progress_guard_stop_tolerance 必须大于 0")
+    if not -1 <= args.reward_direction_motion_cosine_margin <= 1:
+        raise ValueError("reward_direction_motion_cosine_margin 必须在 [-1,1]")
+    if not -1 <= args.reward_direction_heading_cosine_margin <= 1:
+        raise ValueError("reward_direction_heading_cosine_margin 必须在 [-1,1]")
+    if min(
+        args.reward_direction_motion_weight,
+        args.reward_direction_heading_weight,
+    ) < 0:
+        raise ValueError("direction motion/heading 权重不能为负数")
+    if (
+        args.reward_direction_motion_weight
+        + args.reward_direction_heading_weight
+        <= 0
+    ):
+        raise ValueError("direction motion/heading 权重不能同时为 0")
+    if args.reward_direction_min_displacement < 0:
+        raise ValueError("reward_direction_min_displacement 不能为负数")
+    if args.reward_direction_time_horizon <= 0:
+        raise ValueError("reward_direction_time_horizon 必须大于 0")
+    if args.reward_direction_compliance_threshold <= 0:
+        raise ValueError("reward_direction_compliance_threshold 必须大于 0")
+    if (
+        args.reward_direction_violation_threshold
+        <= args.reward_direction_compliance_threshold
+    ):
+        raise ValueError("direction violation threshold 必须大于 compliance threshold")
     if args.reward_risk_speed_reference <= 0:
         raise ValueError("reward_risk_speed_reference 必须大于 0")
     if not 0 <= args.reward_rear_end_collision_penalty <= 1:
@@ -898,6 +952,23 @@ def model_training(args):
             progress_guard_weight=args.reward_progress_guard_weight,
             progress_guard_stop_tolerance=(
                 args.reward_progress_guard_stop_tolerance
+            ),
+            direction_guard_weight=args.reward_direction_guard_weight,
+            direction_motion_cosine_margin=(
+                args.reward_direction_motion_cosine_margin
+            ),
+            direction_heading_cosine_margin=(
+                args.reward_direction_heading_cosine_margin
+            ),
+            direction_motion_weight=args.reward_direction_motion_weight,
+            direction_heading_weight=args.reward_direction_heading_weight,
+            direction_min_displacement=args.reward_direction_min_displacement,
+            direction_time_horizon=args.reward_direction_time_horizon,
+            direction_compliance_threshold=(
+                args.reward_direction_compliance_threshold
+            ),
+            direction_violation_threshold=(
+                args.reward_direction_violation_threshold
             ),
 
             # 【NuPlan 适配】论文未公开的 shaping 阈值。

@@ -103,6 +103,15 @@ def parse_args():
         help="global random sampling or per-log quota followed by random fill",
     )
     parser.add_argument(
+        "--allow_empty_logs",
+        type=str_to_bool,
+        default=False,
+        help=(
+            "allow requested DBs for which NuPlan's valid-scene query returns no scenarios; "
+            "they are reported explicitly and excluded from quota allocation"
+        ),
+    )
+    parser.add_argument(
         "--log_names_json",
         default="./nuplan_train.json",
         type=str,
@@ -195,6 +204,7 @@ def main():
             log_names,
             args.total_scenarios,
             args.seed,
+            allow_empty_logs=args.allow_empty_logs,
         )
     else:
         raw_scenario_count = len(scenarios)

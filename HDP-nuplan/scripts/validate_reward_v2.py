@@ -100,6 +100,22 @@ def _score_npz(path: Path, scorer: NuPlanTensorRewardScorer) -> dict:
         "jitter_increases_comfort_cost": (
             values["comfort_cost"]["jitter"] > values["comfort_cost"]["expert"] + 1e-6
         ),
+        "direction_metrics_are_finite_and_bounded": bool(
+            torch.isfinite(details["direction_cost"]).all()
+            and torch.isfinite(details["motion_alignment"]).all()
+            and torch.isfinite(details["heading_alignment"]).all()
+            and torch.isfinite(details["reverse_fraction"]).all()
+            and torch.isfinite(details["min_progress_in_1s"]).all()
+            and torch.isfinite(details["direction_compliance_score_approx"]).all()
+            and torch.all(
+                (details["direction_cost"] >= 0)
+                & (details["direction_cost"] <= 1)
+            )
+            and torch.all(
+                (details["reverse_fraction"] >= 0)
+                & (details["reverse_fraction"] <= 1)
+            )
+        ),
     }
     if moving_scene:
         checks["reverse_reduces_progress"] = (
@@ -108,6 +124,26 @@ def _score_npz(path: Path, scorer: NuPlanTensorRewardScorer) -> dict:
         checks["reverse_increases_backward_cost"] = (
             values["backward_cost"]["reverse"]
             > values["backward_cost"]["expert"] + 1e-6
+        )
+        checks["reverse_increases_direction_cost"] = (
+            values["direction_cost"]["reverse"]
+            > values["direction_cost"]["expert"] + 1e-6
+        )
+        checks["reverse_reduces_motion_alignment"] = (
+            values["motion_alignment"]["reverse"]
+            < values["motion_alignment"]["expert"] - 1e-6
+        )
+        checks["reverse_reduces_heading_alignment"] = (
+            values["heading_alignment"]["reverse"]
+            < values["heading_alignment"]["expert"] - 1e-6
+        )
+        checks["reverse_reduces_min_progress_in_1s"] = (
+            values["min_progress_in_1s"]["reverse"]
+            < values["min_progress_in_1s"]["expert"] - 1e-6
+        )
+        checks["reverse_reduces_direction_compliance_score_approx"] = (
+            values["direction_compliance_score_approx"]["reverse"]
+            < values["direction_compliance_score_approx"]["expert"] - 1e-6
         )
         checks["moving_expert_beats_stop"] = (
             values["reward"]["expert"] > values["reward"]["stop"]
@@ -134,12 +170,19 @@ def main() -> None:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--max-scenes", default=100, type=int)
     parser.add_argument("--minimum-pass-rate", default=0.8, type=float)
+    parser.add_argument("--progress-guard-weight", default=0.0, type=float)
+    parser.add_argument("--direction-guard-weight", default=0.0, type=float)
     parser.add_argument("--strict", action="store_true")
     args = parser.parse_args()
 
     names: List[str] = json.loads(args.manifest.read_text(encoding="utf-8"))
     names = names[: args.max_scenes]
-    scorer = NuPlanTensorRewardScorer(NuPlanRewardConfig())
+    scorer = NuPlanTensorRewardScorer(
+        NuPlanRewardConfig(
+            progress_guard_weight=args.progress_guard_weight,
+            direction_guard_weight=args.direction_guard_weight,
+        )
+    )
     scene_results = [_score_npz(args.cache_dir / name, scorer) for name in names]
 
     check_values: Dict[str, List[bool]] = {}
@@ -174,6 +217,8 @@ def main() -> None:
         "schema_version": 1,
         "scene_count": len(scene_results),
         "minimum_pass_rate": args.minimum_pass_rate,
+        "progress_guard_weight": args.progress_guard_weight,
+        "direction_guard_weight": args.direction_guard_weight,
         "accepted": accepted,
         "checks": check_summary,
         "metric_means": metric_summary,

@@ -21,8 +21,14 @@ def audit_splits(train_manifest, train_report, val_manifest, val_report):
 
     train_names = {PurePosixPath(item).name for item in train_entries}
     val_names = {PurePosixPath(item).name for item in val_entries}
-    train_logs = set(train_metadata.get("log_names", []))
-    val_logs = set(val_metadata.get("log_names", []))
+    # 早期单缓存报告没有 log_names，只记录 selected_per_log；两者取并集，
+    # 避免把实际含 10 个日志的验证集错误报告为 val_log_count=0。
+    train_logs = set(train_metadata.get("log_names", [])) | set(
+        train_metadata.get("selected_per_log", {})
+    )
+    val_logs = set(val_metadata.get("log_names", [])) | set(
+        val_metadata.get("selected_per_log", {})
+    )
     overlapping_logs = sorted(train_logs & val_logs)
     overlapping_npz = sorted(train_names & val_names)
 

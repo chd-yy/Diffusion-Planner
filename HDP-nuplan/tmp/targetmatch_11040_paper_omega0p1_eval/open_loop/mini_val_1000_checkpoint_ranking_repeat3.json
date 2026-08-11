@@ -1,0 +1,578 @@
+{
+    "args_file": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/args.json",
+    "checkpoint_dir": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33",
+    "pattern": "model_epoch_*.pth",
+    "data_list": "/root/autodl-tmp/workspace/Diffusion-Planner/HDP-nuplan/tmp/mini_val_balanced_1000_seed3407_v1/diffusion_planner_validation.json",
+    "samples": 1000,
+    "repeats": 3,
+    "seed": 3407,
+    "checkpoint_count": 20,
+    "best_checkpoint": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/model_epoch_10_trainloss_1.2008.pth",
+    "best_metrics": {
+        "ego_planning_loss": 0.035876209353407226,
+        "ego_planning_hybrid_loss": 5.779193878809611,
+        "loss": 0.613795604844888
+    },
+    "ranked": [
+        {
+            "checkpoint": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/model_epoch_10_trainloss_1.2008.pth",
+            "epoch": 10,
+            "train_loss": 1.2007707357406616,
+            "metrics": {
+                "ego_planning_loss": 0.035876209353407226,
+                "ego_planning_hybrid_loss": 5.779193878809611,
+                "loss": 0.613795604844888
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.03808627086132765,
+                    "ego_planning_hybrid_loss": 6.218938845634461,
+                    "loss": 0.6599801629781723
+                },
+                {
+                    "ego_planning_loss": 0.034284666113555434,
+                    "ego_planning_hybrid_loss": 5.313785517692566,
+                    "loss": 0.5656632248163224
+                },
+                {
+                    "ego_planning_loss": 0.03525769108533859,
+                    "ego_planning_hybrid_loss": 5.804857273101806,
+                    "loss": 0.6157434267401696
+                }
+            ],
+            "rank": 1
+        },
+        {
+            "checkpoint": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/model_epoch_14_trainloss_1.1029.pth",
+            "epoch": 14,
+            "train_loss": 1.102899193763733,
+            "metrics": {
+                "ego_planning_loss": 0.03527007177472114,
+                "ego_planning_hybrid_loss": 5.84700884962082,
+                "loss": 0.6199709656139215
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.03511105336807668,
+                    "ego_planning_hybrid_loss": 5.9996290469169615,
+                    "loss": 0.635073967218399
+                },
+                {
+                    "ego_planning_loss": 0.03496268992498517,
+                    "ego_planning_hybrid_loss": 5.541574050664901,
+                    "loss": 0.5891201077699662
+                },
+                {
+                    "ego_planning_loss": 0.035736472031101585,
+                    "ego_planning_hybrid_loss": 5.9998234512805935,
+                    "loss": 0.6357188218533992
+                }
+            ],
+            "rank": 2
+        },
+        {
+            "checkpoint": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/model_epoch_9_trainloss_1.3176.pth",
+            "epoch": 9,
+            "train_loss": 1.3176190853118896,
+            "metrics": {
+                "ego_planning_loss": 0.037014152929186826,
+                "ego_planning_hybrid_loss": 5.941421914100647,
+                "loss": 0.6311563555002212
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.03839280843734741,
+                    "ego_planning_hybrid_loss": 6.314493200302124,
+                    "loss": 0.6698421388864517
+                },
+                {
+                    "ego_planning_loss": 0.03590434268116951,
+                    "ego_planning_hybrid_loss": 5.500879562377929,
+                    "loss": 0.5859923083782196
+                },
+                {
+                    "ego_planning_loss": 0.03674530766904354,
+                    "ego_planning_hybrid_loss": 6.008892979621887,
+                    "loss": 0.6376346192359924
+                }
+            ],
+            "rank": 3
+        },
+        {
+            "checkpoint": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/model_epoch_15_trainloss_1.0895.pth",
+            "epoch": 15,
+            "train_loss": 1.0894807577133179,
+            "metrics": {
+                "ego_planning_loss": 0.03710886578510205,
+                "ego_planning_hybrid_loss": 5.988048515319824,
+                "loss": 0.6359137275218963
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.03717422579973936,
+                    "ego_planning_hybrid_loss": 6.026047125816345,
+                    "loss": 0.6397789467573166
+                },
+                {
+                    "ego_planning_loss": 0.03621722047030926,
+                    "ego_planning_hybrid_loss": 5.712746367454529,
+                    "loss": 0.6074918663501739
+                },
+                {
+                    "ego_planning_loss": 0.03793515108525753,
+                    "ego_planning_hybrid_loss": 6.225352052688598,
+                    "loss": 0.6604703694581986
+                }
+            ],
+            "rank": 4
+        },
+        {
+            "checkpoint": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/model_epoch_13_trainloss_1.1211.pth",
+            "epoch": 13,
+            "train_loss": 1.1211073398590088,
+            "metrics": {
+                "ego_planning_loss": 0.03697156544029713,
+                "ego_planning_hybrid_loss": 6.030856901566188,
+                "loss": 0.6400572643280029
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.03753325508534908,
+                    "ego_planning_hybrid_loss": 6.351452358484268,
+                    "loss": 0.672678496748209
+                },
+                {
+                    "ego_planning_loss": 0.03566022472828627,
+                    "ego_planning_hybrid_loss": 5.532236235380172,
+                    "loss": 0.5888838591873646
+                },
+                {
+                    "ego_planning_loss": 0.03772121650725603,
+                    "ego_planning_hybrid_loss": 6.2088821108341214,
+                    "loss": 0.6586094370484352
+                }
+            ],
+            "rank": 5
+        },
+        {
+            "checkpoint": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/model_epoch_8_trainloss_1.4331.pth",
+            "epoch": 8,
+            "train_loss": 1.4331104755401611,
+            "metrics": {
+                "ego_planning_loss": 0.0373485735108455,
+                "ego_planning_hybrid_loss": 6.237028262297312,
+                "loss": 0.6610514123439789
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.03799795088171959,
+                    "ego_planning_hybrid_loss": 6.3575934324264525,
+                    "loss": 0.6737573067545891
+                },
+                {
+                    "ego_planning_loss": 0.03653713134676218,
+                    "ego_planning_hybrid_loss": 5.885395669937134,
+                    "loss": 0.6250767140388489
+                },
+                {
+                    "ego_planning_loss": 0.03751063830405474,
+                    "ego_planning_hybrid_loss": 6.468095684528351,
+                    "loss": 0.6843202162384987
+                }
+            ],
+            "rank": 6
+        },
+        {
+            "checkpoint": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/model_epoch_11_trainloss_1.2779.pth",
+            "epoch": 11,
+            "train_loss": 1.2778630256652832,
+            "metrics": {
+                "ego_planning_loss": 0.03949406548837821,
+                "ego_planning_hybrid_loss": 6.59250759824117,
+                "loss": 0.6987448365688324
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04119473218172789,
+                    "ego_planning_hybrid_loss": 6.9751584968566895,
+                    "loss": 0.7387105959653855
+                },
+                {
+                    "ego_planning_loss": 0.0383466464728117,
+                    "ego_planning_hybrid_loss": 6.235923564910888,
+                    "loss": 0.6619390091896057
+                },
+                {
+                    "ego_planning_loss": 0.03894081781059504,
+                    "ego_planning_hybrid_loss": 6.5664407329559324,
+                    "loss": 0.695584904551506
+                }
+            ],
+            "rank": 7
+        },
+        {
+            "checkpoint": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/model_epoch_20_trainloss_0.9882.pth",
+            "epoch": 20,
+            "train_loss": 0.9882148504257202,
+            "metrics": {
+                "ego_planning_loss": 0.04002443030104041,
+                "ego_planning_hybrid_loss": 6.63072488117218,
+                "loss": 0.7030969286958376
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04077170519158244,
+                    "ego_planning_hybrid_loss": 6.732435788154602,
+                    "loss": 0.7140152872800827
+                },
+                {
+                    "ego_planning_loss": 0.03925319847464562,
+                    "ego_planning_hybrid_loss": 6.419489889144898,
+                    "loss": 0.6812021936178208
+                },
+                {
+                    "ego_planning_loss": 0.040048387236893176,
+                    "ego_planning_hybrid_loss": 6.740248966217041,
+                    "loss": 0.7140733051896095
+                }
+            ],
+            "rank": 8
+        },
+        {
+            "checkpoint": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/model_epoch_12_trainloss_1.1576.pth",
+            "epoch": 12,
+            "train_loss": 1.1576308012008667,
+            "metrics": {
+                "ego_planning_loss": 0.04117789572974046,
+                "ego_planning_hybrid_loss": 6.634434477011362,
+                "loss": 0.7046213544607163
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04191585545241833,
+                    "ego_planning_hybrid_loss": 6.833333047389984,
+                    "loss": 0.7252491741776467
+                },
+                {
+                    "ego_planning_loss": 0.04037217865139246,
+                    "ego_planning_hybrid_loss": 6.314369177818298,
+                    "loss": 0.6718091059923172
+                },
+                {
+                    "ego_planning_loss": 0.041245653085410595,
+                    "ego_planning_hybrid_loss": 6.755601205825806,
+                    "loss": 0.7168057832121849
+                }
+            ],
+            "rank": 9
+        },
+        {
+            "checkpoint": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/model_epoch_19_trainloss_0.9356.pth",
+            "epoch": 19,
+            "train_loss": 0.935574471950531,
+            "metrics": {
+                "ego_planning_loss": 0.03982105462998151,
+                "ego_planning_hybrid_loss": 6.700874588151773,
+                "loss": 0.7099085201323033
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04109464468527585,
+                    "ego_planning_hybrid_loss": 6.848162537336349,
+                    "loss": 0.7259109059870243
+                },
+                {
+                    "ego_planning_loss": 0.0388141869334504,
+                    "ego_planning_hybrid_loss": 6.488197682380676,
+                    "loss": 0.6876339601576328
+                },
+                {
+                    "ego_planning_loss": 0.0395543322712183,
+                    "ego_planning_hybrid_loss": 6.766263544738293,
+                    "loss": 0.7161806942522526
+                }
+            ],
+            "rank": 10
+        },
+        {
+            "checkpoint": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/model_epoch_5_trainloss_1.6931.pth",
+            "epoch": 5,
+            "train_loss": 1.6931403875350952,
+            "metrics": {
+                "ego_planning_loss": 0.04194493314251304,
+                "ego_planning_hybrid_loss": 6.765796756505966,
+                "loss": 0.718524619092544
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04195528820157051,
+                    "ego_planning_hybrid_loss": 6.780536749601364,
+                    "loss": 0.7200089738667012
+                },
+                {
+                    "ego_planning_loss": 0.041874369256198404,
+                    "ego_planning_hybrid_loss": 6.613119699716568,
+                    "loss": 0.7031863459646702
+                },
+                {
+                    "ego_planning_loss": 0.04200514196977019,
+                    "ego_planning_hybrid_loss": 6.9037338201999665,
+                    "loss": 0.7323785374462605
+                }
+            ],
+            "rank": 11
+        },
+        {
+            "checkpoint": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/model_epoch_7_trainloss_1.4811.pth",
+            "epoch": 7,
+            "train_loss": 1.4811040163040161,
+            "metrics": {
+                "ego_planning_loss": 0.03902975918849309,
+                "ego_planning_hybrid_loss": 6.93574732307593,
+                "loss": 0.7326045012921094
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.039226031925529245,
+                    "ego_planning_hybrid_loss": 6.890634138464928,
+                    "loss": 0.728289453074336
+                },
+                {
+                    "ego_planning_loss": 0.03901519218832254,
+                    "ego_planning_hybrid_loss": 6.853542239665985,
+                    "loss": 0.7243694225847721
+                },
+                {
+                    "ego_planning_loss": 0.03884805345162749,
+                    "ego_planning_hybrid_loss": 7.063065591096878,
+                    "loss": 0.7451546282172203
+                }
+            ],
+            "rank": 12
+        },
+        {
+            "checkpoint": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/model_epoch_6_trainloss_1.5513.pth",
+            "epoch": 6,
+            "train_loss": 1.5513370037078857,
+            "metrics": {
+                "ego_planning_loss": 0.04180182129517198,
+                "ego_planning_hybrid_loss": 6.97254396835963,
+                "loss": 0.7390562293529511
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.041340634547173974,
+                    "ego_planning_hybrid_loss": 6.804686906099319,
+                    "loss": 0.721809340775013
+                },
+                {
+                    "ego_planning_loss": 0.042197309352457524,
+                    "ego_planning_hybrid_loss": 6.9301350693702695,
+                    "loss": 0.7352108259797097
+                },
+                {
+                    "ego_planning_loss": 0.04186751998588443,
+                    "ego_planning_hybrid_loss": 7.182809929609299,
+                    "loss": 0.7601485213041306
+                }
+            ],
+            "rank": 13
+        },
+        {
+            "checkpoint": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/model_epoch_16_trainloss_1.1276.pth",
+            "epoch": 16,
+            "train_loss": 1.1275627613067627,
+            "metrics": {
+                "ego_planning_loss": 0.04427268537009756,
+                "ego_planning_hybrid_loss": 7.059387451291085,
+                "loss": 0.7502114419738453
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04430538395792246,
+                    "ego_planning_hybrid_loss": 7.202601493358612,
+                    "loss": 0.7645655493140221
+                },
+                {
+                    "ego_planning_loss": 0.043011960804462436,
+                    "ego_planning_hybrid_loss": 6.7390771465301516,
+                    "loss": 0.716919679582119
+                },
+                {
+                    "ego_planning_loss": 0.04550071134790778,
+                    "ego_planning_hybrid_loss": 7.236483713984489,
+                    "loss": 0.7691490970253945
+                }
+            ],
+            "rank": 14
+        },
+        {
+            "checkpoint": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/model_epoch_18_trainloss_1.0702.pth",
+            "epoch": 18,
+            "train_loss": 1.0702039003372192,
+            "metrics": {
+                "ego_planning_loss": 0.04531435102100173,
+                "ego_planning_hybrid_loss": 7.41715043369929,
+                "loss": 0.7870294117629529
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04595274070650339,
+                    "ego_planning_hybrid_loss": 7.464753655910492,
+                    "loss": 0.7924281342327595
+                },
+                {
+                    "ego_planning_loss": 0.04385223126411438,
+                    "ego_planning_hybrid_loss": 7.180096315383911,
+                    "loss": 0.7618618723154068
+                },
+                {
+                    "ego_planning_loss": 0.046138081092387435,
+                    "ego_planning_hybrid_loss": 7.606601329803467,
+                    "loss": 0.8067982287406922
+                }
+            ],
+            "rank": 15
+        },
+        {
+            "checkpoint": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/model_epoch_17_trainloss_1.0685.pth",
+            "epoch": 17,
+            "train_loss": 1.068454623222351,
+            "metrics": {
+                "ego_planning_loss": 0.04598052385821938,
+                "ego_planning_hybrid_loss": 7.668499609390895,
+                "loss": 0.8128304972449939
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.046211822882294654,
+                    "ego_planning_hybrid_loss": 7.613434614419937,
+                    "loss": 0.8075553012788296
+                },
+                {
+                    "ego_planning_loss": 0.04487624688446522,
+                    "ego_planning_hybrid_loss": 7.542607122898102,
+                    "loss": 0.7991369699239731
+                },
+                {
+                    "ego_planning_loss": 0.04685350180789828,
+                    "ego_planning_hybrid_loss": 7.849457090854645,
+                    "loss": 0.8317992205321789
+                }
+            ],
+            "rank": 16
+        },
+        {
+            "checkpoint": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/model_epoch_4_trainloss_1.8472.pth",
+            "epoch": 4,
+            "train_loss": 1.8472498655319214,
+            "metrics": {
+                "ego_planning_loss": 0.047233660156528155,
+                "ego_planning_hybrid_loss": 7.720058631896972,
+                "loss": 0.8192395311991373
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.04661920334398746,
+                    "ego_planning_hybrid_loss": 7.49534174156189,
+                    "loss": 0.796153379201889
+                },
+                {
+                    "ego_planning_loss": 0.047370878830552104,
+                    "ego_planning_hybrid_loss": 7.717552150726318,
+                    "loss": 0.8191261115074158
+                },
+                {
+                    "ego_planning_loss": 0.0477108982950449,
+                    "ego_planning_hybrid_loss": 7.94728200340271,
+                    "loss": 0.8424391028881073
+                }
+            ],
+            "rank": 17
+        },
+        {
+            "checkpoint": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/model_epoch_3_trainloss_1.4178.pth",
+            "epoch": 3,
+            "train_loss": 1.4178415536880493,
+            "metrics": {
+                "ego_planning_loss": 0.05500363098581632,
+                "ego_planning_hybrid_loss": 8.406979420344035,
+                "loss": 0.8957015848954519
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.05538325662910938,
+                    "ego_planning_hybrid_loss": 8.515734990119935,
+                    "loss": 0.9069567620754242
+                },
+                {
+                    "ego_planning_loss": 0.05463542906939983,
+                    "ego_planning_hybrid_loss": 8.196182796478272,
+                    "loss": 0.8742537243366242
+                },
+                {
+                    "ego_planning_loss": 0.054992207258939746,
+                    "ego_planning_hybrid_loss": 8.5090204744339,
+                    "loss": 0.9058942682743073
+                }
+            ],
+            "rank": 18
+        },
+        {
+            "checkpoint": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/model_epoch_2_trainloss_2.6349.pth",
+            "epoch": 2,
+            "train_loss": 2.6348986625671387,
+            "metrics": {
+                "ego_planning_loss": 0.10071687174836795,
+                "ego_planning_hybrid_loss": 13.15555871963501,
+                "loss": 1.4162727637290955
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.10104265534877777,
+                    "ego_planning_hybrid_loss": 13.23845196533203,
+                    "loss": 1.4248878698349
+                },
+                {
+                    "ego_planning_loss": 0.10033313500881196,
+                    "ego_planning_hybrid_loss": 13.058902374267578,
+                    "loss": 1.4062233839035034
+                },
+                {
+                    "ego_planning_loss": 0.10077482488751412,
+                    "ego_planning_hybrid_loss": 13.16932181930542,
+                    "loss": 1.4177070374488832
+                }
+            ],
+            "rank": 19
+        },
+        {
+            "checkpoint": "/root/autodl-tmp/experiments/hdp_targetmatch_11040_paper_omega0p1_e20/training_log/hdp-paper-supervised-targetmatch11040-omega0p1-e20/2026-08-11-00:15:33/model_epoch_1_trainloss_3.8623.pth",
+            "epoch": 1,
+            "train_loss": 3.8622913360595703,
+            "metrics": {
+                "ego_planning_loss": 0.35367572168509165,
+                "ego_planning_hybrid_loss": 61.73232542928059,
+                "loss": 6.52690836238861
+            },
+            "per_repeat": [
+                {
+                    "ego_planning_loss": 0.3545134690999985,
+                    "ego_planning_hybrid_loss": 62.271408309936525,
+                    "loss": 6.581654448509216
+                },
+                {
+                    "ego_planning_loss": 0.3542429393529892,
+                    "ego_planning_hybrid_loss": 62.36007090759277,
+                    "loss": 6.590250094413757
+                },
+                {
+                    "ego_planning_loss": 0.3522707566022873,
+                    "ego_planning_hybrid_loss": 60.5654970703125,
+                    "loss": 6.408820544242859
+                }
+            ],
+            "rank": 20
+        }
+    ]
+}

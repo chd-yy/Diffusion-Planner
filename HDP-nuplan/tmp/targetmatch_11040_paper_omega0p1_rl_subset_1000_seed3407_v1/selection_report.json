@@ -1,0 +1,24 @@
+{
+    "strategy": "city_stratified_random_without_replacement",
+    "seed": 3407,
+    "source_manifest": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_targetmatch_11040_seed3407_v1/diffusion_planner_training.json",
+    "source_manifest_sha256": "808d3b170d7067785e2120d7f4cffd81b427bdbae6f7fc62c9a634e5206e8bac",
+    "source_count": 11040,
+    "selected_count": 1000,
+    "unique_selected_count": 1000,
+    "city_quotas": {
+        "us-nv-las-vegas-strip": 700,
+        "sg-one-north": 100,
+        "us-ma-boston": 100,
+        "us-pa-pittsburgh-hazelwood": 100
+    },
+    "city_counts": {
+        "sg-one-north": 100,
+        "us-ma-boston": 100,
+        "us-nv-las-vegas-strip": 700,
+        "us-pa-pittsburgh-hazelwood": 100
+    },
+    "selected_from_old_balanced10k": 905,
+    "selected_from_added1040": 95,
+    "manifest_sha256": "e50911179b71c327e6c9ba2081f9d94be1520b65f1529b7dd913bf1bee617255"
+}
