@@ -40,6 +40,8 @@ def diffusion_loss_func(
     supervision_type: str = None,
     # 扩散时间的最小值，避免采样到 t=0 引发数值问题。
     eps: float = 1e-3,
+    # 积分轨迹混合损失的梯度窗口；0 表示普通 cumsum，不使用 stop-gradient。
+    detach_window_size: int = 0,
 ):
     # 从兼容 tuple 中解包自车未来、邻车未来和邻车 padding mask。
     ego_future, neighbors_future, neighbor_future_mask = futures
@@ -130,7 +132,12 @@ def diffusion_loss_func(
     # 把归一化运动增量还原到真实数值尺度。
     pred_v = norm.inverse(pred_v)
     # 只取 x/y 增量并沿时间积分，恢复自车预测位置轨迹。
-    pred_x = detached_integral(pred_v[..., :2], detach_window_size=10)
+    # 本参数必须由训练入口显式控制，不能再把 Detached Integral 窗口写死为 10。
+    # 当前正式监督训练传 0，使位置损失向此前全部 displacement 传播梯度。
+    pred_x = detached_integral(
+        pred_v[..., :2],
+        detach_window_size=detach_window_size,
+    )
     # 预测位置与自车未来 x/y 真值的均方误差，作为混合损失项。
     loss["ego_planning_hybrid_loss"] = torch.sum((pred_x - ego_future[..., :2])**2, dim=-1).mean()
 

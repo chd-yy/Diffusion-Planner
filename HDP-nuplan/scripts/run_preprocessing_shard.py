@@ -17,12 +17,17 @@ from hdp_nuplan.data_process.run_utils import atomic_write_json  # noqa: E402
 def build_command(args, shard):
     shard_dir = args.output_root.resolve() / shard["shard_id"]
     plan_dir = args.plan.resolve().parent
+    cache_dir = (
+        args.shared_cache_path.resolve()
+        if args.shared_cache_path is not None
+        else shard_dir / "cache"
+    )
     command = [
         sys.executable,
         str(PROJECT_ROOT / "data_process.py"),
         "--data_path", str(args.data_path.resolve()),
         "--map_path", str(args.map_path.resolve()),
-        "--save_path", str(shard_dir / "cache"),
+        "--save_path", str(cache_dir),
         "--log_names_json", str(plan_dir / shard["log_names_json"]),
         "--total_scenarios", str(shard["total_scenarios"]),
         "--seed", str(shard["seed"]),
@@ -36,6 +41,10 @@ def build_command(args, shard):
         "--skip_existing", str(args.skip_existing).lower(),
         "--fail_on_error", str(args.fail_on_error).lower(),
     ]
+    if args.scenario_builder_workers is not None:
+        command.extend(
+            ["--scenario_builder_workers", str(args.scenario_builder_workers)]
+        )
     command.extend(args.extra_args)
     return shard_dir, command
 
@@ -47,7 +56,17 @@ def main():
     parser.add_argument("--data_path", required=True, type=Path)
     parser.add_argument("--map_path", required=True, type=Path)
     parser.add_argument("--output_root", required=True, type=Path)
+    parser.add_argument(
+        "--shared_cache_path",
+        type=Path,
+        help="optional common cache used by disjoint-log workers for resumable parallel processing",
+    )
     parser.add_argument("--checksum_mode", choices=["manifest", "files"], default="manifest")
+    parser.add_argument(
+        "--scenario_builder_workers",
+        type=int,
+        help="maximum scenario-builder subprocesses used by this shard",
+    )
     parser.add_argument("--skip_existing", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--fail_on_error", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("extra_args", nargs=argparse.REMAINDER)
@@ -68,6 +87,11 @@ def main():
         {
             "plan": str(args.plan.resolve()),
             "shard": shard,
+            "shared_cache_path": (
+                str(args.shared_cache_path.resolve())
+                if args.shared_cache_path is not None
+                else None
+            ),
             "command": command,
         },
     )

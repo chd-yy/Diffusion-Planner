@@ -161,6 +161,16 @@ class NuPlanRewardConfig:
     # route-aligned progress 已除以 progress_normalization；0.2 对应默认 2 m。
     progress_guard_stop_tolerance: float = 0.2
 
+    # 【NuPlan 安全门，非论文原式】当阈值大于 0 时，在每个场景的
+    # diffusion 候选组内先比较 risk_reward，再比较 progress/follow/lane。
+    # 这防止低 TTC 候选靠更高进度抵消安全退化。0 保持旧行为。
+    safety_gate_threshold: float = 0.0
+    # 存在达标候选时，不达标候选低于最差达标候选的最小间隔。
+    safety_gate_margin: float = 1.0
+    # 【NuPlan TTC 硬安全门】候选轨迹的最小预计 TTC（秒）必须达到该值，
+    # 才能成为 safety gate 的 eligible 候选。0 表示关闭该硬门。
+    safety_gate_min_ttc_seconds: float = 0.0
+
     # 【NuPlan 适配】论文只说明 TTC/THW/OCC 使用速度自适应 shaping，
     # 未公开具体阈值。以下参数全部开放，便于后续通过验证集标定。
     risk_speed_reference: float = 15.0
@@ -1249,6 +1259,71 @@ class NuPlanTensorRewardScorer:
             masked = masked.min(dim=dim).values
         return masked
 
+    def _apply_safety_gate(
+        self,
+        rewards: torch.Tensor,
+        risk_reward: torch.Tensor,
+        min_ttc_seconds: Optional[torch.Tensor] = None,
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """对 [B,G] 候选实施组内安全优先约束。
+
+        risk_reward 和 min_ttc_seconds 都是候选资格条件。只要组内存在
+        同时满足条件的候选，不满足任一条件的候选奖励一定低于所有达标
+        候选；如果整组都不达标，则仍按 risk 排序，原奖励只作 tie-breaker。
+        两个阈值都为 0 时完全保留原奖励。
+        """
+        risk_threshold = float(self.config.safety_gate_threshold)
+        ttc_threshold = float(self.config.safety_gate_min_ttc_seconds)
+        if min_ttc_seconds is None:
+            min_ttc_seconds = torch.full_like(risk_reward, float("inf"))
+
+        risk_eligible = (
+            risk_reward >= risk_threshold
+            if risk_threshold > 0
+            else torch.ones_like(risk_reward, dtype=torch.bool)
+        )
+        ttc_eligible = (
+            min_ttc_seconds >= ttc_threshold
+            if ttc_threshold > 0
+            else torch.ones_like(risk_reward, dtype=torch.bool)
+        )
+        if risk_threshold <= 0 and ttc_threshold <= 0:
+            eligible = torch.ones_like(risk_reward, dtype=torch.bool)
+            has_eligible = torch.ones_like(risk_reward[:, :1], dtype=torch.bool)
+            return rewards, eligible, has_eligible
+
+        eligible = risk_eligible & ttc_eligible
+        has_eligible = eligible.any(dim=1, keepdim=True)
+        safe_floor = torch.where(
+            eligible,
+            rewards,
+            torch.full_like(rewards, float("inf")),
+        ).min(dim=1, keepdim=True).values
+        risk_shortfall = (
+            (risk_threshold - risk_reward).clamp_min(0)
+            if risk_threshold > 0
+            else torch.zeros_like(risk_reward)
+        )
+        ttc_shortfall = (
+            (ttc_threshold - min_ttc_seconds).clamp_min(0) / max(ttc_threshold, 1e-6)
+            if ttc_threshold > 0
+            else torch.zeros_like(risk_reward)
+        )
+        unsafe_reward = (
+            safe_floor
+            - float(self.config.safety_gate_margin)
+            - risk_shortfall
+            - ttc_shortfall
+        )
+        mixed_group_reward = torch.where(eligible, rewards, unsafe_reward)
+        all_unsafe_reward = risk_reward + 1e-3 * rewards
+        gated_reward = torch.where(
+            has_eligible,
+            mixed_group_reward,
+            all_unsafe_reward,
+        )
+        return gated_reward, eligible, has_eligible
+
     def _risk_reward(
         self,
         trajectories: torch.Tensor,
@@ -1269,6 +1344,9 @@ class NuPlanTensorRewardScorer:
         dynamic_horizon = geometry["separation"].shape[-1]
         if geometry["separation"].numel() == 0:
             ttc_reward = trajectories.new_ones(batch_size, group_size)
+            min_ttc_seconds = trajectories.new_full(
+                (batch_size, group_size), float("inf")
+            )
             thw_reward = trajectories.new_ones(batch_size, group_size)
             safety_reward = trajectories.new_ones(batch_size, group_size)
         else:
@@ -1281,6 +1359,26 @@ class NuPlanTensorRewardScorer:
             relative_velocity = geometry["neighbor_velocity"] - ego_velocity_dynamic
             closing_speed = -torch.sum(relative_velocity * line_of_sight, dim=-1)
             ttc = geometry["separation"].clamp_min(0) / closing_speed.clamp_min(1e-3)
+
+            # 直接保留物理单位的 TTC，供 NuPlan 硬安全门使用。
+            # 正在重叠的 OBB 记为 0 秒；没有 closing speed 的有效目标记为
+            # inf，表示在当前恒速近似下不会发生预计碰撞。
+            ttc_seconds = torch.where(
+                closing_speed > 1e-3,
+                ttc,
+                torch.full_like(ttc, float("inf")),
+            )
+            ttc_seconds = torch.where(
+                geometry["separation"] <= 0,
+                torch.zeros_like(ttc_seconds),
+                ttc_seconds,
+            )
+            ttc_seconds = torch.where(
+                geometry["valid"],
+                ttc_seconds,
+                torch.full_like(ttc_seconds, float("inf")),
+            )
+            min_ttc_seconds = ttc_seconds.flatten(2).min(dim=-1).values
 
             speed_ratio = (
                 ego_speed[..., :dynamic_horizon] / cfg.risk_speed_reference
@@ -1390,6 +1488,7 @@ class NuPlanTensorRewardScorer:
         risk_reward = torch.minimum(risk_reward, safety_reward).clamp(0, 1)
         return {
             "risk_reward": risk_reward,
+            "min_ttc_seconds": min_ttc_seconds,
             "safety_reward": safety_reward.clamp(0, 1),
             "ttc_reward": ttc_reward.clamp(0, 1),
             "thw_reward": thw_reward.clamp(0, 1),
@@ -1949,12 +2048,27 @@ class NuPlanTensorRewardScorer:
         )
 
         cfg = self.config
-        rewards = (
+        base_rewards = (
             cfg.risk_weight * risk["risk_reward"]
             + cfg.follow_weight * follow_reward
             + cfg.lane_weight * lane_reward
             + cfg.progress_guard_weight * progress_guard_reward
         )
+        rewards, safety_gate_eligible, safety_gate_has_eligible = (
+            self._apply_safety_gate(
+                base_rewards,
+                risk["risk_reward"],
+                risk["min_ttc_seconds"],
+            )
+        )
+        if self.config.safety_gate_min_ttc_seconds > 0:
+            safety_gate_ttc_eligible = (
+                risk["min_ttc_seconds"] >= self.config.safety_gate_min_ttc_seconds
+            )
+        else:
+            safety_gate_ttc_eligible = torch.ones_like(
+                risk["min_ttc_seconds"], dtype=torch.bool
+            )
 
         route_cost = self._route_cost(trajectories, route_lanes)
         comfort_cost = self._comfort_cost(trajectories, ego_current_state)
@@ -1968,7 +2082,11 @@ class NuPlanTensorRewardScorer:
 
         details = {
             "reward": rewards,
+            "base_reward": base_rewards,
             **risk,
+            "safety_gate_eligible": safety_gate_eligible.to(rewards.dtype),
+            "safety_gate_ttc_eligible": safety_gate_ttc_eligible.to(rewards.dtype),
+            "safety_gate_has_eligible": safety_gate_has_eligible.to(rewards.dtype),
             "follow_reward": follow_reward,
             "leader_fraction": leader_fraction,
             "lane_reward": lane_reward,

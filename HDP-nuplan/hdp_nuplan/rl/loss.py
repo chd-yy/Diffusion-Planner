@@ -1157,12 +1157,13 @@ def reward_weighted_diffusion_loss(
         #
         # 控制积分反向传播最多回传多少个历史时间步。
         #
-        # max(detach_window_size,1)：
+        # detach_window_size=0：
         #
-        # 确保窗口至少是 1。
+        # 关闭 stop-gradient，退化为普通 torch.cumsum，位置损失可以向
+        # 此前全部 displacement 传播梯度；正数继续使用原截断窗口。
         predicted_xy = detached_integral(
             predicted_action[..., :2],
-            detach_window_size=max(detach_window_size, 1),
+            detach_window_size=detach_window_size,
         )
 
         # ------------------------------------------------------------------

@@ -828,3 +828,236 @@ SHA-256: 4da0a2f800913174e12e7b73725c8715b053d943f53500a3d3e42b20a0db7c91
 本次固定 20 场景 NuPlan 官方 `closed_loop_nonreactive_agents` 门禁判定为 **通过**：RL 在安全、TTC、可行驶区域、行驶方向和舒适性均不退化的前提下，将路线进度提高 `6.256%`，使闭环总分提高 `1.196%`。这与离线阶段“恢复 progress 且不增加碰撞”的方向一致。
 
 边界：20 个 mini-val 固定场景仍是小样本，且 challenge 中邻车为 non-reactive；该结果可以作为完整项目经历中的受控闭环正收益证据，但不能外推为完整 NuPlan benchmark、reactive closed-loop 或实车结论。下一步不应继续在这 20 个场景上调参，应扩大到独立且更多的闭环场景，防止对固定门禁集合过拟合。
+
+## 19. 去除 Detached Integral 后复验第 16–18 节（2026-08-13）
+
+### 19.1 目的与唯一实验变量
+
+本轮重新执行第 16–18 节的最后验证，检验 RL waypoint loss 取消时间窗口 stop-gradient 后，正收益是否仍然成立。受控变量保持不变：
+
+- 监督起点仍为 mini10k、`omega=0.1` 的 epoch 14 EMA；
+- RL 数据、seed、group size 32、rollout 6 步、500 update、学习率 `4e-7`、EMA `0.05`、centered weights 和 progress guard 5 均不变；
+- validation-1000 仍使用 3 repeats、共同随机数和单轨迹 6 步推理；
+- NuPlan 官方闭环仍为 seed 0、`closed_loop_nonreactive_agents`、sequential worker 和相同固定 3/20 场景；
+- 唯一训练变量由 `--rl_detach_window_size 10` 改为 `--rl_detach_window_size 0`。
+
+这里“去除 detach”只指 RL hybrid waypoint integral 的梯度截断：
+
+```text
+window=10：前向为完整 cumsum，反向最多回传最近 10 个 displacement
+window=0 ：前向为完整 cumsum，反向回传到此前全部 displacement
+```
+
+Replay Buffer 写入时的 `.detach().cpu()` 和指标转 Python 标量前的 `.detach()` 继续保留。它们用于结束 rollout 计算图和安全记录日志，不属于 waypoint integral 消融；删除前者会让 replay 长期持有旧计算图，既不符合当前离线 replay 更新设计，也会显著增加显存。
+
+### 19.2 代码改造与测试
+
+修改：
+
+- `hdp_nuplan/utils/traj_kinematics.py`：`detach_window_size == 0` 时直接返回 `torch.cumsum(u, dim=-2)`；负数直接抛出 `ValueError`；
+- `hdp_nuplan/rl/loss.py`：移除原来的 `max(detach_window_size, 1)`，使 `0` 能真实传入积分函数；
+- `train_predictor_rl.py`：明确命令行参数 `0` 的无截断语义；
+- `tests/test_rl_components.py`：新增完整 cumsum 梯度和负窗口测试。
+
+执行：
+
+```bash
+cd /home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan
+/home/yanjun/NewDisk/conda_envs/diffusion_planner/bin/python -m pytest -q tests
+```
+
+结果：`40 passed, 15 warnings in 7.02s`。warning 均来自 timm/matplotlib 依赖弃用提示。测试额外确认：最后一个 waypoint 的 loss 会向全部历史 displacement 返回单位梯度，而不再只返回最近 10 步。
+
+### 19.3 无 detach RL 训练
+
+执行：
+
+```bash
+CUDA_VISIBLE_DEVICES=0 PYTHONUNBUFFERED=1 \
+/home/yanjun/NewDisk/conda_envs/diffusion_planner/bin/python \
+  -m torch.distributed.run --nnodes=1 --nproc-per-node=1 --standalone \
+  train_predictor_rl.py \
+  --name hdp-paper-rl-progressguard5-centered-g32-lr4e7-gate500-nodetach-from-omega01-epoch14 \
+  --save_dir /home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_pilot_1000_seed3407_v1 \
+  --train_set /home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_pilot_1000_seed3407_v1/cache \
+  --train_set_list /home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_pilot_1000_seed3407_v1/diffusion_planner_training.json \
+  --pretrained_model_path /home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_14_trainloss_0.9782.pth \
+  --normalization_file_path /home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/normalization.json \
+  --train_epochs 2 --batch_size 2 --learning_rate 4e-7 \
+  --warm_up_epoch 1 --save_utd 1 --num_workers 2 \
+  --planning_hybrid_loss 0.1 \
+  --rl_group_size 32 --rl_rollout_steps 6 \
+  --rl_sampling_noise_scale 0.1 \
+  --rl_trajectory_augmentation_std 0 \
+  --rl_trajectory_augmentation_epochs 0 \
+  --rl_buffer_update_epoch 2 --rl_buffer_size 1024 \
+  --rl_ema_update_rate 0.05 --rl_reward_temperature 1.0 \
+  --rl_advantage_clip 5.0 --rl_min_reward_std 1e-6 \
+  --rl_normalize_weights true --rl_center_reward_weights true \
+  --rl_rollout_loss_weight 1.0 --rl_expert_anchor_weight 0.0 \
+  --rl_max_update_steps_per_epoch 500 \
+  --rl_detach_window_size 0 --rl_grad_clip 5.0 \
+  --rl_freeze_encoder true --rl_deterministic_update true \
+  --reward_progress_guard_weight 5.0 \
+  --reward_progress_guard_stop_tolerance 0.2
+```
+
+结果：buffer size 1000、update steps 500、active group fraction `0.997`、reward std mean `0.0416547`，未出现 NaN、OOM 或梯度异常。最终 loss 为 `-0.0192338`。它与 detach 版本前向 loss 接近是正常的：detach 只改变反向梯度，不改变完整积分的前向数值；两个 checkpoint 的 SHA-256 不同，证明实际参数更新不同。
+
+新 EMA checkpoint：
+
+```text
+tmp/mini_train_pilot_1000_seed3407_v1/training_log/
+hdp-paper-rl-progressguard5-centered-g32-lr4e7-gate500-nodetach-from-omega01-epoch14/
+2026-08-13-20:13:16/model_epoch_2_trainloss_-0.0192.pth
+SHA-256: 10c21496d94f11c4e4302aa1fabe21e7e7bd72e0c50a680607bd78621fc617f6
+```
+
+训练原始日志：
+
+```text
+tmp/hdp_paper_rl_nodetach_train_20260813.log
+```
+
+### 19.4 validation-1000 三次 open-loop 配对评估
+
+执行：
+
+```bash
+CUDA_VISIBLE_DEVICES=0 PYTHONUNBUFFERED=1 \
+/home/yanjun/NewDisk/conda_envs/diffusion_planner/bin/python \
+  scripts/compare_checkpoint_behavior.py \
+  --args-file /home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_pilot_1000_seed3407_v1/training_log/hdp-paper-rl-progressguard5-centered-g32-lr4e7-gate500-nodetach-from-omega01-epoch14/2026-08-13-20:13:16/args.json \
+  --supervised-checkpoint /home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/model_epoch_14_trainloss_0.9782.pth \
+  --rl-checkpoint /home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_pilot_1000_seed3407_v1/training_log/hdp-paper-rl-progressguard5-centered-g32-lr4e7-gate500-nodetach-from-omega01-epoch14/2026-08-13-20:13:16/model_epoch_2_trainloss_-0.0192.pth \
+  --data-dir /home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_val_balanced_1000_seed3407_v1/cache \
+  --data-list /home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_val_balanced_1000_seed3407_v1/diffusion_planner_validation.json \
+  --batch-size 16 --num-workers 2 --repeats 3 --seed 3407 \
+  --num-samples 1 --diffusion-steps 6 --sampling-noise-scale 0.1 \
+  --trajectory-augmentation-std 0 --device cuda \
+  --output /home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_val_balanced_1000_seed3407_v1/behavior_paper_rl_progressguard5_centered_nodetach_from_omega01_epoch14_lr4e7_gate500_ema_val1k_repeat3.json
+```
+
+paired delta（无 detach RL - supervised）：
+
+| 指标 | delta | 相对变化 | 原 detach delta |
+|---|---:|---:|---:|
+| 总训练 reward | +0.026223 | +0.304% | +0.032668 |
+| progress | +0.035755 | +1.551% | +0.036869 |
+| path length | +0.358006 m | +1.534% | +0.373050 m |
+| mean speed | +0.044751 m/s | +1.534% | +0.046631 m/s |
+| low-speed fraction | -0.001338 | -0.259% | -0.001333 |
+| no-collision | +0.002333 | +0.251% | +0.002667 |
+| collision cost | -0.001463 | -1.517% | -0.001261 |
+| comfort cost | -0.002306 | -0.149% | -0.002822 |
+| ADE | -0.115883 m | -5.005% | -0.110914 m |
+| FDE | -0.238092 m | -4.055% | -0.251088 m |
+| heading error | -0.000245 rad | -0.718% | -0.000295 rad |
+| route cost | +0.000503 | +0.222% | +0.000538 |
+| stationary trajectory fraction | 0 | 0% | 0 |
+
+论文 risk/follow/lane 三项的加权净变化为：
+
+```text
+-0.000120709 + 3 * 0.003990636 + 2.5 * (-0.000300102)
+= +0.011101
+```
+
+它高于原 detach 实验的约 `+0.00967`。总 reward 增益反而略小，主要因为 progress guard、no-collision 等其他 reward 分量的变化不同。整体上，无 detach 仍稳定获得 open-loop 正收益；相对原 detach，它改善了 collision cost、ADE 和论文三项加权和，但 progress、FDE 与 comfort cost 的改善幅度略小。
+
+报告：
+
+```text
+tmp/mini_val_balanced_1000_seed3407_v1/
+behavior_paper_rl_progressguard5_centered_nodetach_from_omega01_epoch14_
+lr4e7_gate500_ema_val1k_repeat3.json
+SHA-256: 09c22f7f564c5ca302a64e05f1fd84f53190cc04bd9a3ff5c7d6ada3aca48e89
+```
+
+### 19.5 官方闭环 3 场景 smoke
+
+监督侧 checkpoint、配置、seed 和固定场景均未改变，因此直接复用第 18.4 节的监督结果，只运行新的无 detach RL 侧：
+
+```bash
+bash scripts/run_mini_closed_loop.sh \
+  hdp-paper-rl-nodetach-cl3 \
+  /home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/args.json \
+  /home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_pilot_1000_seed3407_v1/training_log/hdp-paper-rl-progressguard5-centered-g32-lr4e7-gate500-nodetach-from-omega01-epoch14/2026-08-13-20:13:16/model_epoch_2_trainloss_-0.0192.pth \
+  mini-val-closed-loop-3
+```
+
+结果为 `3/3` 成功、`0` 失败：
+
+| 指标 | supervised | 无 detach RL | delta |
+|---|---:|---:|---:|
+| overall score | 0.942122 | 0.951270 | +0.009149 |
+| expert-route progress | 0.814853 | 0.844130 | +0.029277 |
+| no-at-fault collision | 1.000000 | 1.000000 | 0 |
+| TTC within bound | 1.000000 | 1.000000 | 0 |
+| drivable-area compliance | 1.000000 | 1.000000 | 0 |
+| comfort | 1.000000 | 1.000000 | 0 |
+| speed-limit compliance | 0.999921335 | 0.999918966 | -0.000002369 |
+
+报告：
+
+```text
+tmp/closed_loop_eval/hdp-paper-e14-vs-rl-nodetach-cl3.json
+SHA-256: 16a5ee10b91413bf14452f7e49250eb4e0a7890c67d1e45430a53fa82dedf9f5
+```
+
+### 19.6 官方闭环固定 20 场景三方比较
+
+3 场景 smoke 满足进入条件后，运行：
+
+```bash
+bash scripts/run_mini_closed_loop.sh \
+  hdp-paper-rl-nodetach-cl20 \
+  /home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/training_log/hdp-paper-supervised-balanced10k-omega01/2026-08-08-18:38:30/args.json \
+  /home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_pilot_1000_seed3407_v1/training_log/hdp-paper-rl-progressguard5-centered-g32-lr4e7-gate500-nodetach-from-omega01-epoch14/2026-08-13-20:13:16/model_epoch_2_trainloss_-0.0192.pth \
+  mini-val-closed-loop-20
+```
+
+无 detach RL 为 `20/20` 成功、`0` 失败。运行中恰好有 3 个 `route_list empty` 警告，与第 18 节监督和原 detach RL 的相同场景现象一致。聚合三方结果：
+
+| 指标 | supervised | 原 detach=10 RL | 无 detach RL | 无 detach - supervised | 无 detach - 原 detach |
+|---|---:|---:|---:|---:|---:|
+| overall score | 0.755254 | 0.764288 | 0.766306 | +0.011052 | +0.002019 |
+| expert-route progress | 0.656133 | 0.697180 | 0.704408 | +0.048275 | +0.007228 |
+| no-at-fault collision | 1.000000 | 1.000000 | 1.000000 | 0 | 0 |
+| TTC within bound | 1.000000 | 1.000000 | 1.000000 | 0 | 0 |
+| drivable-area compliance | 0.950000 | 0.950000 | 0.950000 | 0 | 0 |
+| ego is making progress | 0.900000 | 0.900000 | 0.900000 | 0 | 0 |
+| driving-direction compliance | 0.975000 | 0.975000 | 0.975000 | 0 | 0 |
+| comfort | 1.000000 | 1.000000 | 1.000000 | 0 | 0 |
+| speed-limit compliance | 0.999988179 | 0.999987826 | 0.999987826 | -0.000000354 | 约 0 |
+
+相对监督模型：
+
+```text
+原 detach：overall +1.196%，expert-route progress +6.256%
+无 detach ：overall +1.463%，expert-route progress +7.357%
+```
+
+相对原 detach RL，无 detach 将 overall 再提高 `0.264%`，expert-route progress 再提高 `1.037%`。逐场景比较：
+
+- 无 detach 相对监督：overall 为 11 提高、8 相同、1 降低；唯一降低仍是 `134f95eed3775e22`，仅 `-1.77e-6`；
+- 无 detach 相对监督：expert-route progress 为 13 提高、7 相同、0 降低；
+- 无 detach 相对原 detach：expert-route progress 为 12 提高、8 相同、0 降低；overall 为 10 提高、9 相同、1 个浮点级降低；
+- 碰撞、TTC、可行驶区域、行驶方向和舒适性与监督及原 detach RL 完全一致。
+
+三方报告：
+
+```text
+tmp/closed_loop_eval/hdp-paper-e14-vs-rl-detach10-vs-nodetach-cl20.json
+SHA-256: 0c02e1270621a2d78293bf7b0a85f1f02197e9cccfa37eb3ad10a2e54762927c
+```
+
+无 detach 本轮 mean planner runtime 为 `0.273967 s`，高于先前两次运行。模型结构和推理代码没有变化，detach 只作用于训练反向传播、不会进入 `model.sample()`，因此不能把跨时段测得的 runtime 差异归因于无 detach；它更可能来自机器负载、频率或温度状态。规划行为指标可以配对比较，跨时段 runtime 不能作为本消融结论。
+
+### 19.7 复验结论与边界
+
+1. 去除 RL waypoint integral 的 detach 后，训练、validation-1000 和 NuPlan 官方固定 3/20 场景闭环均完整通过。
+2. 无 detach 仍相对同一监督 checkpoint 获得正收益，并在 20 场景闭环上把 overall 从 `+1.196%` 提高到 `+1.463%`，把 expert-route progress 从 `+6.256%` 提高到 `+7.357%`。
+3. 因此，原第 16–18 节的正收益不是依赖 Detached Integral 才出现；在当前小样本固定门禁上，完整时间梯度反而略优。
+4. 这只是一个 seed、一个 RL run 和固定 20 个 mini-val non-reactive 场景。差异幅度较小，不能据此宣称无 detach 普遍优于 detach=10；严格结论需要至少 3 个训练 seed 和更大的独立闭环场景集。
+5. 下一步不应继续用这 20 个场景调 detach 超参数。进入完整数据实验时，可把 `0` 与 `10` 作为预注册消融；如果算力有限，当前证据支持优先使用 `0`，同时保留梯度裁剪 `5.0` 和 NaN/OOM 监控。

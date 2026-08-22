@@ -851,6 +851,7 @@ def update_epoch(
                 {},
                 args.diffusion_model_type,
                 args.diffusion_supervision_type,
+                detach_window_size=args.rl_detach_window_size,
             )
             expert_anchor_loss = (
                 anchor_loss_dict["ego_planning_loss"]

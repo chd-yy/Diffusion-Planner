@@ -139,6 +139,14 @@ def get_args():
     parser.add_argument('--learning_rate', type=float, help='learning rate (default: 5e-4)', default=5e-4)
     # 学习率 warm-up 持续的 epoch 数。
     parser.add_argument('--warm_up_epoch', type=int, help='number of warm up', default=5)
+    # 完整恢复通常连同 scheduler 状态一起恢复；受控学习率分叉实验可显式丢弃旧 scheduler，
+    # 并以当前命令行的 learning_rate / warm_up_epoch 重建调度器。
+    parser.add_argument(
+        '--reset_lr_schedule_on_resume',
+        default=False,
+        type=boolean,
+        help='reset optimizer lr and rebuild scheduler after loading a full checkpoint',
+    )
     # Encoder/Decoder 的 stochastic-depth（drop path）比例。
     parser.add_argument('--encoder_drop_path_rate', type=float, help='encoder drop out rate', default=0.1)
     parser.add_argument('--decoder_drop_path_rate', type=float, help='decoder drop out rate', default=0.1)
@@ -150,6 +158,15 @@ def get_args():
     # 加权邻车预测损失，而 HDP 不再训练邻车预测。
     # 【论文 HDP】Table 6 使用 omega=0.1；后续 RL 必须沿用同一权重。
     parser.add_argument('--planning_hybrid_loss', type=float, help='coefficient of planning hybrid loss (default: 0.1)', default=0.1)
+    # 积分轨迹混合损失的反向传播窗口。0 表示关闭 stop-gradient，使用普通
+    # torch.cumsum；正数表示只允许最近若干 displacement 接收位置损失梯度。
+    # 当前正式监督训练要求不启用 detach，因此默认值和运行命令均使用 0。
+    parser.add_argument(
+        '--planning_detach_window_size',
+        type=int,
+        default=0,
+        help='hybrid waypoint integral gradient window; 0 disables detach',
+    )
 
     # 模型和训练张量使用的设备，默认使用 CUDA。
     parser.add_argument('--device', type=str, help='run on which device (default: cuda)', default='cuda')
@@ -203,6 +220,8 @@ def get_args():
 
     # 将命令行输入解析为 argparse.Namespace，后续通过 args.xxx 读取。
     args = parser.parse_args()
+    if args.planning_detach_window_size < 0:
+        raise ValueError('planning_detach_window_size must be non-negative')
 
     # 根据 normalization.json 创建状态和观测归一化器，供 train_epoch 和模型共同使用。
     args.state_normalizer = StateNormalizer.from_json(args)
@@ -218,10 +237,20 @@ def model_training(args):
     # 因此没有这些检查；HDP 禁止完整 resume 与 encoder-only 初始化同时使用，并校验冻结轮数。
     if args.resume_model_path is not None and args.encoder_pretrained_model_path is not None:
         raise ValueError('resume_model_path and encoder_pretrained_model_path are mutually exclusive')
+    if args.reset_lr_schedule_on_resume and args.resume_model_path is None:
+        raise ValueError('reset_lr_schedule_on_resume requires resume_model_path')
     if args.freeze_encoder_epochs < 0:
         raise ValueError('freeze_encoder_epochs must be non-negative')
-    if args.freeze_encoder_epochs > 0 and args.encoder_pretrained_model_path is None:
-        raise ValueError('freeze_encoder_epochs requires encoder_pretrained_model_path')
+    # 从完整 checkpoint 恢复时，encoder 权重已包含在 checkpoint 中，仍需保留原实验的
+    # freeze_encoder_epochs，保证恢复后的冻结/解冻时机与中断前一致。
+    if (
+        args.freeze_encoder_epochs > 0
+        and args.encoder_pretrained_model_path is None
+        and args.resume_model_path is None
+    ):
+        raise ValueError(
+            'freeze_encoder_epochs requires encoder_pretrained_model_path or resume_model_path'
+        )
 
     # 初始化分布式环境。
     # global_rank 是当前进程在全部进程中的编号；rank 是本机设备编号；第三项未使用。
@@ -355,10 +384,29 @@ def model_training(args):
     if args.resume_model_path is not None:
         print(f"Model loaded from {args.resume_model_path}")
         diffusion_planner, optimizer, scheduler, init_epoch, wandb_id, model_ema = resume_model(args.resume_model_path, diffusion_planner, optimizer, scheduler, model_ema, args.device)
+        if args.reset_lr_schedule_on_resume:
+            # 受控分叉实验保留模型、EMA 和 AdamW 动量，但覆盖 checkpoint 中的旧学习率，
+            # 再按当前参数重建 scheduler；warm_up_epoch<=1 时即得到恒定学习率。
+            for param_group in optimizer.param_groups:
+                param_group['lr'] = args.learning_rate
+                param_group['initial_lr'] = args.learning_rate
+            scheduler = CosineAnnealingWarmUpRestarts(
+                optimizer,
+                train_epochs,
+                args.warm_up_epoch,
+            )
+            print(
+                'Learning-rate schedule reset after resume: '
+                f'lr={args.learning_rate}, warm_up_epoch={args.warm_up_epoch}'
+            )
     else:
         # 新实验从 epoch 0 开始，并创建新的日志运行。
         init_epoch = 0
         wandb_id = None
+
+    # DistributedSampler 的 epoch 不在 checkpoint 中；恢复时显式对齐到下一训练 epoch，
+    # 避免每次重启都从 sampler epoch 0 的相同 shuffle 顺序重新开始。
+    train_sampler.set_epoch(init_epoch)
 
     # logger
     # rank 信息交给 Logger，由其避免多进程重复记录。

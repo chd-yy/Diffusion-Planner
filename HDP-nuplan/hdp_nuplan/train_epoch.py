@@ -21,7 +21,9 @@ from hdp_nuplan.loss import diffusion_loss_func
 # data_loader：训练数据加载器；model：HDP 模型；optimizer：优化器；args：训练配置；
 # ema：模型参数的指数滑动平均副本；aug：可选的状态扰动增强器。
 def train_epoch(data_loader, model, optimizer, args, ema, aug: StatePerturbation=None):
-    # 保存当前 epoch 每个 batch 的 loss 字典，最后统一计算各项平均值。
+    # 保存当前 epoch 每个 batch 的标量 loss，最后统一计算各项平均值。
+    # 不能直接保存带梯度的 loss 张量，否则其反向计算图会被保留到 epoch 结束；
+    # 在完整 mini-train 的 38,350 个 batch 上会造成 CPU RAM 持续增长并触发 OOM。
     epoch_loss = []
 
     # 切换到训练模式，启用 Dropout、DropPath 等训练阶段行为。
@@ -141,7 +143,8 @@ def train_epoch(data_loader, model, optimizer, args, ema, aug: StatePerturbation
                 args.state_normalizer,
                 loss,
                 args.diffusion_model_type,
-                args.diffusion_supervision_type
+                args.diffusion_supervision_type,
+                detach_window_size=args.planning_detach_window_size,
             )
             
             # 【HDP 与原 Diffusion-Planner 的区别：总损失组成】原版使用
@@ -182,8 +185,13 @@ def train_epoch(data_loader, model, optimizer, args, ema, aug: StatePerturbation
             # HDP 分别显示总损失、自车运动增量扩散损失和积分轨迹混合损失，便于观察
             # 两种自车监督项各自的变化。
             data_epoch.set_postfix(total_loss='{:.4f}'.format(total_loss), velocity_loss='{:.4f}'.format(loss['ego_planning_loss'].item()), hybrid_loss='{:.4f}'.format(loss['ego_planning_hybrid_loss'].item()))
-            # 保存各损失张量，供 epoch 结束后计算平均值。
-            epoch_loss.append(loss)
+            # 只保存脱离计算图的 Python 标量，训练数值不变，同时避免跨 batch 保留计算图。
+            epoch_loss.append(
+                {
+                    key: value.detach().item() if torch.is_tensor(value) else value
+                    for key, value in loss.items()
+                }
+            )
 
     # 分别计算当前 epoch 中各个 loss 项的 batch 平均值。
     epoch_mean_loss = get_epoch_mean_loss(epoch_loss)

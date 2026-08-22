@@ -119,6 +119,12 @@ def parse_args():
     parser.add_argument("--checksum_path", default=None, type=str)
     parser.add_argument("--shard_id", default="shard_00000", type=str)
     parser.add_argument(
+        "--scenario_builder_workers",
+        type=int,
+        default=None,
+        help="limit NuPlan scenario-builder subprocesses; useful when multiple shards run concurrently",
+    )
+    parser.add_argument(
         "--skip_existing",
         type=str_to_bool,
         default=True,
@@ -150,6 +156,8 @@ def main():
     args = parse_args()
     if args.total_scenarios <= 0:
         raise ValueError("--total_scenarios must be positive")
+    if args.scenario_builder_workers is not None and args.scenario_builder_workers <= 0:
+        raise ValueError("--scenario_builder_workers must be positive")
 
     started_at = datetime.now(timezone.utc).isoformat()
     start_time = time.monotonic()
@@ -185,7 +193,10 @@ def main():
         )
     )
 
-    worker = SingleMachineParallelExecutor(use_process_pool=True)
+    worker = SingleMachineParallelExecutor(
+        use_process_pool=True,
+        max_workers=args.scenario_builder_workers,
+    )
     scenarios = builder.get_scenarios(scenario_filter, worker)
     del worker, builder, scenario_filter
 

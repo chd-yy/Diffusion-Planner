@@ -150,6 +150,13 @@ def reward_config_from_args(config: Config) -> NuPlanRewardConfig:
         progress_guard_stop_tolerance=getattr(
             config, "reward_progress_guard_stop_tolerance", 0.2
         ),
+        safety_gate_threshold=getattr(
+            config, "reward_safety_gate_threshold", 0.0
+        ),
+        safety_gate_margin=getattr(config, "reward_safety_gate_margin", 1.0),
+        safety_gate_min_ttc_seconds=getattr(
+            config, "reward_safety_gate_min_ttc_seconds", 0.0
+        ),
         risk_speed_reference=getattr(config, "reward_risk_speed_reference", 15.0),
         ttc_safe_low_speed=getattr(config, "reward_ttc_safe_low_speed", 2.0),
         ttc_safe_high_speed=getattr(config, "reward_ttc_safe_high_speed", 4.0),

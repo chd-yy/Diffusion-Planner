@@ -471,6 +471,8 @@ def get_args():
     #
     # detach_window_size=10 表示位置损失最多向前传播到
     # 最近 10 个速度时间步，更早部分使用 stop-gradient。
+    # 设置为 0 则完全关闭 stop-gradient，使用普通 torch.cumsum，
+    # 让位置损失向此前全部时间步传播梯度。
     parser.add_argument("--rl_detach_window_size", default=10, type=int)
 
     # 强化学习更新时的梯度范数裁剪阈值。
@@ -550,6 +552,15 @@ def get_args():
     parser.add_argument(
         "--reward_progress_guard_stop_tolerance", default=0.2, type=float
     )
+    # 【NuPlan 安全门，非论文原式】在同场景候选组内使安全达标
+    # 成为 progress/follow/lane 之前的硬优先级；0 表示关闭。
+    parser.add_argument("--reward_safety_gate_threshold", default=0.0, type=float)
+    parser.add_argument("--reward_safety_gate_margin", default=1.0, type=float)
+    # 【NuPlan TTC 硬安全门】候选的最小预计 TTC（秒）必须达到该值；
+    # 默认 1.0 s，比官方 0.95 s 门槛保留少量余量；0 表示关闭。
+    parser.add_argument(
+        "--reward_safety_gate_min_ttc_seconds", default=1.0, type=float
+    )
 
     # 【NuPlan 适配】论文没有公开 TTC/THW/OCC shaping 的具体阈值，
     # 因此作为命令行参数写入 args.json，保证实验可以准确复现。
@@ -626,6 +637,12 @@ def get_args():
         raise ValueError("multi-reward 及 progress guard 权重不能为负数")
     if args.reward_progress_guard_stop_tolerance <= 0:
         raise ValueError("reward_progress_guard_stop_tolerance 必须大于 0")
+    if not 0 <= args.reward_safety_gate_threshold <= 1:
+        raise ValueError("reward_safety_gate_threshold 必须在 [0,1]")
+    if args.reward_safety_gate_margin <= 0:
+        raise ValueError("reward_safety_gate_margin 必须大于 0")
+    if args.reward_safety_gate_min_ttc_seconds < 0:
+        raise ValueError("reward_safety_gate_min_ttc_seconds 不能小于 0")
     if args.reward_risk_speed_reference <= 0:
         raise ValueError("reward_risk_speed_reference 必须大于 0")
     if not 0 <= args.reward_rear_end_collision_penalty <= 1:
@@ -899,6 +916,9 @@ def model_training(args):
             progress_guard_stop_tolerance=(
                 args.reward_progress_guard_stop_tolerance
             ),
+            safety_gate_threshold=args.reward_safety_gate_threshold,
+            safety_gate_margin=args.reward_safety_gate_margin,
+            safety_gate_min_ttc_seconds=args.reward_safety_gate_min_ttc_seconds,
 
             # 【NuPlan 适配】论文未公开的 shaping 阈值。
             risk_speed_reference=args.reward_risk_speed_reference,

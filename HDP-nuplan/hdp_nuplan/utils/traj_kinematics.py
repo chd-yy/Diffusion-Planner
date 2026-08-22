@@ -72,6 +72,14 @@ import torch
 #
 # 这与截断时间反向传播 Truncated BPTT 的思想相似。
 def detached_integral(u, detach_window_size):
+    # detach_window_size=0 是显式的“关闭 stop-gradient”模式。
+    # 此时直接使用普通累积和，让每个位置损失向此前全部 action 传播梯度。
+    # 该分支用于和 HDP 的 Detached Integral 做受控消融实验。
+    if detach_window_size == 0:
+        return torch.cumsum(u, dim=-2)
+    if detach_window_size < 0:
+        raise ValueError("detach_window_size must be non-negative")
+
     # HDP 新增的截断梯度积分：数值上仍累计完整轨迹，但只让最近窗口的积分项
     # 反向传播，降低长时域累积造成的梯度爆炸和显存开销。
     # u: (B, T=80, D)

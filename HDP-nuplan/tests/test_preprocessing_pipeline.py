@@ -12,8 +12,9 @@ SCRIPTS_DIR = PROJECT_ROOT / "scripts"
 sys.path.insert(0, str(SCRIPTS_DIR))
 
 from audit_dataset_splits import audit_splits  # noqa: E402
-from build_preprocessing_plan import build_plan  # noqa: E402
+from build_preprocessing_plan import build_plan, build_weighted_plan  # noqa: E402
 from merge_preprocessing_shards import merge_shards  # noqa: E402
+from run_preprocessing_shard import build_command  # noqa: E402
 from hdp_nuplan.data_process.data_processor import DataProcessor  # noqa: E402
 
 
@@ -89,6 +90,71 @@ def test_build_plan_partitions_logs_and_preserves_exact_target(tmp_path):
     assert recovered_logs == logs
 
 
+def test_build_weighted_plan_balances_real_log_counts_without_overlap(tmp_path):
+    logs = ["log-a", "log-b", "log-c", "log-d", "log-e"]
+    targets = {
+        "log-a": 10_000,
+        "log-b": 8_000,
+        "log-c": 6_000,
+        "log-d": 2_400,
+        "log-e": 801,
+    }
+
+    plan = build_weighted_plan(
+        logs,
+        targets,
+        num_shards=2,
+        seed=3407,
+        output_dir=tmp_path,
+    )
+
+    assert plan["format_version"] == 2
+    assert plan["total_scenarios"] == sum(targets.values())
+    assert sum(item["total_scenarios"] for item in plan["shards"]) == sum(
+        targets.values()
+    )
+    recovered_logs = [
+        log_name
+        for shard in plan["shards"]
+        for log_name in shard["per_log_targets"]
+    ]
+    assert sorted(recovered_logs) == sorted(logs)
+    assert len(recovered_logs) == len(set(recovered_logs))
+    loads = [item["total_scenarios"] for item in plan["shards"]]
+    assert max(loads) - min(loads) <= max(targets.values())
+
+
+def test_run_shard_can_reuse_a_shared_cache(tmp_path):
+    plan_path = tmp_path / "plan" / "preprocessing_plan.json"
+    plan_path.parent.mkdir()
+    plan_path.write_text("{}", encoding="utf-8")
+    shared_cache = tmp_path / "shared-cache"
+    args = SimpleNamespace(
+        output_root=tmp_path / "workers",
+        plan=plan_path,
+        data_path=tmp_path / "data",
+        map_path=tmp_path / "maps",
+        shared_cache_path=shared_cache,
+        checksum_mode="manifest",
+        skip_existing=True,
+        fail_on_error=True,
+        scenario_builder_workers=4,
+        extra_args=[],
+    )
+    shard = {
+        "shard_id": "shard_00000",
+        "log_names_json": "shard_00000_logs.json",
+        "total_scenarios": 10,
+        "seed": 3407,
+    }
+
+    _, command = build_command(args, shard)
+
+    save_path_index = command.index("--save_path") + 1
+    assert command[save_path_index] == str(shared_cache.resolve())
+    assert command[-2:] == ["--scenario_builder_workers", "4"]
+
+
 def _write_shard(root, shard_id, log_name, npz_name):
     shard_dir = root / shard_id
     cache_dir = shard_dir / "cache"
@@ -132,6 +198,25 @@ def test_merge_shards_creates_dataset_relative_paths(tmp_path):
     assert report["shard_count"] == 2
     assert report["log_count"] == 2
     assert report["selected_per_log"] == {"log-a": 1, "log-b": 1}
+
+
+def test_merge_shards_supports_a_shared_cache(tmp_path):
+    shards_root = tmp_path / "workers"
+    _write_shard(shards_root, "shard_00000", "log-a", "map_a.npz")
+    _write_shard(shards_root, "shard_00001", "log-b", "map_b.npz")
+    shared_cache = tmp_path / "cache"
+    shared_cache.mkdir()
+    for npz_name in ["map_a.npz", "map_b.npz"]:
+        (shared_cache / npz_name).write_bytes(b"npz-placeholder")
+
+    manifest, report = merge_shards(
+        shards_root,
+        shared_cache=shared_cache,
+        manifest_prefix="cache",
+    )
+
+    assert manifest == ["cache/map_a.npz", "cache/map_b.npz"]
+    assert report["shared_cache"] == str(shared_cache.resolve())
 
 
 def test_audit_splits_detects_log_and_scenario_leakage(tmp_path):

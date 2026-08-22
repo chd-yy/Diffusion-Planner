@@ -130,6 +130,91 @@ class RlComponentTest(unittest.TestCase):
         self.assertAlmostEqual(guard[0, 1].item(), 1.0, places=6)
         self.assertAlmostEqual(guard[0, 2].item(), 1.0, places=6)
 
+    def test_safety_gate_prevents_progress_from_overriding_safe_candidate(self):
+        scorer = NuPlanTensorRewardScorer(
+            NuPlanRewardConfig(
+                safety_gate_threshold=0.4,
+                safety_gate_margin=1.0,
+            )
+        )
+        # 候选 0 的原奖励更高，但 risk 不达标；候选 1 安全达标。
+        base_reward = torch.tensor([[11.0, 2.0, 3.0]])
+        risk_reward = torch.tensor([[0.3, 0.4, 0.8]])
+
+        gated, eligible, has_eligible = scorer._apply_safety_gate(
+            base_reward, risk_reward
+        )
+
+        self.assertTrue(has_eligible.item())
+        self.assertFalse(eligible[0, 0].item())
+        self.assertLess(gated[0, 0], gated[0, 1:].min())
+        torch.testing.assert_close(gated[0, 1:], base_reward[0, 1:])
+
+    def test_safety_gate_enforces_min_ttc_seconds(self):
+        scorer = NuPlanTensorRewardScorer(
+            NuPlanRewardConfig(
+                safety_gate_min_ttc_seconds=1.0,
+                safety_gate_margin=1.0,
+            )
+        )
+        # 两个候选的连续 risk 相同；只有候选 1 通过 1 秒 TTC 硬门。
+        base_reward = torch.tensor([[10.0, 1.0]])
+        risk_reward = torch.tensor([[0.8, 0.8]])
+        min_ttc_seconds = torch.tensor([[0.9, 1.1]])
+
+        gated, eligible, has_eligible = scorer._apply_safety_gate(
+            base_reward,
+            risk_reward,
+            min_ttc_seconds,
+        )
+
+        self.assertTrue(has_eligible.item())
+        self.assertFalse(eligible[0, 0].item())
+        self.assertTrue(eligible[0, 1].item())
+        self.assertLess(gated[0, 0], gated[0, 1])
+
+    def test_reward_returns_physical_min_ttc_seconds(self):
+        scorer = NuPlanTensorRewardScorer(NuPlanRewardConfig())
+        _, details = scorer(
+            self.trajectories,
+            self.neighbors,
+            self.neighbor_mask,
+            self.route,
+            static_objects=torch.zeros(self.batch_size, 2, 10),
+        )
+
+        # 候选 0 与邻车重叠，预计 TTC 为 0；候选 1 横向错开且无 closing，
+        # 在当前恒速近似下没有预计碰撞，返回 inf。
+        self.assertAlmostEqual(details["min_ttc_seconds"][0, 0].item(), 0.0)
+        self.assertTrue(torch.isinf(details["min_ttc_seconds"][0, 1]))
+
+    def test_safety_gate_all_unsafe_group_prefers_highest_risk(self):
+        scorer = NuPlanTensorRewardScorer(
+            NuPlanRewardConfig(safety_gate_threshold=0.4)
+        )
+        # 整组都不达标时，更高的原始 utility 不能压过更好的 risk。
+        base_reward = torch.tensor([[11.0, 1.0]])
+        risk_reward = torch.tensor([[0.1, 0.3]])
+
+        gated, eligible, has_eligible = scorer._apply_safety_gate(
+            base_reward, risk_reward
+        )
+
+        self.assertFalse(has_eligible.item())
+        self.assertFalse(eligible.any().item())
+        self.assertGreater(gated[0, 1], gated[0, 0])
+
+    def test_disabled_safety_gate_preserves_paper_reward(self):
+        scorer = NuPlanTensorRewardScorer(
+            NuPlanRewardConfig(safety_gate_threshold=0.0)
+        )
+        base_reward = torch.tensor([[1.0, 2.0]])
+        risk_reward = torch.tensor([[0.1, 0.9]])
+
+        gated, _, _ = scorer._apply_safety_gate(base_reward, risk_reward)
+
+        torch.testing.assert_close(gated, base_reward)
+
     def test_paper_follow_reward_prefers_safe_gap_to_tailgating(self):
         horizon = 20
         time = torch.arange(1, horizon + 1, dtype=torch.float32) * 0.1
@@ -391,6 +476,21 @@ class RlComponentTest(unittest.TestCase):
         expected_gradient = torch.zeros_like(values)
         expected_gradient[:, -window_size:, :] = 1
         torch.testing.assert_close(values.grad, expected_gradient)
+
+    def test_detached_integral_zero_uses_full_cumsum_gradient(self):
+        values = torch.arange(1, 13, dtype=torch.float32).reshape(1, 6, 2)
+        values.requires_grad_()
+
+        integrated = detached_integral(values, detach_window_size=0)
+        torch.testing.assert_close(integrated, torch.cumsum(values, dim=-2))
+
+        integrated[:, -1, :].sum().backward()
+        torch.testing.assert_close(values.grad, torch.ones_like(values))
+
+    def test_detached_integral_rejects_negative_window(self):
+        values = torch.ones(1, 2, 2)
+        with self.assertRaisesRegex(ValueError, "must be non-negative"):
+            detached_integral(values, detach_window_size=-1)
 
 
 if __name__ == "__main__":

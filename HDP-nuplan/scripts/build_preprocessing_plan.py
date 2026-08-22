@@ -69,23 +69,143 @@ def build_plan(log_names, logs_per_shard, total_scenarios, seed, output_dir):
     return plan
 
 
+def build_weighted_plan(log_names, per_log_targets, num_shards, seed, output_dir):
+    """按每个日志的真实场景数做确定性的贪心均衡分片。"""
+    log_names = unique_log_names(log_names)
+    if not log_names:
+        raise ValueError("log list is empty")
+    if num_shards <= 0 or num_shards > len(log_names):
+        raise ValueError(
+            f"num_shards must be in [1, {len(log_names)}], got {num_shards}"
+        )
+
+    missing_logs = [name for name in log_names if name not in per_log_targets]
+    extra_logs = sorted(set(per_log_targets) - set(log_names))
+    if missing_logs or extra_logs:
+        raise ValueError(
+            f"per-log targets do not match log list; "
+            f"missing={missing_logs}, extra={extra_logs}"
+        )
+
+    normalized_targets = {}
+    for log_name in log_names:
+        target = per_log_targets[log_name]
+        if isinstance(target, bool) or not isinstance(target, int) or target <= 0:
+            raise ValueError(f"invalid target for {log_name}: {target!r}")
+        normalized_targets[log_name] = target
+
+    # Largest-processing-time-first：每次把最大日志放入当前负载最小的分片。
+    original_index = {name: index for index, name in enumerate(log_names)}
+    ordered_logs = sorted(
+        log_names,
+        key=lambda name: (-normalized_targets[name], original_index[name]),
+    )
+    bins = [{"logs": [], "total": 0} for _ in range(num_shards)]
+    for log_name in ordered_logs:
+        shard_index = min(
+            range(num_shards),
+            key=lambda index: (bins[index]["total"], index),
+        )
+        bins[shard_index]["logs"].append(log_name)
+        bins[shard_index]["total"] += normalized_targets[log_name]
+
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    shards = []
+    for shard_index, bin_data in enumerate(bins):
+        shard_logs = sorted(bin_data["logs"], key=original_index.__getitem__)
+        shard_id = f"shard_{shard_index:05d}"
+        log_file = output_dir / f"{shard_id}_logs.json"
+        atomic_write_json(log_file, shard_logs)
+        shard_targets = {
+            log_name: normalized_targets[log_name] for log_name in shard_logs
+        }
+        shards.append(
+            {
+                "shard_index": shard_index,
+                "shard_id": shard_id,
+                "log_names_json": log_file.name,
+                "log_count": len(shard_logs),
+                "total_scenarios": sum(shard_targets.values()),
+                "per_log_targets": shard_targets,
+                "seed": seed + shard_index,
+            }
+        )
+
+    plan = {
+        "format_version": 2,
+        "strategy": "balanced_logs_weighted",
+        "source_log_count": len(log_names),
+        "shard_count": num_shards,
+        "total_scenarios": sum(normalized_targets.values()),
+        "seed": seed,
+        "per_log_targets": normalized_targets,
+        "shards": shards,
+    }
+    recovered_logs = [
+        log_name for shard in shards for log_name in shard["per_log_targets"]
+    ]
+    if len(recovered_logs) != len(set(recovered_logs)):
+        raise AssertionError("internal error: logs overlap across weighted shards")
+    if set(recovered_logs) != set(log_names):
+        raise AssertionError("internal error: weighted plan lost logs")
+    if sum(item["total_scenarios"] for item in shards) != plan["total_scenarios"]:
+        raise AssertionError("internal error: weighted target mismatch")
+    return plan
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--log_names_json", required=True, type=Path)
     parser.add_argument("--output_dir", required=True, type=Path)
     parser.add_argument("--logs_per_shard", type=int, default=100)
     parser.add_argument("--total_scenarios", type=int, required=True)
+    parser.add_argument(
+        "--sampling_report",
+        type=Path,
+        help="use selected_per_log from an audited sampling report for weighted shards",
+    )
+    parser.add_argument(
+        "--num_shards",
+        type=int,
+        help="number of weighted shards; required with --sampling_report",
+    )
     parser.add_argument("--seed", type=int, default=3407)
     args = parser.parse_args()
 
     log_names = json.loads(args.log_names_json.read_text(encoding="utf-8"))
-    plan = build_plan(
-        log_names,
-        args.logs_per_shard,
-        args.total_scenarios,
-        args.seed,
-        args.output_dir,
-    )
+    if args.sampling_report:
+        if args.num_shards is None:
+            parser.error("--num_shards is required with --sampling_report")
+        sampling_report = json.loads(
+            args.sampling_report.read_text(encoding="utf-8")
+        )
+        per_log_targets = sampling_report.get("selected_per_log")
+        if not isinstance(per_log_targets, dict):
+            raise ValueError("sampling report has no selected_per_log mapping")
+        plan = build_weighted_plan(
+            log_names,
+            per_log_targets,
+            args.num_shards,
+            args.seed,
+            args.output_dir,
+        )
+        if plan["total_scenarios"] != args.total_scenarios:
+            raise ValueError(
+                f"weighted report total={plan['total_scenarios']} does not match "
+                f"--total_scenarios={args.total_scenarios}"
+            )
+        plan["source_sampling_report"] = str(args.sampling_report.resolve())
+    else:
+        if args.num_shards is not None:
+            parser.error("--num_shards requires --sampling_report")
+        plan = build_plan(
+            log_names,
+            args.logs_per_shard,
+            args.total_scenarios,
+            args.seed,
+            args.output_dir,
+        )
     plan_path = args.output_dir / "preprocessing_plan.json"
     atomic_write_json(plan_path, plan)
     print(

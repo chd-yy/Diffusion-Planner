@@ -21,8 +21,16 @@ def _safe_manifest_name(name):
     return path.as_posix()
 
 
-def merge_shards(shards_root, verify_files=True):
+def merge_shards(
+    shards_root,
+    verify_files=True,
+    shared_cache=None,
+    manifest_prefix=None,
+):
     shards_root = Path(shards_root).resolve()
+    shared_cache = Path(shared_cache).resolve() if shared_cache is not None else None
+    if manifest_prefix is not None:
+        manifest_prefix = _safe_manifest_name(manifest_prefix)
     report_paths = sorted(shards_root.glob("shard_*/processing_report.json"))
     if not report_paths:
         raise ValueError(f"no shard processing reports found under {shards_root}")
@@ -70,10 +78,22 @@ def merge_shards(shards_root, verify_files=True):
                 raise ValueError(f"duplicate NPZ across shards: {output_name}")
             seen_output_names.add(output_name)
 
-            source_path = shard_dir / "cache" / Path(name)
+            source_path = (
+                shared_cache / Path(name)
+                if shared_cache is not None
+                else shard_dir / "cache" / Path(name)
+            )
             if verify_files and not source_path.is_file():
                 raise FileNotFoundError(source_path)
-            merged_entries.append(source_path.relative_to(shards_root).as_posix())
+            if shared_cache is not None:
+                manifest_name = (
+                    (PurePosixPath(manifest_prefix) / name).as_posix()
+                    if manifest_prefix is not None
+                    else name
+                )
+                merged_entries.append(manifest_name)
+            else:
+                merged_entries.append(source_path.relative_to(shards_root).as_posix())
 
         shard_summaries.append(
             {
@@ -88,6 +108,7 @@ def merge_shards(shards_root, verify_files=True):
     return sorted(merged_entries), {
         "status": "complete" if all(item["status"] == "complete" for item in shard_summaries) else "partial",
         "shards_root": str(shards_root),
+        "shared_cache": str(shared_cache) if shared_cache is not None else None,
         "shard_count": len(shard_summaries),
         "log_count": len(merged_logs),
         "log_names": merged_logs,
@@ -103,12 +124,23 @@ def main():
     parser.add_argument("--shards_root", required=True, type=Path)
     parser.add_argument("--output_manifest", required=True, type=Path)
     parser.add_argument("--output_report", required=True, type=Path)
+    parser.add_argument(
+        "--shared_cache",
+        type=Path,
+        help="verify shard manifests against a common cache instead of shard-local caches",
+    )
+    parser.add_argument(
+        "--manifest_prefix",
+        help="prefix added to entries from --shared_cache, for example 'cache'",
+    )
     parser.add_argument("--no_verify_files", action="store_true")
     args = parser.parse_args()
 
     manifest, report = merge_shards(
         args.shards_root,
         verify_files=not args.no_verify_files,
+        shared_cache=args.shared_cache,
+        manifest_prefix=args.manifest_prefix,
     )
     atomic_write_json(args.output_manifest, manifest)
     report["manifest_path"] = str(args.output_manifest.resolve())
