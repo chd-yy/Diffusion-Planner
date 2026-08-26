@@ -171,6 +171,14 @@ class NuPlanRewardConfig:
     # 才能成为 safety gate 的 eligible 候选。0 表示关闭该硬门。
     safety_gate_min_ttc_seconds: float = 0.0
 
+    # 【NuPlan drivable-area 硬门】要求候选轨迹的自车包络始终位于
+    # NPZ 中可见 lane 的左右边界走廊内。它是基于缓存 lane 边界的
+    # 可批量近似，不等同于重新调用 NuPlan polygon scorer；默认关闭以保持
+    # 旧实验行为，正式 RL 实验通过命令行显式开启。
+    safety_gate_require_drivable_area: bool = False
+    # 车辆包络距离 lane 边界额外保留的安全余量，单位为米。
+    safety_gate_drivable_area_margin: float = 0.1
+
     # 【NuPlan 适配】论文只说明 TTC/THW/OCC 使用速度自适应 shaping，
     # 未公开具体阈值。以下参数全部开放，便于后续通过验证集标定。
     risk_speed_reference: float = 15.0
@@ -197,6 +205,17 @@ class NuPlanRewardConfig:
     # 使用 1.75 m 作为半车道宽回退值。
     lane_half_width_fallback: float = 1.75
     lane_change_ratio: float = 0.5
+
+    # 【NuPlan 闭环对齐】默认保持旧论文 reward，新的 RL 实验显式使用
+    # nuplan_aligned。该模式把可计算的安全、进度、路线、跟车和舒适性
+    # 指标转换为 [0,1] 质量分，再做加权几何平均，避免某一个可加性奖励
+    # 抵消碰撞或路线退化。
+    objective_mode: str = "legacy"
+    aligned_safety_exponent: float = 0.45
+    aligned_progress_exponent: float = 0.25
+    aligned_route_exponent: float = 0.15
+    aligned_comfort_exponent: float = 0.10
+    aligned_follow_exponent: float = 0.05
 
 
 # ----------------------------------------------------------------------
@@ -1264,12 +1283,14 @@ class NuPlanTensorRewardScorer:
         rewards: torch.Tensor,
         risk_reward: torch.Tensor,
         min_ttc_seconds: Optional[torch.Tensor] = None,
+        drivable_area_compliant: Optional[torch.Tensor] = None,
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """对 [B,G] 候选实施组内安全优先约束。
 
-        risk_reward 和 min_ttc_seconds 都是候选资格条件。只要组内存在
-        同时满足条件的候选，不满足任一条件的候选奖励一定低于所有达标
-        候选；如果整组都不达标，则仍按 risk 排序，原奖励只作 tie-breaker。
+        risk_reward、min_ttc_seconds 和 drivable_area_compliant 都是候选
+        资格条件。只要组内存在同时满足条件的候选，不满足任一条件的
+        候选奖励一定低于所有达标候选；如果整组都不达标，则仍按 risk
+        排序，原奖励只作 tie-breaker。
         两个阈值都为 0 时完全保留原奖励。
         """
         risk_threshold = float(self.config.safety_gate_threshold)
@@ -1287,12 +1308,20 @@ class NuPlanTensorRewardScorer:
             if ttc_threshold > 0
             else torch.ones_like(risk_reward, dtype=torch.bool)
         )
-        if risk_threshold <= 0 and ttc_threshold <= 0:
+        if drivable_area_compliant is None or not self.config.safety_gate_require_drivable_area:
+            drivable_eligible = torch.ones_like(risk_reward, dtype=torch.bool)
+        else:
+            drivable_eligible = drivable_area_compliant.to(dtype=torch.bool)
+        if (
+            risk_threshold <= 0
+            and ttc_threshold <= 0
+            and not self.config.safety_gate_require_drivable_area
+        ):
             eligible = torch.ones_like(risk_reward, dtype=torch.bool)
             has_eligible = torch.ones_like(risk_reward[:, :1], dtype=torch.bool)
             return rewards, eligible, has_eligible
 
-        eligible = risk_eligible & ttc_eligible
+        eligible = risk_eligible & ttc_eligible & drivable_eligible
         has_eligible = eligible.any(dim=1, keepdim=True)
         safe_floor = torch.where(
             eligible,
@@ -1309,6 +1338,8 @@ class NuPlanTensorRewardScorer:
             if ttc_threshold > 0
             else torch.zeros_like(risk_reward)
         )
+        # drivable-area 是布尔硬约束；不使用连续距离补偿，避免“更快但
+        # 越界”的候选通过更高 progress/follow/lane 得分重新成为优选。
         unsafe_reward = (
             safe_floor
             - float(self.config.safety_gate_margin)
@@ -1323,6 +1354,115 @@ class NuPlanTensorRewardScorer:
             all_unsafe_reward,
         )
         return gated_reward, eligible, has_eligible
+
+    def _drivable_area_compliance(
+        self,
+        trajectories: torch.Tensor,
+        lanes: Optional[torch.Tensor],
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """按 lane 左右边界检查候选自车包络是否始终可行驶。
+
+        返回 ``compliance``（[B,G] 布尔值）和 ``min_clearance``（[B,G]，
+        单位米）。NPZ 没有保存 NuPlan drivable-area polygon，因此使用
+        lane 中心线及左右边界相对向量构造局部 lane corridor；自车矩形
+        投影到 lane 横向方向后再检查两侧余量，避免只检查自车中心点。
+        """
+        batch_size, group_size, horizon, _ = trajectories.shape
+        if lanes is None:
+            ones = trajectories.new_ones((batch_size, group_size))
+            return ones.bool(), ones * float("inf")
+        if lanes.ndim != 4 or lanes.shape[0] != batch_size or lanes.shape[-1] < 8:
+            raise ValueError("lanes must have shape [B, L, P, >=8]")
+
+        compliance = torch.ones(
+            (batch_size, group_size), dtype=torch.bool, device=trajectories.device
+        )
+        min_clearance = trajectories.new_full((batch_size, group_size), float("inf"))
+        candidate_points = trajectories[..., :2]
+        ego_forward = self._normalize_direction(trajectories[..., 2:4])
+        ego_lateral = torch.stack([-ego_forward[..., 1], ego_forward[..., 0]], dim=-1)
+        half_length = float(self.config.ego_length) * 0.5
+        half_width = float(self.config.ego_width) * 0.5
+        margin = float(self.config.safety_gate_drivable_area_margin)
+
+        for batch_idx in range(batch_size):
+            lane_batch = lanes[batch_idx]
+            # 每条 lane 原始固定采样 20 个点；硬门只需要做 corridor
+            # 覆盖检查，不需要对相邻的重复几何点逐一计算 cdist。保留首点、
+            # 尾点和每隔一个中间点，可将每 batch 的地图点数约减半，且不
+            # 改变左右边界宽度和 lane 的候选资格逻辑。
+            point_indices = torch.arange(
+                0, lane_batch.shape[1], 2, device=lane_batch.device
+            )
+            if point_indices[-1] != lane_batch.shape[1] - 1:
+                point_indices = torch.cat(
+                    [point_indices, point_indices.new_tensor([lane_batch.shape[1] - 1])]
+                )
+            lane_batch = lane_batch[:, point_indices]
+            lane_xy = lane_batch[..., :2].reshape(-1, 2)
+            lane_vector = lane_batch[..., 2:4].reshape(-1, 2)
+            left_width = torch.linalg.vector_norm(lane_batch[..., 4:6], dim=-1).reshape(-1)
+            right_width = torch.linalg.vector_norm(lane_batch[..., 6:8], dim=-1).reshape(-1)
+            valid = torch.any(lane_batch[..., :8] != 0, dim=-1).reshape(-1)
+            valid &= left_width > 0.1
+            valid &= right_width > 0.1
+            if not torch.any(valid):
+                # 地图缺失时不把所有候选误判为越界；该情况应由数据质量
+                # 检查发现，而不是让 RL 学习“地图缺失即停车”。
+                continue
+
+            centers = lane_xy[valid]
+            tangents = self._normalize_direction(lane_vector[valid])
+            left_width = left_width[valid]
+            right_width = right_width[valid]
+            lane_lateral = torch.stack([-tangents[:, 1], tangents[:, 0]], dim=-1)
+
+            points = candidate_points[batch_idx].reshape(-1, 2)
+            point_forward = ego_forward[batch_idx].reshape(-1, 2)
+            point_lateral = ego_lateral[batch_idx].reshape(-1, 2)
+
+            # 只检查最近的若干条 lane，而不是只检查最近中心点。后者在
+            # 路口/换道处可能把车辆错误归到一条相邻 lane；top-k 仍保持
+            # 可批量计算，同时允许任意一条局部 corridor 通过检查。
+            distances = torch.cdist(points, centers)
+            candidate_lane_count = min(8, centers.shape[0])
+            _, nearest_indices = torch.topk(
+                distances, k=candidate_lane_count, dim=-1, largest=False
+            )
+            nearest_center = centers[nearest_indices]
+            nearest_lateral = lane_lateral[nearest_indices]
+            nearest_left = left_width[nearest_indices]
+            nearest_right = right_width[nearest_indices]
+
+            signed_lateral = torch.sum(
+                (points[:, None] - nearest_center) * nearest_lateral, dim=-1
+            )
+            # 车辆矩形在 lane 横向上的投影半径：航向越偏离 lane，车辆
+            # 长度对横向占用的贡献越大，判定会自动变得更保守。
+            footprint_half_extent = (
+                half_length
+                * torch.abs(
+                    torch.sum(point_forward[:, None] * nearest_lateral, dim=-1)
+                )
+                + half_width
+                * torch.abs(
+                    torch.sum(point_lateral[:, None] * nearest_lateral, dim=-1)
+                )
+                + margin
+            )
+            left_clearance = nearest_left - footprint_half_extent - signed_lateral
+            right_clearance = nearest_right - footprint_half_extent + signed_lateral
+            lane_clearance = torch.minimum(left_clearance, right_clearance)
+            # 只要候选车辆包络落在任意一条附近 lane corridor 内，该时间
+            # 点就通过；对同一点取最宽松的可行 corridor 余量。
+            clearance, _ = lane_clearance.max(dim=-1)
+            point_compliant = clearance >= 0
+            clearance = clearance.reshape(group_size, horizon)
+            point_compliant = point_compliant.reshape(group_size, horizon)
+            compliance[batch_idx] = point_compliant.all(dim=-1)
+            min_clearance[batch_idx] = clearance.min(dim=-1).values
+
+        return compliance, min_clearance
 
     def _risk_reward(
         self,
@@ -1996,6 +2136,209 @@ class NuPlanTensorRewardScorer:
         ).clamp(0, 1)
         return torch.where(moving, moving_reward, stopped_reward)
 
+    def _nuplan_aligned_reward(
+        self,
+        risk_reward: torch.Tensor,
+        no_collision: torch.Tensor,
+        progress_guard_reward: torch.Tensor,
+        lane_reward: torch.Tensor,
+        follow_reward: torch.Tensor,
+        comfort_cost: torch.Tensor,
+    ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor]]:
+        """构造与 NuPlan 闭环指标方向一致的有界 reward。
+
+        NuPlan 最终 score 是多个安全、进度和舒适性指标的组合。这里不把
+        各项直接相加，而是使用加权几何平均：任一关键质量显著下降都会
+        影响总 reward；碰撞通过 no_collision 直接把安全质量置为 0。
+        drivable-area 不在这里使用，因为 NPZ 只有 lane 边界代理，不是
+        NuPlan 原生 polygon scorer。
+        """
+        cfg = self.config
+        exponents = torch.tensor(
+            [
+                cfg.aligned_safety_exponent,
+                cfg.aligned_progress_exponent,
+                cfg.aligned_route_exponent,
+                cfg.aligned_comfort_exponent,
+                cfg.aligned_follow_exponent,
+            ],
+            device=risk_reward.device,
+            dtype=risk_reward.dtype,
+        )
+        if not torch.isfinite(exponents).all() or (exponents < 0).any():
+            raise ValueError("aligned reward exponents must be finite and non-negative")
+        exponent_sum = exponents.sum().clamp_min(torch.finfo(exponents.dtype).eps)
+        exponents = exponents / exponent_sum
+
+        # comfort_cost 是非负超限代价，转换成单调递减的 [0,1] 质量分。
+        comfort_quality = torch.exp(-comfort_cost.clamp_min(0.0)).clamp(0.0, 1.0)
+        safety_quality = risk_reward.clamp(0.0, 1.0) * no_collision.to(risk_reward.dtype)
+        qualities = torch.stack(
+            [
+                safety_quality,
+                progress_guard_reward.clamp(0.0, 1.0),
+                lane_reward.clamp(0.0, 1.0),
+                comfort_quality,
+                follow_reward.clamp(0.0, 1.0),
+            ],
+            dim=-1,
+        )
+        # 用极小值保留有限梯度信号；碰撞的 safety_quality 仍会让总 reward
+        # 接近 0，而不是允许其他项把碰撞抵消掉。
+        aligned_reward = torch.exp(
+            (torch.log(qualities.clamp_min(1e-4)) * exponents).sum(dim=-1)
+        )
+        details = {
+            "aligned_safety_quality": safety_quality,
+            "aligned_progress_quality": progress_guard_reward.clamp(0.0, 1.0),
+            "aligned_route_quality": lane_reward.clamp(0.0, 1.0),
+            "aligned_comfort_quality": comfort_quality,
+            "aligned_follow_quality": follow_reward.clamp(0.0, 1.0),
+        }
+        return aligned_reward, details
+
+    def _nuplan_score_proxy_v2_reward(
+        self,
+        risk_reward: torch.Tensor,
+        no_collision: torch.Tensor,
+        progress_guard_reward: torch.Tensor,
+        route_cost: torch.Tensor,
+        follow_reward: torch.Tensor,
+        comfort_cost: torch.Tensor,
+        backward_cost: torch.Tensor,
+        collision_cost: torch.Tensor,
+    ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor]]:
+        """构造使用真实路线/碰撞/舒适性分量的 NuPlan 代理 reward。
+
+        ``legacy`` 模式保留论文迁移实验的 risk/follow/lane 加性目标。
+        本模式单独修复一个目标错位：NuPlan 闭环相关的 route_cost、
+        collision_cost 和 comfort_cost 必须真正进入候选排序，而不能只
+        作为 details 记录下来。质量项统一映射到 [0, 1] 后使用加权几何
+        平均，避免某个安全项被高 progress 抵消。
+        """
+        cfg = self.config
+        exponents = torch.tensor(
+            [
+                cfg.aligned_safety_exponent,
+                cfg.aligned_progress_exponent,
+                cfg.aligned_route_exponent,
+                cfg.aligned_comfort_exponent,
+                cfg.aligned_follow_exponent,
+            ],
+            device=risk_reward.device,
+            dtype=risk_reward.dtype,
+        )
+        if not torch.isfinite(exponents).all() or (exponents < 0).any():
+            raise ValueError("aligned reward exponents must be finite and non-negative")
+        exponents = exponents / exponents.sum().clamp_min(
+            torch.finfo(exponents.dtype).eps
+        )
+
+        safety_quality = risk_reward.clamp(0.0, 1.0) * no_collision.to(
+            risk_reward.dtype
+        )
+        progress_quality = progress_guard_reward.clamp(0.0, 1.0)
+        route_quality = (1.0 - route_cost).clamp(0.0, 1.0)
+        comfort_quality = torch.exp(-comfort_cost.clamp_min(0.0)).clamp(0.0, 1.0)
+        follow_quality = follow_reward.clamp(0.0, 1.0)
+        qualities = torch.stack(
+            [
+                safety_quality,
+                progress_quality,
+                route_quality,
+                comfort_quality,
+                follow_quality,
+            ],
+            dim=-1,
+        )
+        reward = torch.exp(
+            (torch.log(qualities.clamp_min(1e-4)) * exponents).sum(dim=-1)
+        )
+
+        # 这些连续代价不直接再次相加，避免改变几何平均的尺度；保留为
+        # details 供训练日志检查其与 NuPlan 闭环指标的方向是否一致。
+        details = {
+            "proxy_v2_safety_quality": safety_quality,
+            "proxy_v2_progress_quality": progress_quality,
+            "proxy_v2_route_quality": route_quality,
+            "proxy_v2_comfort_quality": comfort_quality,
+            "proxy_v2_follow_quality": follow_quality,
+            "proxy_v2_collision_cost": collision_cost,
+            "proxy_v2_backward_cost": backward_cost,
+        }
+        return reward, details
+
+    def _nuplan_score_proxy_v3_reward(
+        self,
+        risk_reward: torch.Tensor,
+        no_collision: torch.Tensor,
+        progress_guard_reward: torch.Tensor,
+        route_cost: torch.Tensor,
+        follow_reward: torch.Tensor,
+        comfort_cost: torch.Tensor,
+        backward_cost: torch.Tensor,
+        collision_cost: torch.Tensor,
+    ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor]]:
+        """构造 v3 NuPlan 代理 reward。
+
+        v2 的连续 collision_cost 只进入 details，没有进入候选排序；v3
+        显式把归一化 collision_cost 转成安全质量，且保留 no_collision
+        的零质量约束。collision_cost 的范围由 _collision_cost 保证为
+        [0, 1]，因此 1-cost 是可解释的连续安全质量。
+        """
+        cfg = self.config
+        exponents = torch.tensor(
+            [
+                cfg.aligned_safety_exponent,
+                cfg.aligned_progress_exponent,
+                cfg.aligned_route_exponent,
+                cfg.aligned_comfort_exponent,
+                cfg.aligned_follow_exponent,
+            ],
+            device=risk_reward.device,
+            dtype=risk_reward.dtype,
+        )
+        if not torch.isfinite(exponents).all() or (exponents < 0).any():
+            raise ValueError("aligned reward exponents must be finite and non-negative")
+        exponents = exponents / exponents.sum().clamp_min(
+            torch.finfo(exponents.dtype).eps
+        )
+
+        collision_quality = (1.0 - collision_cost.clamp(0.0, 1.0)).clamp(0.0, 1.0)
+        safety_quality = (
+            risk_reward.clamp(0.0, 1.0)
+            * collision_quality
+            * no_collision.to(risk_reward.dtype)
+        )
+        progress_quality = progress_guard_reward.clamp(0.0, 1.0)
+        route_quality = (1.0 - route_cost).clamp(0.0, 1.0)
+        comfort_quality = torch.exp(-comfort_cost.clamp_min(0.0)).clamp(0.0, 1.0)
+        follow_quality = follow_reward.clamp(0.0, 1.0)
+        qualities = torch.stack(
+            [
+                safety_quality,
+                progress_quality,
+                route_quality,
+                comfort_quality,
+                follow_quality,
+            ],
+            dim=-1,
+        )
+        reward = torch.exp(
+            (torch.log(qualities.clamp_min(1e-4)) * exponents).sum(dim=-1)
+        )
+        details = {
+            "proxy_v3_safety_quality": safety_quality,
+            "proxy_v3_collision_quality": collision_quality,
+            "proxy_v3_progress_quality": progress_quality,
+            "proxy_v3_route_quality": route_quality,
+            "proxy_v3_comfort_quality": comfort_quality,
+            "proxy_v3_follow_quality": follow_quality,
+            "proxy_v3_collision_cost": collision_cost,
+            "proxy_v3_backward_cost": backward_cost,
+        }
+        return reward, details
+
     @torch.no_grad()
     def __call__(
         self,
@@ -2034,6 +2377,26 @@ class NuPlanTensorRewardScorer:
         lane_reward, lane_mask = self._lane_reward(
             trajectories, lane_source, ego_future
         )
+        drivable_area_compliance, drivable_area_min_clearance = (
+            self._drivable_area_compliance(trajectories, lanes)
+        )
+        # lane vector缓存可能在换道、路口或查询范围边缘无法完整覆盖专家
+        # 轨迹。此时不能把“地图表示不完整”当作候选越界，否则整组 RL
+        # 样本都会被错误硬门；仅在专家本身也能被当前 lane corridor 覆盖
+        # 时启用候选级 drivable-area 门。
+        drivable_area_gate_active = torch.ones_like(
+            drivable_area_compliance, dtype=torch.bool
+        )
+        if self.config.safety_gate_require_drivable_area and ego_future is not None:
+            expert_compliance, _ = self._drivable_area_compliance(
+                ego_future[:, None], lanes
+            )
+            drivable_area_gate_active = expert_compliance.expand_as(
+                drivable_area_compliance
+            )
+            drivable_area_compliance = drivable_area_compliance | (
+                ~drivable_area_gate_active
+            )
 
         # 旧指标主要用于 reward hacking/运动退化诊断；progress guard 只有在
         # 显式设置非零权重时才作为 NuPlan 小数据适配加入论文三项奖励。
@@ -2054,11 +2417,61 @@ class NuPlanTensorRewardScorer:
             + cfg.lane_weight * lane_reward
             + cfg.progress_guard_weight * progress_guard_reward
         )
+        route_cost = self._route_cost(trajectories, route_lanes)
+        comfort_cost = self._comfort_cost(trajectories, ego_current_state)
+        collision_cost, no_collision = self._collision_cost(
+            trajectories,
+            neighbors_future,
+            neighbor_mask,
+            static_objects,
+            neighbor_agents_past,
+        )
+        if cfg.objective_mode == "nuplan_aligned":
+            rewards, aligned_details = self._nuplan_aligned_reward(
+                risk["risk_reward"],
+                no_collision,
+                progress_guard_reward,
+                lane_reward,
+                follow_reward,
+                comfort_cost,
+            )
+        elif cfg.objective_mode == "nuplan_score_proxy_v2":
+            rewards, aligned_details = self._nuplan_score_proxy_v2_reward(
+                risk["risk_reward"],
+                no_collision,
+                progress_guard_reward,
+                route_cost,
+                follow_reward,
+                comfort_cost,
+                backward_cost,
+                collision_cost,
+            )
+        elif cfg.objective_mode == "nuplan_score_proxy_v3":
+            rewards, aligned_details = self._nuplan_score_proxy_v3_reward(
+                risk["risk_reward"],
+                no_collision,
+                progress_guard_reward,
+                route_cost,
+                follow_reward,
+                comfort_cost,
+                backward_cost,
+                collision_cost,
+            )
+        elif cfg.objective_mode == "legacy":
+            rewards = base_rewards
+            aligned_details = {}
+        else:
+            raise ValueError(
+                f"Unsupported reward objective_mode: {cfg.objective_mode!r}; "
+                "expected 'legacy', 'nuplan_aligned', 'nuplan_score_proxy_v2' "
+                "or 'nuplan_score_proxy_v3'"
+            )
         rewards, safety_gate_eligible, safety_gate_has_eligible = (
             self._apply_safety_gate(
-                base_rewards,
+                rewards,
                 risk["risk_reward"],
                 risk["min_ttc_seconds"],
+                drivable_area_compliance,
             )
         )
         if self.config.safety_gate_min_ttc_seconds > 0:
@@ -2070,16 +2483,6 @@ class NuPlanTensorRewardScorer:
                 risk["min_ttc_seconds"], dtype=torch.bool
             )
 
-        route_cost = self._route_cost(trajectories, route_lanes)
-        comfort_cost = self._comfort_cost(trajectories, ego_current_state)
-        collision_cost, no_collision = self._collision_cost(
-            trajectories,
-            neighbors_future,
-            neighbor_mask,
-            static_objects,
-            neighbor_agents_past,
-        )
-
         details = {
             "reward": rewards,
             "base_reward": base_rewards,
@@ -2087,6 +2490,14 @@ class NuPlanTensorRewardScorer:
             "safety_gate_eligible": safety_gate_eligible.to(rewards.dtype),
             "safety_gate_ttc_eligible": safety_gate_ttc_eligible.to(rewards.dtype),
             "safety_gate_has_eligible": safety_gate_has_eligible.to(rewards.dtype),
+            "safety_gate_drivable_area_eligible": drivable_area_compliance.to(
+                rewards.dtype
+            ),
+            "drivable_area_compliance": drivable_area_compliance.to(rewards.dtype),
+            "drivable_area_gate_active": drivable_area_gate_active.to(
+                rewards.dtype
+            ),
+            "drivable_area_min_clearance": drivable_area_min_clearance,
             "follow_reward": follow_reward,
             "leader_fraction": leader_fraction,
             "lane_reward": lane_reward,
@@ -2098,5 +2509,6 @@ class NuPlanTensorRewardScorer:
             "route_cost": route_cost,
             "comfort_cost": comfort_cost,
             "backward_cost": backward_cost,
+            **aligned_details,
         }
         return rewards, details

@@ -65,6 +65,14 @@ def summarize_run(root):
     scenarios = metrics[metrics["log_name"].notna()].copy()
     runner = pd.read_parquet(runner_path)
 
+    # 中文注释：正常运行时 runner 与指标文件一一对应；断点恢复时，旧进程已经
+    # 写出的指标文件仍可精确用于规划得分，但中断前的 runner 耗时记录无法恢复。
+    # 因此得分按全部指标场景统计，耗时均值只在 runner 覆盖完整时才对外报告。
+    runner_succeeded = int(runner["succeeded"].sum())
+    runner_failed = int((~runner["succeeded"]).sum())
+    metric_succeeded = len(scenarios)
+    runner_report_complete = len(runner) == len(scenarios)
+
     scenario_records = []
     for _, row in scenarios.sort_values("scenario").iterrows():
         record = {
@@ -85,18 +93,25 @@ def summarize_run(root):
     means = {}
     for column in METRIC_COLUMNS:
         means[column] = native_number(pd.to_numeric(scenarios[column]).mean())
-    means["trajectory_runtime_mean_s"] = native_number(
-        pd.to_numeric(runner["compute_trajectory_runtimes_mean"]).mean()
+    means["trajectory_runtime_mean_s"] = (
+        native_number(pd.to_numeric(runner["compute_trajectory_runtimes_mean"]).mean())
+        if runner_report_complete
+        else None
     )
-    means["simulation_duration_s"] = native_number(
-        pd.to_numeric(runner["duration"]).mean()
+    means["simulation_duration_s"] = (
+        native_number(pd.to_numeric(runner["duration"]).mean())
+        if runner_report_complete
+        else None
     )
 
     return {
         "run_dir": str(root),
         "scenario_count": len(scenarios),
-        "successful_simulations": int(runner["succeeded"].sum()),
-        "failed_simulations": int((~runner["succeeded"]).sum()),
+        "successful_simulations": max(metric_succeeded, runner_succeeded),
+        "failed_simulations": runner_failed,
+        "runner_report_count": len(runner),
+        "runner_report_complete": runner_report_complete,
+        "metric_only_recovered_scenarios": max(0, metric_succeeded - len(runner)),
         "means": means,
         "scenarios": scenario_records,
     }

@@ -86,10 +86,20 @@ def _score_npz(path: Path, scorer: NuPlanTensorRewardScorer) -> dict:
         ego_current_state=ego_current_state,
     )
 
-    values = {
-        key: {name: float(value[0, idx]) for idx, name in enumerate(CANDIDATE_NAMES)}
-        for key, value in details.items()
-    }
+    values = {}
+    for key, value in details.items():
+        # 某些地图诊断量在没有 lane cache 时只有 [B,1]；它们不是候选级
+        # 指标，不能按 6 条候选轨迹索引。候选级 [B,G] 指标才进入排序报告。
+        if not isinstance(value, torch.Tensor) or value.ndim < 2:
+            continue
+        if value.shape[1] == 1 and len(CANDIDATE_NAMES) > 1:
+            value = value.expand(-1, len(CANDIDATE_NAMES))
+        if value.shape[1] != len(CANDIDATE_NAMES):
+            continue
+        values[key] = {
+            name: float(value[0, idx])
+            for idx, name in enumerate(CANDIDATE_NAMES)
+        }
     # 近乎静止的专家轨迹可能对应红灯、拥堵或停车场景，不应强制要求其
     # 优于停车，也无法用坐标取反构造有意义的逆行对照。
     moving_scene = bool(torch.linalg.vector_norm(candidates[0, -1, :2]) >= 1.0)
@@ -134,12 +144,25 @@ def main() -> None:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--max-scenes", default=100, type=int)
     parser.add_argument("--minimum-pass-rate", default=0.8, type=float)
+    parser.add_argument(
+        "--objective-mode",
+        default="legacy",
+        choices=[
+            "legacy",
+            "nuplan_aligned",
+            "nuplan_score_proxy_v2",
+            "nuplan_score_proxy_v3",
+        ],
+        help="验证旧加性 reward 或新的 NuPlan 闭环对齐 reward",
+    )
     parser.add_argument("--strict", action="store_true")
     args = parser.parse_args()
 
     names: List[str] = json.loads(args.manifest.read_text(encoding="utf-8"))
     names = names[: args.max_scenes]
-    scorer = NuPlanTensorRewardScorer(NuPlanRewardConfig())
+    scorer = NuPlanTensorRewardScorer(
+        NuPlanRewardConfig(objective_mode=args.objective_mode)
+    )
     scene_results = [_score_npz(args.cache_dir / name, scorer) for name in names]
 
     check_values: Dict[str, List[bool]] = {}

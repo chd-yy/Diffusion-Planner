@@ -5,7 +5,7 @@
 #
 # Tuple：
 # 表示函数返回由多个对象组成的固定结构元组。
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 
 # PyTorch：
 # 用于张量计算、随机采样、自动求导以及扩散训练。
@@ -250,14 +250,49 @@ def waypoint_to_model_action(trajectories: torch.Tensor) -> torch.Tensor:
 # ->
 # 对 reward 方差达到阈值的有效组，低于组内平均水平的轨迹仍参与训练，
 # 但损失权重更小；低方差组整体跳过 rollout 自蒸馏。
+def _masked_group_statistics(
+    rewards: torch.Tensor,
+    candidate_mask: Optional[torch.Tensor] = None,
+) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    """计算候选掩码内的组均值/标准差，并返回布尔掩码与有效数量。"""
+    if candidate_mask is None:
+        mask = torch.ones_like(rewards, dtype=torch.bool)
+    else:
+        if candidate_mask.shape != rewards.shape:
+            raise ValueError("candidate_mask must have the same shape as rewards")
+        mask = candidate_mask.to(device=rewards.device, dtype=torch.bool)
+
+    counts = mask.sum(dim=1, keepdim=True)
+    denominator = counts.clamp_min(1).to(rewards.dtype)
+    masked_rewards = torch.where(mask, rewards, torch.zeros_like(rewards))
+    mean = masked_rewards.sum(dim=1, keepdim=True) / denominator
+    centered = torch.where(mask, rewards - mean, torch.zeros_like(rewards))
+    variance = centered.square().sum(dim=1, keepdim=True) / denominator
+    std = variance.sqrt()
+    return mask, counts, mean, std
+
+
 def group_advantage_weights(
     rewards: torch.Tensor,
     temperature: float = 1.0,
     clip: float = 5.0,
     min_reward_std: float = 0.01,
     normalize_weights: bool = True,
+    weighting_mode: str = "exp_advantage",
+    candidate_mask: Optional[torch.Tensor] = None,
+    reference_rewards: Optional[torch.Tensor] = None,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
-    """生成稳定的组内权重；低方差组返回全零权重并跳过自蒸馏。"""
+    """生成组内权重；低方差组返回全零权重并跳过自蒸馏。
+
+    ``softmax_positive`` 是保守更新目标：所有样本权重均为正，
+    只通过相对优势改变拟合强度，不会像 ``w-1`` 那样产生负的回归损失。
+
+    ``positive_advantage`` 默认是组内自蒸馏目标：只有高于组内平均 reward
+    的候选获得权重。传入 ``reference_rewards`` 后，baseline 改为冻结参考
+    策略（通常是 B Epoch10）在同一场景上的 reward；此时只有真正超过参考
+    策略的候选获得正权重，避免把“比同组平均好、但比 B10 差”的候选当作
+    改进目标。
+    """
 
     # rewards 必须是二维矩阵：
     #
@@ -267,8 +302,25 @@ def group_advantage_weights(
     # 或 reward scorer 的数据结构不符合预期。
     if rewards.ndim != 2:
         raise ValueError("rewards must have shape [B, G]")
+    if reference_rewards is not None:
+        if reference_rewards.ndim == 1:
+            reference_rewards = reference_rewards[:, None]
+        if reference_rewards.shape != (rewards.shape[0], 1):
+            raise ValueError("reference_rewards must have shape [B] or [B, 1]")
+        reference_rewards = reference_rewards.to(
+            device=rewards.device, dtype=rewards.dtype
+        )
     if min_reward_std < 0:
         raise ValueError("min_reward_std must be non-negative")
+    if weighting_mode not in {
+        "exp_advantage",
+        "softmax_positive",
+        "positive_advantage",
+    }:
+        raise ValueError(
+            "weighting_mode must be 'exp_advantage', 'softmax_positive' "
+            "or 'positive_advantage'"
+        )
 
     # ------------------------------------------------------------------
     # 对每个场景的 G 条轨迹计算平均奖励
@@ -294,7 +346,9 @@ def group_advantage_weights(
     # =
     # (1/G)sum_g rewards[b,g]
     # 保存每个场景内部 G 条候选轨迹的平均奖励。
-    mean = rewards.mean(dim=1, keepdim=True)
+    mask, candidate_counts, mean, std = _masked_group_statistics(
+        rewards, candidate_mask
+    )
 
     # ------------------------------------------------------------------
     # 计算同一场景内部奖励的标准差
@@ -320,7 +374,8 @@ def group_advantage_weights(
     #
     # 在这里 G 条候选轨迹本身就是当前组内全部样本，
     # 因此使用总体标准差。
-    std = rewards.std(dim=1, keepdim=True, unbiased=False)
+    # std 已由 _masked_group_statistics 仅在合格候选内计算。整组无安全
+    # 候选或只有一个安全候选时，不能定义可靠的组内相对优势。
 
     # ------------------------------------------------------------------
     # 计算组内标准化优势
@@ -358,9 +413,19 @@ def group_advantage_weights(
     #
     # 所以所有 advantage 都是 0。
     # advantages  [B,G],advantages[b,g]表示第 b 个场景中，第 g 条候选轨迹相对于该场景候选平均奖励的优势
-    active_groups = std >= min_reward_std
-    advantages = (rewards - mean) / (std + 1e-6)
-    advantages = torch.where(active_groups, advantages, torch.zeros_like(advantages))
+    active_groups = (candidate_counts >= 2) & (std >= min_reward_std)
+    # 默认 baseline 是组内均值；显式参考 reward 模式下，baseline 是冻结
+    # B Epoch10 的 reward。std 仍使用候选组内部方差，只负责判断当前组是否
+    # 具有足够的候选区分度以及把差值归一化到相近尺度。
+    advantage_baseline = (
+        reference_rewards if reference_rewards is not None else mean
+    )
+    advantages = (rewards - advantage_baseline) / (std + 1e-6)
+    advantages = torch.where(
+        active_groups & mask,
+        advantages,
+        torch.zeros_like(advantages),
+    )
 
     # 对极端 advantage 进行裁剪：
     #
@@ -419,16 +484,48 @@ def group_advantage_weights(
     #
     # 所有样本权重越接近 1。
     # 它把候选轨迹的相对奖励转换为“模型应该多大程度拟合该轨迹”
-    # 【HDP-NAVSIM 主线】所有有效候选都参与训练，组内优势通过指数函数
-    # 转换为相对权重；高 reward 候选权重大，低 reward 候选权重小。
-    weights = torch.exp(temperature * advantages)
+    if weighting_mode == "exp_advantage":
+        # 【兼容旧实验】指数优势权重；高 reward 候选权重大，低 reward 候选
+        # 候选权重小。
+        weights = torch.exp(temperature * advantages) * mask.to(rewards.dtype)
+    elif weighting_mode == "softmax_positive":
+        # 【NuPlan 稳定更新】正的 softmax 权重。乘以 G 后，组内权重均值为
+        # 1，便于与旧学习率保持同量级；温度越小，越偏向高优势候选。
+        temperature = max(float(temperature), 1e-3)
+        logits = torch.where(
+            mask,
+            advantages / temperature,
+            torch.full_like(advantages, float("-inf")),
+        )
+        # 全 False 组会产生 softmax(NaN)；先将该组 logits 置 0，随后由
+        # active_groups 把权重整体清零。
+        logits = torch.where(
+            (candidate_counts > 0).expand_as(logits),
+            logits,
+            torch.zeros_like(logits),
+        )
+        weights = torch.softmax(logits, dim=1)
+        weights = weights * candidate_counts.to(rewards.dtype)
+        weights = weights * mask.to(rewards.dtype)
+    else:
+        # 【NuPlan v3 稳定更新】只保留正优势候选，去掉所有候选共同携带
+        # 的常数监督分量。若 reward 差异很小，外层 active_groups 会先将
+        # 整组清零；若 reward 差异达到门槛，则只有 A>0 的候选参与拟合。
+        weights = torch.relu(advantages) * mask.to(rewards.dtype)
 
     # 有效组按组归一化到均值 1，避免 exp 的 Jensen 偏差改变有效学习率。
     if normalize_weights:
-        weights = weights / weights.mean(dim=1, keepdim=True).clamp_min(1e-12)
+        eligible_mean = weights.sum(dim=1, keepdim=True) / candidate_counts.clamp_min(
+            1
+        ).to(rewards.dtype)
+        weights = weights / eligible_mean.clamp_min(1e-12)
 
     # 低方差组的候选差异主要是数值/采样噪声，不再用 rollout 轨迹自蒸馏。
-    weights = torch.where(active_groups, weights, torch.zeros_like(weights))
+    weights = torch.where(
+        active_groups & mask,
+        weights,
+        torch.zeros_like(weights),
+    )
 
     # 返回：
     #
@@ -512,6 +609,10 @@ def reward_weighted_diffusion_loss(
     min_reward_std: float = 0.01,
     normalize_weights: bool = True,
     center_reward_weights: bool = False,
+    weighting_mode: str = "exp_advantage",
+    candidate_mask: Optional[torch.Tensor] = None,
+    reference_model=None,
+    reference_rewards: Optional[torch.Tensor] = None,
     eps: float = 1e-3,
 ):
     """计算 NuPlan 分组奖励加权的 HDP 扩散损失。
@@ -519,6 +620,7 @@ def reward_weighted_diffusion_loss(
     Args:
         trajectories: [B, G, T, 4] 的物理空间候选轨迹。
         rewards: [B, G] 的绝对场景奖励。
+        reference_rewards: 可选的 [B] 或 [B, 1] 冻结参考策略 reward。
     """
 
     # 从轨迹张量读取四个维度：
@@ -876,6 +978,25 @@ def reward_weighted_diffusion_loss(
         x_t,
     )
 
+    # 可选的 reference-policy 保守约束：reference_model 是训练开始前
+    # 从 B Epoch 10 checkpoint 复制的冻结模型。两者使用完全相同的 x_t、t
+    # 和 supervision space，因而该项只度量当前策略相对起点策略的漂移。
+    # 不启用时保持旧 RL loss 的计算图和数值完全不变。
+    reference_anchor_loss = prediction.new_zeros(())
+    if reference_model is not None:
+        reference_model.eval()
+        with torch.no_grad():
+            _, reference_output = reference_model(repeated_inputs)
+            reference_prediction = sde.transform(
+                f"{model_type}->{supervision_type}",
+                reference_output["score"],
+                t,
+                x_t,
+            )
+        reference_anchor_loss = torch.mean(
+            (prediction - reference_prediction) ** 2
+        )
+
     # ------------------------------------------------------------------
     # 根据 supervision_type 计算扩散监督损失
     # ------------------------------------------------------------------
@@ -1028,19 +1149,27 @@ def reward_weighted_diffusion_loss(
         clip=advantage_clip,
         min_reward_std=min_reward_std,
         normalize_weights=normalize_weights,
+        weighting_mode=weighting_mode,
+        candidate_mask=candidate_mask,
+        reference_rewards=reference_rewards,
     )
 
     # 【NuPlan 小数据适配，非论文原式】论文直接使用正权重 w。在有限 replay
     # 上，w 的常数 1 分量会产生明显的无权自蒸馏漂移；减去该 baseline 后，
     # beta=0 时梯度严格为 0，只保留 reward 与回归梯度的协方差信号。
     # 低方差无效组仍保持 0，避免 0-1 变成负权重。
-    reward_std = rewards.std(dim=1, unbiased=False)
-    active_groups = reward_std >= min_reward_std
+    candidate_mask, candidate_counts, _, reward_std_column = (
+        _masked_group_statistics(rewards, candidate_mask)
+    )
+    reward_std = reward_std_column.squeeze(1)
+    active_groups = (candidate_counts.squeeze(1) >= 2) & (
+        reward_std >= min_reward_std
+    )
     regression_weights = weights
-    if center_reward_weights:
+    if center_reward_weights and weighting_mode == "exp_advantage":
         regression_weights = torch.where(
-            active_groups[:, None],
-            weights - 1.0,
+            active_groups[:, None] & candidate_mask,
+            weights - candidate_mask.to(weights.dtype),
             torch.zeros_like(weights),
         )
 
@@ -1295,9 +1424,8 @@ def reward_weighted_diffusion_loss(
     # ------------------------------------------------------------------
     # 记录训练监控指标
     # ------------------------------------------------------------------
-    active_candidate_count = (
-        active_groups.sum() * group_size
-    ).clamp_min(1)
+    active_candidate_mask = active_groups[:, None] & candidate_mask
+    active_candidate_count = active_candidate_mask.sum().clamp_min(1)
 
     metrics = {
 
@@ -1346,6 +1474,14 @@ def reward_weighted_diffusion_loss(
         # 表示每个场景中最差候选轨迹奖励的平均水平。
         "reward_min": rewards.min(dim=1).values.mean(),
 
+        # 显式 reference-relative 模式下，记录冻结 B Epoch10 的 reward；
+        # 没有 reference 时用零填充，保持旧实验日志结构稳定。
+        "reference_reward_mean": (
+            reference_rewards.to(rewards).mean()
+            if reference_rewards is not None
+            else rewards.new_zeros(())
+        ),
+
         # 所有组内标准化 advantage 的平均值。
         #
         # 理论上标准化前的组内 advantage 均值接近 0。
@@ -1354,6 +1490,19 @@ def reward_weighted_diffusion_loss(
         # 最终 advantage_mean 不一定严格等于 0。
         "advantage_mean": advantages.mean(),
 
+        # 参考策略相对优势的平均值及正优势比例。正比例越高，表示当前
+        # rollout 候选中有更多轨迹真正超过 B Epoch10，而不是仅超过组均值。
+        "reference_relative_advantage_mean": (
+            advantages.mean()
+            if reference_rewards is not None
+            else rewards.new_zeros(())
+        ),
+        "reference_positive_fraction": (
+            ((advantages > 0) & candidate_mask).float().mean()
+            if reference_rewards is not None
+            else rewards.new_zeros(())
+        ),
+
         # 所有场景、所有候选的平均权重。normalize_weights=True 时，有效组
         # 内部均值为 1、低方差组为 0，所以该值近似等于 active_group_fraction。
         "weight_mean": weights.mean(),
@@ -1361,8 +1510,26 @@ def reward_weighted_diffusion_loss(
 
         # v2 稳定性门控：监控有多少场景具有足够大的组内 reward 差异。
         "reward_std_mean": reward_std.mean(),
+        # 记录组内 reward 标准差分布，判断候选轨迹是否真正产生了足够的
+        # reward 区分度；mean 单独使用时容易掩盖少数高方差/低方差场景。
+        "reward_std_p10": torch.quantile(reward_std, 0.10),
+        "reward_std_p50": torch.quantile(reward_std, 0.50),
+        "reward_std_p90": torch.quantile(reward_std, 0.90),
         "active_group_fraction": active_groups.float().mean(),
         "active_weight_mean": weights.sum() / active_candidate_count,
+        # 保守安全更新诊断：候选通过硬门的比例，以及整组无安全候选而被
+        # rollout loss 跳过的比例。未传 mask 时分别恒为 1 和 0。
+        "eligible_candidate_fraction": candidate_mask.float().mean(),
+        "eligible_candidates_per_group": candidate_counts.float().mean(),
+        "no_eligible_group_fraction": (candidate_counts == 0).float().mean(),
+        "positive_weighting_mode": torch.tensor(
+            1.0
+            if weighting_mode in {"softmax_positive", "positive_advantage"}
+            else 0.0,
+            device=rewards.device,
+            dtype=rewards.dtype,
+        ),
+        "reference_anchor_loss": reference_anchor_loss,
     }
 
     # 返回：

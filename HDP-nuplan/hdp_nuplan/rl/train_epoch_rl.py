@@ -83,15 +83,24 @@ def combine_update_losses(
     expert_anchor_loss,
     rollout_loss_weight,
     expert_anchor_weight,
+    reference_anchor_loss=None,
+    reference_anchor_weight=0.0,
 ):
-    """按显式权重组合 rollout 自蒸馏损失与专家监督损失。"""
+    """按显式权重组合 rollout、expert 和 reference 三类损失。"""
 
-    if rollout_loss_weight < 0 or expert_anchor_weight < 0:
+    if (
+        rollout_loss_weight < 0
+        or expert_anchor_weight < 0
+        or reference_anchor_weight < 0
+    ):
         raise ValueError("update loss weights must be non-negative")
-    return (
+    total = (
         rollout_loss_weight * rl_loss
         + expert_anchor_weight * expert_anchor_loss
     )
+    if reference_anchor_loss is not None:
+        total = total + reference_anchor_weight * reference_anchor_loss
+    return total
 
 
 # 对多个 batch 记录的指标求平均。
@@ -365,6 +374,7 @@ def rollout_epoch(
     args,
     device,
     epoch=0,
+    reference_model=None,
 ):
     """对每个 NuPlan 场景分组采样并写入 Replay Buffer。"""
 
@@ -496,6 +506,35 @@ def rollout_epoch(
             lanes=raw_inputs["lanes"],
         )
 
+        # 可选的 reference-relative reward：冻结参考策略通常是 B Epoch10。
+        # 它只生成每个场景一条确定性候选，不写入 replay；其 reward 作为
+        # 当前 G 条候选的 baseline，update 时只学习真正超过参考策略的候选。
+        reference_rewards = None
+        if getattr(args, "rl_relative_to_reference", False):
+            if reference_model is None:
+                raise RuntimeError(
+                    "rl_relative_to_reference=true requires reference_model"
+                )
+            reference_trajectories = reference_model.sample(
+                model_inputs,
+                num_samples=1,
+                diffusion_steps=args.rl_rollout_steps,
+                noise_scale=args.rl_reference_noise_scale,
+            )
+            reference_rewards, _ = reward_scorer(
+                trajectories=reference_trajectories,
+                neighbors_future=neighbors_future,
+                neighbor_mask=neighbor_mask,
+                route_lanes=raw_inputs["route_lanes"],
+                static_objects=raw_inputs["static_objects"],
+                ego_future=ego_future,
+                neighbor_agents_past=raw_inputs["neighbor_agents_past"],
+                ego_current_state=raw_inputs["ego_current_state"],
+                lanes=raw_inputs["lanes"],
+            )
+            # reward scorer 返回 [B,1]；ReplayItem 每个场景保存一个标量。
+            reference_rewards = reference_rewards.squeeze(1)
+
         # 按场景把候选轨迹组和奖励组写入 Replay Buffer。
         #
         # zip 每次取出：
@@ -508,10 +547,35 @@ def rollout_epoch(
         #
         # scene_rewards：
         # 当前场景 K 条候选轨迹对应的 K 个奖励。
-        for scene_name, scene_trajectories, scene_rewards in zip(
+        # 把候选级安全资格和轨迹、奖励一起存入 Replay Buffer。旧实现只保存
+        # 门控后的标量 reward，更新阶段无法区分“安全候选”和“被硬门降分的
+        # 不安全候选”，因而 centered 权重仍可能对不安全候选产生负回归梯度。
+        safety_candidate_masks = details["safety_gate_eligible"].to(torch.bool)
+        candidate_masks = safety_candidate_masks
+        if getattr(args, "rl_filter_progress_guard_candidates", False):
+            # progress_guard_reward 是候选相对专家路线进度的 [0, 1] 质量分。
+            # 这里取 safety mask 与 progress mask 的交集，避免把“没有碰撞但
+            # 明显停滞/落后”的候选作为 rollout 目标。整组无候选时，update
+            # 阶段会跳过该组 rollout loss，但仍保留 expert anchor。
+            progress_guard_reward = details["progress_guard_reward"]
+            progress_candidate_masks = progress_guard_reward >= float(
+                getattr(args, "rl_min_progress_guard_reward", 0.9)
+            )
+            candidate_masks = safety_candidate_masks & progress_candidate_masks
+        for (
+            scene_name,
+            scene_trajectories,
+            scene_rewards,
+            scene_candidate_mask,
+            scene_reference_reward,
+        ) in zip(
             scene_names,
             trajectories,
             rewards,
+            candidate_masks,
+            reference_rewards
+            if reference_rewards is not None
+            else [None] * len(scene_names),
         ):
             # Replay Buffer 保存：
             #
@@ -519,7 +583,13 @@ def rollout_epoch(
             #
             # 后续 update 阶段会根据 scene_name 重新加载场景输入，
             # 再用 scene_trajectories 和 scene_rewards 训练模型。
-            replay_buffer.put(scene_name, scene_trajectories, scene_rewards)
+            replay_buffer.put(
+                scene_name,
+                scene_trajectories,
+                scene_rewards,
+                candidate_mask=scene_candidate_mask,
+                reference_reward=scene_reference_reward,
+            )
 
         # 对当前 batch 的每个奖励分项取平均。
         #
@@ -544,6 +614,13 @@ def rollout_epoch(
             f"reward/{key}": value.mean().item()
             for key, value in details.items()
         }
+        if getattr(args, "rl_filter_progress_guard_candidates", False):
+            record["reward/progress_guard_eligible"] = (
+                candidate_masks.float().mean().item()
+            )
+            record["reward/progress_guard_has_eligible"] = (
+                candidate_masks.any(dim=1).float().mean().item()
+            )
 
         # 记录处理完当前 batch 后 Replay Buffer 的即时容量。
         record["buffer_size"] = len(replay_buffer)
@@ -627,8 +704,31 @@ def _load_replay_batch(dataset, replay_items):
         dim=0,
     )
 
-    # 返回重新加载的场景 batch、候选轨迹和奖励。
-    return batch, trajectories, rewards
+    # 旧 ReplayItem 没有候选掩码；为兼容已有调用，将其视为全部候选可用。
+    candidate_masks = torch.stack(
+        [
+            item.candidate_mask
+            if item.candidate_mask is not None
+            else torch.ones_like(item.rewards, dtype=torch.bool)
+            for item in replay_items
+        ],
+        dim=0,
+    )
+
+    # 返回重新加载的场景 batch、候选轨迹、奖励和候选级安全资格。
+    reference_rewards = torch.stack(
+        [
+            item.reference_reward
+            if item.reference_reward is not None
+            else torch.tensor(float("nan"), dtype=item.rewards.dtype)
+            for item in replay_items
+        ],
+        dim=0,
+    )
+
+    # 返回参考策略 reward；旧 replay 条目用 NaN 标记，调用方会在显式
+    # reference-relative 模式下拒绝混用，避免静默退化为错误 baseline。
+    return batch, trajectories, rewards, candidate_masks, reference_rewards
 
 
 # 从 Replay Buffer 中采样数据，
@@ -641,6 +741,7 @@ def update_epoch(
     replay_buffer,
     args,
     device,
+    reference_model=None,
 ):
     """从 Replay Buffer 采样，执行 reward-weighted diffusion 更新。"""
 
@@ -706,7 +807,13 @@ def update_epoch(
 
         # 根据场景名称重新加载场景输入，
         # 并堆叠对应的候选轨迹和奖励。
-        replay_batch, trajectories, rewards = _load_replay_batch(
+        (
+            replay_batch,
+            trajectories,
+            rewards,
+            candidate_masks,
+            reference_rewards,
+        ) = _load_replay_batch(
             dataset,
             replay_items,
         )
@@ -735,6 +842,17 @@ def update_epoch(
 
         # 把候选轨迹奖励移动到当前训练设备。
         rewards = rewards.to(device)
+        reference_rewards = reference_rewards.to(device)
+
+        # 保守更新显式开启时，只允许通过 rollout 安全门的候选成为回归目标。
+        # 整组无合格候选时，rollout loss 对该场景为 0，后面的专家 anchor
+        # 仍正常训练，避免“在一组不安全动作中挑一个相对没那么差的动作”。
+        candidate_masks = candidate_masks.to(device)
+        rollout_candidate_mask = (
+            candidate_masks
+            if args.rl_filter_safety_eligible_candidates
+            else None
+        )
 
         # 清空上一轮反向传播留下的梯度。
         #
@@ -837,6 +955,25 @@ def update_epoch(
 
             # 可选 control-variate：只保留 reward-dependent 梯度。
             center_reward_weights=args.rl_center_reward_weights,
+
+            # 新的 NuPlan 稳定目标使用正的 softmax advantage 权重；旧实验
+            # 默认仍使用指数权重，便于复现实验和做消融。
+            weighting_mode=args.rl_weighting_mode,
+
+            # 将候选安全资格传入损失；None 保持旧实验完全兼容。
+            candidate_mask=rollout_candidate_mask,
+
+            # 可选的 B Epoch 10 reference policy 约束；默认 None 保持旧实验
+            # 数值兼容，新 v7 实验通过显式权重开启。
+            reference_model=reference_model,
+
+            # 只有显式开启 reference-relative 模式时才把冻结策略 reward
+            # 传给 advantage；旧实验保持组内均值 baseline。
+            reference_rewards=(
+                reference_rewards
+                if args.rl_relative_to_reference
+                else None
+            ),
         )
 
         # 使用同一批场景的真实 ego future 作为监督 anchor，抑制仅拟合旧策略
@@ -866,12 +1003,20 @@ def update_epoch(
             expert_anchor_loss,
             args.rl_rollout_loss_weight,
             args.rl_expert_anchor_weight,
+            metrics.get("reference_anchor_loss"),
+            args.rl_reference_anchor_weight,
         )
         metrics["rl_loss"] = rl_loss
         metrics["expert_anchor_loss"] = expert_anchor_loss
         metrics["weighted_rl_loss"] = args.rl_rollout_loss_weight * rl_loss
         metrics["weighted_expert_anchor_loss"] = (
             args.rl_expert_anchor_weight * expert_anchor_loss
+        )
+        metrics["reference_anchor_loss"] = metrics.get(
+            "reference_anchor_loss", total_loss.new_zeros(())
+        )
+        metrics["weighted_reference_anchor_loss"] = (
+            args.rl_reference_anchor_weight * metrics["reference_anchor_loss"]
         )
         metrics["loss"] = total_loss
 

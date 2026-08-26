@@ -64,4 +64,8 @@ ROOT="$OUT_ROOT/exp/simulation/closed_loop_nonreactive_agents"
     --run hdp_rl_seed42="$ROOT/rl-seed42-closed-loop200" \
     --run hdp_rl_seed2026="$ROOT/rl-seed2026-closed-loop200" \
     --output "$OUT_ROOT/b10_vs_rl_fixed200.json" >> "$LOG" 2>&1
-log "Fixed 200 paired evaluation completed: $OUT_ROOT/b10_vs_rl_fixed200.json"
+"$PYTHON_BIN" "$PROJECT_ROOT/HDP-nuplan/scripts/analyze_fixed200_paired.py" \
+    --summary "$OUT_ROOT/b10_vs_rl_fixed200.json" \
+    --output "$OUT_ROOT/b10_vs_rl_fixed200_analysis.json" \
+    --markdown "$OUT_ROOT/b10_vs_rl_fixed200_analysis.md" >> "$LOG" 2>&1
+log "Fixed 200 paired evaluation and analysis completed: $OUT_ROOT/b10_vs_rl_fixed200_analysis.md"

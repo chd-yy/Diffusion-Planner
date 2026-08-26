@@ -108,6 +108,57 @@ class RlComponentTest(unittest.TestCase):
         )
         torch.testing.assert_close(rewards, expected)
 
+    def test_nuplan_aligned_reward_is_bounded_and_collision_first(self):
+        scorer = NuPlanTensorRewardScorer(
+            NuPlanRewardConfig(
+                objective_mode="nuplan_aligned",
+                comfort_weight=0.0,
+                safety_gate_min_ttc_seconds=0.0,
+            )
+        )
+        rewards, details = scorer(
+            self.trajectories,
+            self.neighbors,
+            self.neighbor_mask,
+            self.route,
+            static_objects=torch.zeros(self.batch_size, 2, 10),
+            ego_future=self.trajectories[:, 1],
+        )
+
+        self.assertTrue(torch.all((rewards >= 0) & (rewards <= 1)))
+        self.assertLess(rewards[0, 0], rewards[0, 1])
+        for key in (
+            "aligned_safety_quality",
+            "aligned_progress_quality",
+            "aligned_route_quality",
+            "aligned_comfort_quality",
+            "aligned_follow_quality",
+        ):
+            self.assertIn(key, details)
+
+    def test_nuplan_proxy_v3_uses_continuous_collision_cost(self):
+        scorer = NuPlanTensorRewardScorer(
+            NuPlanRewardConfig(objective_mode="nuplan_score_proxy_v3")
+        )
+        shape = (1, 2)
+        common = torch.full(shape, 0.9)
+        rewards, details = scorer._nuplan_score_proxy_v3_reward(
+            risk_reward=common,
+            no_collision=torch.ones(shape),
+            progress_guard_reward=common,
+            route_cost=torch.full(shape, 0.1),
+            follow_reward=common,
+            comfort_cost=torch.full(shape, 0.1),
+            backward_cost=torch.zeros(shape),
+            collision_cost=torch.tensor([[0.0, 0.5]]),
+        )
+
+        self.assertGreater(rewards[0, 0], rewards[0, 1])
+        torch.testing.assert_close(
+            details["proxy_v3_collision_quality"],
+            torch.tensor([[1.0, 0.5]]),
+        )
+
     def test_progress_guard_is_bounded_and_does_not_reward_overspeed(self):
         trajectories = torch.zeros(1, 3, 4, 4)
         trajectories[..., 2] = 1.0
@@ -270,6 +321,54 @@ class RlComponentTest(unittest.TestCase):
         self.assertGreater(lane_reward[0, 0], lane_reward[0, 1])
         torch.testing.assert_close(lane_mask, torch.ones_like(lane_mask))
 
+    def test_drivable_area_gate_rejects_candidate_outside_lane_corridor(self):
+        horizon = 6
+        x = torch.arange(horizon, dtype=torch.float32)
+        trajectories = torch.zeros(1, 2, horizon, 4)
+        trajectories[..., 0] = x
+        trajectories[..., 2] = 1.0
+        # 候选 0 在 lane 中心；候选 1 的中心偏到左边界外。
+        trajectories[0, 1, :, 1] = 1.0
+        lanes = torch.zeros(1, 1, horizon, 12)
+        lanes[..., 0] = x
+        lanes[..., 2] = 1.0
+        lanes[..., 5] = 1.75
+        lanes[..., 7] = -1.75
+
+        scorer = NuPlanTensorRewardScorer(
+            NuPlanRewardConfig(
+                safety_gate_require_drivable_area=True,
+                safety_gate_drivable_area_margin=0.1,
+            )
+        )
+        compliant, clearance = scorer._drivable_area_compliance(
+            trajectories, lanes
+        )
+
+        self.assertTrue(compliant[0, 0].item())
+        self.assertFalse(compliant[0, 1].item())
+        self.assertGreater(clearance[0, 0], clearance[0, 1])
+
+    def test_drivable_area_gate_has_priority_over_base_reward(self):
+        scorer = NuPlanTensorRewardScorer(
+            NuPlanRewardConfig(
+                safety_gate_require_drivable_area=True,
+                safety_gate_margin=1.0,
+            )
+        )
+        base_reward = torch.tensor([[10.0, 1.0]])
+        risk_reward = torch.ones_like(base_reward)
+        drivable = torch.tensor([[False, True]])
+
+        gated, eligible, has_eligible = scorer._apply_safety_gate(
+            base_reward, risk_reward, drivable_area_compliant=drivable
+        )
+
+        self.assertTrue(has_eligible.item())
+        self.assertFalse(eligible[0, 0].item())
+        self.assertTrue(eligible[0, 1].item())
+        self.assertLess(gated[0, 0], gated[0, 1])
+
     def test_paper_ema_value_is_interpreted_as_update_rate(self):
         model = torch.nn.Linear(1, 1, bias=False)
         model.weight.data.fill_(1.0)
@@ -366,10 +465,19 @@ class RlComponentTest(unittest.TestCase):
     def test_replay_buffer_round_trip(self):
         buffer = NuPlanReplayBuffer(max_size=2)
         rewards = torch.tensor([0.0, 1.0])
-        buffer.put("scene.npz", self.trajectories[0], rewards)
+        candidate_mask = torch.tensor([False, True])
+        buffer.put(
+            "scene.npz",
+            self.trajectories[0],
+            rewards,
+            candidate_mask=candidate_mask,
+            reference_reward=torch.tensor(0.25),
+        )
         item = buffer.sample(1)[0]
         self.assertEqual(item.scene_name, "scene.npz")
         self.assertEqual(tuple(item.trajectories.shape), (2, 20, 4))
+        torch.testing.assert_close(item.candidate_mask, candidate_mask)
+        self.assertAlmostEqual(item.reference_reward.item(), 0.25)
 
     def test_reward_weighted_loss_has_gradient(self):
         model = _DummyModel()
@@ -432,6 +540,113 @@ class RlComponentTest(unittest.TestCase):
         self.assertAlmostEqual(weights[1].mean().item(), 1.0, places=6)
         self.assertGreater(weights[1, -1], weights[1, 0])
 
+    def test_softmax_positive_weights_never_become_negative(self):
+        rewards = torch.tensor([[0.0, 0.5, 1.0]])
+        _, weights = group_advantage_weights(
+            rewards,
+            temperature=0.5,
+            min_reward_std=1e-6,
+            weighting_mode="softmax_positive",
+        )
+        self.assertTrue(torch.all(weights > 0))
+        self.assertAlmostEqual(weights.mean().item(), 1.0, places=6)
+        self.assertGreater(weights[0, -1], weights[0, 0])
+
+    def test_positive_advantage_weights_remove_constant_self_distillation(self):
+        rewards = torch.tensor([[0.0, 0.5, 1.0]])
+        advantages, weights = group_advantage_weights(
+            rewards,
+            min_reward_std=1e-6,
+            weighting_mode="positive_advantage",
+        )
+
+        self.assertTrue(torch.all(weights >= 0))
+        self.assertEqual(weights[0, 0].item(), 0.0)
+        self.assertEqual(weights[0, 1].item(), 0.0)
+        self.assertGreater(weights[0, 2].item(), 0.0)
+        self.assertAlmostEqual(weights.mean().item(), 1.0, places=6)
+        self.assertLess(advantages[0, 0], 0)
+
+    def test_reference_relative_positive_weights_require_beating_reference(self):
+        rewards = torch.tensor([[0.2, 0.5, 0.8, 1.0]])
+        reference_rewards = torch.tensor([0.75])
+        advantages, weights = group_advantage_weights(
+            rewards,
+            min_reward_std=1e-6,
+            weighting_mode="positive_advantage",
+            reference_rewards=reference_rewards,
+        )
+
+        # 0.8 和 1.0 超过冻结参考策略，0.2 和 0.5 即使其中 0.5 可能
+        # 高于某些候选，也不能作为正向改进目标。
+        self.assertEqual(weights[0, 0].item(), 0.0)
+        self.assertEqual(weights[0, 1].item(), 0.0)
+        self.assertGreater(weights[0, 2].item(), 0.0)
+        self.assertGreater(weights[0, 3].item(), weights[0, 2].item())
+        self.assertGreater(advantages[0, 2].item(), 0.0)
+
+    def test_safety_filtered_positive_weights_exclude_unsafe_candidates(self):
+        rewards = torch.tensor(
+            [
+                [100.0, 1.0, 2.0, 3.0],
+                [4.0, 3.0, 2.0, 1.0],
+            ]
+        )
+        candidate_mask = torch.tensor(
+            [
+                [False, True, True, True],
+                [False, False, False, False],
+            ]
+        )
+        advantages, weights = group_advantage_weights(
+            rewards,
+            temperature=0.5,
+            min_reward_std=1e-6,
+            weighting_mode="softmax_positive",
+            candidate_mask=candidate_mask,
+        )
+
+        # 即使不安全候选的原始 reward 极高，也必须完全排除。
+        self.assertEqual(weights[0, 0].item(), 0.0)
+        self.assertEqual(advantages[0, 0].item(), 0.0)
+        self.assertGreater(weights[0, 3], weights[0, 1])
+        self.assertAlmostEqual(weights[0, 1:].mean().item(), 1.0, places=6)
+        # 整组无安全候选时不从“相对没那么差”的轨迹学习。
+        torch.testing.assert_close(weights[1], torch.zeros(4))
+        torch.testing.assert_close(advantages[1], torch.zeros(4))
+
+    def test_progress_guard_mask_intersects_safety_mask(self):
+        safety_mask = torch.tensor([[True, True, False, False]])
+        progress_guard_reward = torch.tensor([[1.0, 0.82, 0.99, 0.95]])
+        candidate_mask = safety_mask & (progress_guard_reward >= 0.9)
+        torch.testing.assert_close(
+            candidate_mask,
+            torch.tensor([[True, False, False, False]]),
+        )
+
+    def test_no_safe_candidate_group_has_zero_rollout_gradient(self):
+        model = _DummyModel()
+        loss, metrics = reward_weighted_diffusion_loss(
+            model=model,
+            inputs={"condition": torch.zeros(self.batch_size, 3)},
+            trajectories=self.trajectories,
+            rewards=torch.tensor([[0.0, 1.0]]),
+            candidate_mask=torch.zeros(1, 2, dtype=torch.bool),
+            state_normalizer=_Normalizer(),
+            sde=VPSDE_linear(),
+            model_type="x_start",
+            supervision_type="x_start",
+            hybrid_loss_weight=0.01,
+            min_reward_std=1e-6,
+            weighting_mode="softmax_positive",
+        )
+        loss.backward()
+
+        torch.testing.assert_close(loss, torch.zeros_like(loss))
+        torch.testing.assert_close(model.scale.grad, torch.zeros_like(model.scale.grad))
+        self.assertEqual(metrics["no_eligible_group_fraction"].item(), 1.0)
+        self.assertEqual(metrics["eligible_candidate_fraction"].item(), 0.0)
+
     def test_navsim_trajectory_augmentation_uses_local_frame(self):
         trajectories = torch.zeros(1, 2, 3, 4)
         trajectories[0, 0, :, 2] = 1.0
@@ -463,6 +678,25 @@ class RlComponentTest(unittest.TestCase):
         self.assertEqual(total.item(), 2.0)
         self.assertEqual(rl_loss.grad.item(), 0.0)
         self.assertEqual(anchor_loss.grad.item(), 1.0)
+
+    def test_update_loss_weights_include_reference_anchor(self):
+        rl_loss = torch.tensor(3.0, requires_grad=True)
+        expert_loss = torch.tensor(2.0, requires_grad=True)
+        reference_loss = torch.tensor(4.0, requires_grad=True)
+        total = combine_update_losses(
+            rl_loss,
+            expert_loss,
+            1.0,
+            0.0,
+            reference_loss,
+            0.5,
+        )
+        total.backward()
+
+        self.assertEqual(total.item(), 5.0)
+        self.assertEqual(rl_loss.grad.item(), 1.0)
+        self.assertEqual(expert_loss.grad.item(), 0.0)
+        self.assertEqual(reference_loss.grad.item(), 0.5)
 
     def test_detached_integral_preserves_values_and_truncates_gradient(self):
         window_size = 3

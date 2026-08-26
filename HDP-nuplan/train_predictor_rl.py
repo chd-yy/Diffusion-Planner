@@ -28,6 +28,7 @@
 
 # argparse 用于解析命令行参数。
 import argparse
+import copy
 
 # datetime 用于生成当前训练任务的时间戳，
 # 从而为每次训练创建独立的日志和模型保存目录。
@@ -454,12 +455,64 @@ def get_args():
     # Eq. (9)；小数据实验需显式开启。
     parser.add_argument("--rl_center_reward_weights", default=False, type=boolean)
 
+    # rollout 自蒸馏的样本权重模式。softmax_positive 保证所有候选的
+    # 回归权重为正，避免 centered (w-1) 产生负损失和不稳定更新。
+    parser.add_argument(
+        "--rl_weighting_mode",
+        default="exp_advantage",
+        choices=["exp_advantage", "softmax_positive", "positive_advantage"],
+    )
+
+    # 【NuPlan 保守安全更新】只把通过 reward safety gate 的候选作为 rollout
+    # 回归目标。整组没有安全候选时跳过该组的 rollout loss，只保留专家 anchor。
+    # 默认 False 保持旧 checkpoint/实验兼容；新安全实验需显式开启。
+    parser.add_argument(
+        "--rl_filter_safety_eligible_candidates",
+        default=False,
+        type=boolean,
+    )
+
+    # 【NuPlan 进度保护门】只让相对专家路线进度达到阈值的候选进入
+    # rollout 自蒸馏；与 safety mask 取交集，避免模型学习“安全但不前进”的轨迹。
+    # 默认关闭，保持旧实验兼容；新进度保护实验需显式开启。
+    parser.add_argument(
+        "--rl_filter_progress_guard_candidates",
+        default=False,
+        type=boolean,
+    )
+    parser.add_argument(
+        "--rl_min_progress_guard_reward",
+        default=0.9,
+        type=float,
+    )
+
     # rollout reward-weighted 自蒸馏损失的权重；0 用于 expert-anchor-only 控制实验。
     parser.add_argument("--rl_rollout_loss_weight", default=1.0, type=float)
 
     # 真实专家轨迹监督 anchor 的权重，用于抑制 rollout 自蒸馏漂移。
     # 论文目标不包含额外 expert anchor；旧 checkpoint 兼容实验可显式传 0.1。
     parser.add_argument("--rl_expert_anchor_weight", default=0.0, type=float)
+
+    # B Epoch 10 reference policy anchor 的权重。它约束当前 RL 模型在同一
+    # 扩散状态上的预测不要偏离监督起点；默认 0 保持旧实验完全兼容。
+    parser.add_argument("--rl_reference_anchor_weight", default=0.0, type=float)
+
+    # 将每个候选的 reward 改为相对冻结 B Epoch10 reference policy 的差值。
+    # 开启后，只有超过 reference reward 的候选才是正向改进目标；默认关闭
+    # 以保持历史实验的组内均值 baseline 不变。
+    parser.add_argument(
+        "--rl_relative_to_reference",
+        default=False,
+        type=boolean,
+    )
+
+    # reference policy 的确定性采样噪声。0 表示同一场景每次得到相同的
+    # baseline trajectory，便于把 RL 更新目标和 B Epoch10 对齐。
+    parser.add_argument(
+        "--rl_reference_noise_scale",
+        default=0.0,
+        type=float,
+    )
 
     # 0 表示完整遍历；正数用于短步门禁，例如 20 表示每个 update epoch 最多 20 步。
     parser.add_argument("--rl_max_update_steps_per_epoch", default=0, type=int)
@@ -561,6 +614,33 @@ def get_args():
     parser.add_argument(
         "--reward_safety_gate_min_ttc_seconds", default=1.0, type=float
     )
+    parser.add_argument(
+        "--reward_safety_gate_require_drivable_area",
+        default=False,
+        type=boolean,
+        help="将 NPZ lane 左右边界走廊作为候选级 drivable-area 硬约束",
+    )
+    parser.add_argument(
+        "--reward_safety_gate_drivable_area_margin", default=0.1, type=float
+    )
+
+    # 【NuPlan 闭环对齐】legacy 保持旧论文加性 reward；nuplan_aligned 使用
+    # 安全优先的有界几何组合，避免进度/跟车奖励抵消安全退化。
+    parser.add_argument(
+        "--reward_objective_mode",
+        default="legacy",
+        choices=[
+            "legacy",
+            "nuplan_aligned",
+            "nuplan_score_proxy_v2",
+            "nuplan_score_proxy_v3",
+        ],
+    )
+    parser.add_argument("--reward_aligned_safety_exponent", default=0.45, type=float)
+    parser.add_argument("--reward_aligned_progress_exponent", default=0.25, type=float)
+    parser.add_argument("--reward_aligned_route_exponent", default=0.15, type=float)
+    parser.add_argument("--reward_aligned_comfort_exponent", default=0.10, type=float)
+    parser.add_argument("--reward_aligned_follow_exponent", default=0.05, type=float)
 
     # 【NuPlan 适配】论文没有公开 TTC/THW/OCC shaping 的具体阈值，
     # 因此作为命令行参数写入 args.json，保证实验可以准确复现。
@@ -622,10 +702,14 @@ def get_args():
         raise ValueError("rl_rollout_loss_weight 不能为负数")
     if args.rl_expert_anchor_weight < 0:
         raise ValueError("rl_expert_anchor_weight 不能为负数")
+    if args.rl_reference_anchor_weight < 0:
+        raise ValueError("rl_reference_anchor_weight 不能为负数")
     if args.rl_rollout_loss_weight == 0 and args.rl_expert_anchor_weight == 0:
         raise ValueError("rl_rollout_loss_weight 和 rl_expert_anchor_weight 不能同时为 0")
     if args.rl_max_update_steps_per_epoch < 0:
         raise ValueError("rl_max_update_steps_per_epoch 不能为负数")
+    if not 0 <= args.rl_min_progress_guard_reward <= 1:
+        raise ValueError("rl_min_progress_guard_reward 必须在 [0,1]")
     if not 0 < args.rl_ema_update_rate <= 1:
         raise ValueError("rl_ema_update_rate 必须在 (0,1]")
     if min(
@@ -643,6 +727,15 @@ def get_args():
         raise ValueError("reward_safety_gate_margin 必须大于 0")
     if args.reward_safety_gate_min_ttc_seconds < 0:
         raise ValueError("reward_safety_gate_min_ttc_seconds 不能小于 0")
+    aligned_exponents = (
+        args.reward_aligned_safety_exponent,
+        args.reward_aligned_progress_exponent,
+        args.reward_aligned_route_exponent,
+        args.reward_aligned_comfort_exponent,
+        args.reward_aligned_follow_exponent,
+    )
+    if any(value < 0 for value in aligned_exponents) or sum(aligned_exponents) <= 0:
+        raise ValueError("aligned reward exponents 必须非负且总和大于 0")
     if args.reward_risk_speed_reference <= 0:
         raise ValueError("reward_risk_speed_reference 必须大于 0")
     if not 0 <= args.reward_rear_end_collision_penalty <= 1:
@@ -834,6 +927,14 @@ def model_training(args):
             # 3. 可以减少显存和反向计算量。
             parameter.requires_grad_(False)
 
+    # 可选地保存一份冻结的 B Epoch 10 reference policy。必须在 DDP 包装前
+    # 复制，确保每个进程拥有本地 reference；权重为 0 时不额外占用显存。
+    reference_model = None
+    if args.rl_reference_anchor_weight > 0 or args.rl_relative_to_reference:
+        reference_model = copy.deepcopy(model).eval()
+        for parameter in reference_model.parameters():
+            parameter.requires_grad_(False)
+
     # 如果已经成功初始化分布式环境，则使用 DDP 包装模型。
     if args.ddp and ddp.is_dist_avail_and_initialized():
         model = DDP(
@@ -919,6 +1020,14 @@ def model_training(args):
             safety_gate_threshold=args.reward_safety_gate_threshold,
             safety_gate_margin=args.reward_safety_gate_margin,
             safety_gate_min_ttc_seconds=args.reward_safety_gate_min_ttc_seconds,
+            safety_gate_require_drivable_area=args.reward_safety_gate_require_drivable_area,
+            safety_gate_drivable_area_margin=args.reward_safety_gate_drivable_area_margin,
+            objective_mode=args.reward_objective_mode,
+            aligned_safety_exponent=args.reward_aligned_safety_exponent,
+            aligned_progress_exponent=args.reward_aligned_progress_exponent,
+            aligned_route_exponent=args.reward_aligned_route_exponent,
+            aligned_comfort_exponent=args.reward_aligned_comfort_exponent,
+            aligned_follow_exponent=args.reward_aligned_follow_exponent,
 
             # 【NuPlan 适配】论文未公开的 shaping 阈值。
             risk_speed_reference=args.reward_risk_speed_reference,
@@ -1056,6 +1165,7 @@ def model_training(args):
                 args,
                 device,
                 epoch=epoch,
+                reference_model=reference_model,
             )
 
             # 标记当前阶段名称。
@@ -1086,6 +1196,7 @@ def model_training(args):
                 replay_buffer,
                 args,
                 device,
+                reference_model=reference_model,
             )
 
             # 每个 update epoch 后更新一次学习率。
