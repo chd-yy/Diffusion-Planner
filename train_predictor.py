@@ -76,6 +76,73 @@ def boolean(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
+
+# 只加载 checkpoint 中与当前原始 Diffusion Planner Encoder 同名且形状一致的参数。
+# 这样可以复现 B Epoch10 的 Encoder warm-start，同时不会把 HDP/原版不兼容的 Decoder
+# 或其他模型参数误加载进来。
+def load_encoder_warm_start(model, checkpoint_path):
+    """Load only compatible encoder tensors and return an auditable report."""
+    checkpoint = torch.load(checkpoint_path, map_location='cpu')
+    if isinstance(checkpoint, dict) and 'ema_state_dict' in checkpoint:
+        source_name = 'ema_state_dict'
+        source_state = checkpoint[source_name]
+    elif isinstance(checkpoint, dict) and 'model' in checkpoint:
+        source_name = 'model'
+        source_state = checkpoint[source_name]
+    elif isinstance(checkpoint, dict):
+        source_name = 'root_state_dict'
+        source_state = checkpoint
+    else:
+        raise TypeError('Unsupported checkpoint type: {}'.format(type(checkpoint).__name__))
+
+    # DDP 保存的权重可能带有 module. 前缀；当前未包装模型不带此前缀。
+    source_state = {
+        (key[len('module.'):] if key.startswith('module.') else key): value
+        for key, value in source_state.items()
+    }
+    target_state = model.state_dict()
+    loaded = {}
+    missing = []
+    shape_mismatch = []
+
+    for key, target_value in target_state.items():
+        if not key.startswith('encoder.'):
+            continue
+        if key not in source_state:
+            missing.append(key)
+            continue
+        source_value = source_state[key]
+        if source_value.shape != target_value.shape:
+            shape_mismatch.append({
+                'key': key,
+                'source_shape': list(source_value.shape),
+                'target_shape': list(target_value.shape),
+            })
+            continue
+        loaded[key] = source_value
+
+    merged_state = dict(target_state)
+    merged_state.update(loaded)
+    model.load_state_dict(merged_state, strict=True)
+
+    return {
+        'checkpoint_path': str(checkpoint_path),
+        'source_state': source_name,
+        'loaded_tensor_count': len(loaded),
+        'loaded_parameter_count': int(sum(value.numel() for value in loaded.values())),
+        'target_encoder_tensor_count': sum(key.startswith('encoder.') for key in target_state),
+        'missing_keys': sorted(missing),
+        'shape_mismatches': shape_mismatch,
+        'decoder_tensor_count_loaded': sum(key.startswith('decoder.') for key in loaded),
+    }
+
+
+# 控制 Encoder 在 warm-start 后是否参与反向传播。
+# B Epoch10 的协议是前 3 个 epoch 冻结，之后解冻；默认 0 表示原始入口的旧行为。
+def set_encoder_trainable(model, trainable):
+    for parameter in model.encoder.parameters():
+        parameter.requires_grad_(trainable)
+
 # 解析训练脚本的命令行参数。
 #
 # 该函数集中定义：
@@ -206,6 +273,16 @@ def get_args():
     # 用于恢复训练的检查点路径。
     # 默认值为 None，表示从头开始训练。
     parser.add_argument('--resume_model_path', type=str, help='path to resume model', default=None)
+    # 仅使用 checkpoint 中兼容的 Encoder 参数进行初始化，不加载 Decoder。
+    parser.add_argument('--encoder_pretrained_model_path', type=str, default=None,
+                        help='path to checkpoint used for encoder-only warm-start')
+    # Encoder 冻结的 epoch 数；例如设置为 3 时，Epoch1-3 冻结，Epoch4 起解冻。
+    parser.add_argument('--freeze_encoder_epochs', type=int, default=0,
+                        help='number of initial epochs to freeze encoder')
+    # 恢复时是否使用当前命令中的学习率和 warm-up 重新建立调度器。
+    # 该选项用于复现 B Epoch10 从 Epoch4 分叉后的低学习率阶段。
+    parser.add_argument('--reset_lr_schedule_on_resume', default=False, type=boolean,
+                        help='reset learning-rate schedule after resume')
 
     # 是否启用 Weights & Biases 日志平台。
     parser.add_argument('--use_wandb', default=False, type=boolean)
@@ -221,6 +298,15 @@ def get_args():
     # 解析命令行输入，生成 args 对象。
     # 后续可以通过 args.xxx 的形式访问各项参数。
     args = parser.parse_args()
+
+    if args.resume_model_path is not None and args.encoder_pretrained_model_path is not None:
+        raise ValueError('resume_model_path and encoder_pretrained_model_path are mutually exclusive')
+    if args.reset_lr_schedule_on_resume and args.resume_model_path is None:
+        raise ValueError('reset_lr_schedule_on_resume requires resume_model_path')
+    if args.freeze_encoder_epochs < 0:
+        raise ValueError('freeze_encoder_epochs must be non-negative')
+    if args.freeze_encoder_epochs > 0 and args.encoder_pretrained_model_path is None and args.resume_model_path is None:
+        raise ValueError('freeze_encoder_epochs requires encoder_pretrained_model_path or resume_model_path')
 
     # 根据 normalization.json 构造状态归一化器，并保存到 args 中。
     # 这样模型、数据集或训练函数都可以通过 args.state_normalizer 使用它。
@@ -368,6 +454,28 @@ def model_training(args):
     # set up model
     # 根据 args 创建 Diffusion Planner 模型。
     diffusion_planner = Diffusion_Planner(args)
+    # 与 B Epoch10 一致：在 DDP 包装前只加载原始 checkpoint 的 Encoder。
+    if args.encoder_pretrained_model_path is not None:
+        warm_start_report = load_encoder_warm_start(
+            diffusion_planner,
+            args.encoder_pretrained_model_path,
+        )
+        if global_rank == 0:
+            from mmengine.fileio import dump
+            dump(
+                warm_start_report,
+                os.path.join(save_path, 'encoder_warm_start_report.json'),
+                file_format='json',
+                indent=4,
+            )
+            print(
+                'Encoder warm-start: loaded={}/{} tensors, parameters={}, decoder_loaded={}'.format(
+                    warm_start_report['loaded_tensor_count'],
+                    warm_start_report['target_encoder_tensor_count'],
+                    warm_start_report['loaded_parameter_count'],
+                    warm_start_report['decoder_tensor_count_loaded'],
+                )
+            )
     # 将模型移动到指定设备。
     #
     # 当 args.device == 'cuda' 时，使用 rank 选择当前进程对应的 GPU；
@@ -377,7 +485,15 @@ def model_training(args):
     # 如果启用了 DDP，则使用 DistributedDataParallel 包装模型。
     if args.ddp:
         # device_ids=[rank] 指定当前进程绑定的 GPU。
-        diffusion_planner = DDP(diffusion_planner, device_ids=[rank])
+        # 当前模型包含在部分训练分支中不会参与当前 loss 的参数；
+        # 单卡 DDP 默认要求每个参数每轮都产生梯度，会因此在第二个
+        # batch 报 reduction 错误。允许检测未参与反传的参数，不改变
+        # 实际 loss 或参数更新逻辑。
+        diffusion_planner = DDP(
+            diffusion_planner,
+            device_ids=[rank],
+            find_unused_parameters=True,
+        )
 
     # 如果启用了 EMA，则创建 EMA 模型。
     #
@@ -427,12 +543,30 @@ def model_training(args):
         #
         # 这样可以从中断位置继续训练，而不是重新开始。
         diffusion_planner, optimizer, scheduler, init_epoch, wandb_id, model_ema = resume_model(args.resume_model_path, diffusion_planner, optimizer, scheduler, model_ema, args.device)
+        if args.reset_lr_schedule_on_resume:
+            # 保留 checkpoint 中的模型、EMA 和 AdamW 动量，仅将优化器学习率及
+            # 调度器切换为当前阶段的配置，复现 B Epoch4 后的受控分叉。
+            for param_group in optimizer.param_groups:
+                param_group['lr'] = args.learning_rate
+                param_group['initial_lr'] = args.learning_rate
+            scheduler = CosineAnnealingWarmUpRestarts(
+                optimizer,
+                train_epochs,
+                args.warm_up_epoch,
+            )
+            print(
+                'Learning-rate schedule reset after resume: '
+                f'lr={args.learning_rate}, warm_up_epoch={args.warm_up_epoch}'
+            )
     # 如果没有提供检查点，则从第 0 个 epoch 开始训练。
     else:
         # 初始 epoch 设为 0。
         init_epoch = 0
         # 没有需要恢复的 wandb 日志 ID。
         wandb_id = None
+
+    # DistributedSampler 的初始 epoch 显式对齐；新训练时等价于默认的 epoch 0。
+    train_sampler.set_epoch(init_epoch)
 
     # logger
     # 创建训练日志记录器。
@@ -449,9 +583,14 @@ def model_training(args):
     # 开始训练循环。
     # range(init_epoch, train_epochs) 支持从检查点保存的 epoch 继续训练。
     for epoch in range(init_epoch, train_epochs):
+        # 与 B Epoch10 一致：前 freeze_encoder_epochs 个 epoch 不更新 Encoder。
+        base_model = ddp.get_model(diffusion_planner, args.ddp)
+        encoder_trainable = epoch >= args.freeze_encoder_epochs
+        set_encoder_trainable(base_model, encoder_trainable)
         # 只让主进程打印训练进度。
         if global_rank == 0:
             print(f"Epoch {epoch+1}/{train_epochs}")
+            print(f"Encoder trainable: {encoder_trainable}")
         # 执行一个 epoch 的训练。
         #
         # train_epoch() 通常会完成：

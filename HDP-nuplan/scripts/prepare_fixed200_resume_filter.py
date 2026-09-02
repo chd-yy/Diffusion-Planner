@@ -19,6 +19,11 @@ def parse_args():
     parser.add_argument("--metrics-dir", type=Path, required=True)
     parser.add_argument("--output-filter", type=Path, required=True)
     parser.add_argument("--expected-total", type=int, default=200)
+    parser.add_argument(
+        "--metric-suffix",
+        default="hyper_diffusion_planner",
+        help="指标文件名中的 planner 后缀，默认用于 HDP；原始模型使用 diffusion_planner。",
+    )
     return parser.parse_args()
 
 
@@ -33,8 +38,11 @@ def main():
         )
 
     completed_tokens = set()
+    token_pattern = re.compile(
+        rf"_([0-9a-f]{{16}})_{re.escape(args.metric_suffix)}\.pickle\.temp$"
+    )
     for path in args.metrics_dir.glob("*.pickle.temp"):
-        match = TOKEN_PATTERN.search(path.name)
+        match = token_pattern.search(path.name)
         if match:
             completed_tokens.add(match.group(1))
 

@@ -215,3 +215,114 @@ Epoch4：已完成 121，补跑 79
 恢复配置由 `scripts/prepare_fixed200_resume_filter.py` 根据已有指标文件自动生成，
 恢复命令由 `scripts/resume_rl_reference_relative_epoch2_epoch4_fixed200.sh` 执行，
 不会重新计算已完成场景。
+
+## 8. 断点恢复后的再次续跑
+
+2026-08-26 期间，第一次断点恢复运行到 Epoch2 `55/80`、Epoch4 `54/79` 时，
+两个后台评测进程被暂停；当时各自累计完成 `175/200`。恢复前重新执行
+`scripts/prepare_fixed200_resume_filter.py`，根据当前 `metrics/*.pickle.temp` 文件
+重新生成缺失场景过滤器，确认两组都只剩 `25` 个场景。
+
+随后使用与原评测完全相同的 checkpoint、NuPlan 闭环配置、固定 200 场景过滤器和
+单 worker 参数，从剩余 25 个场景并行续跑：
+
+```text
+Epoch2 PID：25073
+Epoch4 PID：25074
+```
+
+完成后应分别达到 `200/200`，再自动生成 Epoch2/Epoch4 汇总及与 B Epoch10 的
+配对比较。已有 175 个指标文件不删除、不重复计算。
+
+## 9. Epoch2 / Epoch4 fixed200 最终结果
+
+剩余场景补跑于 2026-08-26 12:58 CST 完成。Epoch2 和 Epoch4 均无仿真失败，
+最终聚合结果都包含相同的 200 个 fixed200 场景。由于断点续跑，最终一次
+`runner_report.parquet` 只记录新补跑的 25 个场景；分析脚本同时读取前 175 个已保留
+场景指标，因此配对分析中的实际场景数仍为 `200`，且
+`same_scenario_set=true`、`evaluation_complete=true`。
+
+| 模型 | score | 相对 B10 | route progress | 相对 B10 | speed compliance | 相对 B10 |
+|---|---:|---:|---:|---:|---:|---:|
+| B Epoch10 | 0.90456672 | 0 | 0.91206773 | 0 | 0.99543114 | 0 |
+| RL Epoch2 | 0.90343762 | -0.00112910 | 0.90799076 | -0.00407697 | 0.99565243 | +0.00022129 |
+| RL Epoch4 | 0.90325512 | -0.00131160 | 0.90730290 | -0.00476483 | 0.99568556 | +0.00025442 |
+| RL Epoch6 | 0.89830025 | -0.00626647 | 0.90737836 | -0.00468937 | 0.99114009 | -0.00429105 |
+
+配对场景统计：
+
+```text
+Epoch2 score：6 胜 / 90 负 / 104 平
+Epoch4 score：8 胜 / 88 负 / 104 平
+
+Epoch2 route progress：0 胜 / 98 负 / 102 平
+Epoch4 route progress：0 胜 / 98 负 / 102 平
+```
+
+collision、drivable area、making progress、driving direction、TTC 和 comfort 在
+Epoch2/Epoch4 上均与 B Epoch10 相同。Epoch2/Epoch4 仅带来约 `+0.00022` 至
+`+0.00025` 的限速合规提升，但路线进度下降约 `0.0041` 至 `0.0048`，无法抵消路线
+退化，所以总分为负。
+
+结论：第一次 RL 更新（Epoch2）已经朝错误的闭环目标方向移动；继续更新到 Epoch4
+没有修复该问题，Epoch6 则进一步放大总分退化。因此问题不是单纯“训练轮数过多”，
+而是训练 reward / reference-relative proxy 与 NuPlan 闭环路线进度目标仍不对齐。
+
+结果文件：
+
+```text
+fixed200_epoch2_epoch4_eval/b10_vs_epoch2_analysis.md
+fixed200_epoch2_epoch4_eval/b10_vs_epoch4_analysis.md
+fixed200_epoch2_epoch4_eval/b10_vs_epoch2_epoch4_fixed200.json
+```
+
+## 10. 原始 Diffusion Planner fixed200 对照评测
+
+为回答“B Epoch10 是否超过原始 Diffusion Planner”，新增同场景对照评测脚本：
+
+```text
+HDP-nuplan/scripts/evaluate_original_diffusion_fixed200.sh
+```
+
+该脚本使用仓库发布的：
+
+```text
+checkpoints/args.json
+checkpoints/model.pth
+```
+
+并严格复用 B Epoch10 的 `mini-val-fixed-200-rl-v4`、NuPlan mini DB、
+`closed_loop_nonreactive_agents`、2 个 thread worker、0.5 GPU/仿真和 metric 配置。
+评测于 2026-08-26 13:12 CST 启动，输出目录为：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/original_diffusion_fixed200_eval/
+```
+
+评测完成后自动生成原始 Diffusion Planner 的汇总，以及与 B Epoch10 的逐场景配对结果。
+
+评测于 2026-08-26 完成，原始 Diffusion Planner 的 200 个场景均成功，且与 B Epoch10
+使用完全相同的场景集合。配对分析结果如下：
+
+| 指标 | B Epoch10 | 原始 Diffusion Planner | 差值（原始 DP - B10） | 胜/负/平 |
+|---|---:|---:|---:|---:|
+| score | 0.90456672 | 0.95797087 | +0.05340415 | 88/33/79 |
+| no at-fault collision | 0.95750000 | 0.98000000 | +0.02250000 | 10/1/189 |
+| drivable area | 0.95000000 | 0.99000000 | +0.04000000 | 9/1/190 |
+| making progress | 0.99000000 | 1.00000000 | +0.01000000 | 2/0/198 |
+| route progress | 0.91206773 | 0.96030783 | +0.04824009 | 89/22/89 |
+| TTC | 0.93500000 | 0.97500000 | +0.04000000 | 9/1/190 |
+| speed compliance | 0.99543114 | 0.99433434 | -0.00109679 | 5/12/183 |
+| comfort | 0.99500000 | 0.97000000 | -0.02500000 | 1/6/193 |
+
+因此，在同一 fixed200 场景上，B Epoch10 的 score 比仓库发布版原始 Diffusion Planner
+低 `0.05340415`，即低约 `5.57%`（以原始 Diffusion Planner 为分母）。主要差距来自
+expert-route progress，B Epoch10 低 `0.04824009`；原始模型同时在碰撞、可行驶区域、
+making progress 和 TTC 上更好，但舒适性略低、限速合规略低。
+
+最终对比文件：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/
+  original_diffusion_fixed200_eval/b10_vs_original_diffusion_fixed200_analysis.md
+```

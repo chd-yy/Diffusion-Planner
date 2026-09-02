@@ -6,9 +6,13 @@ import os
 # SummaryWriter 用于将训练指标写入 TensorBoard 日志文件
 from torch.utils.tensorboard import SummaryWriter
 
-# 导入 wandb
-# wandb 用于实验记录、指标可视化、配置保存和实验恢复
-import wandb
+# 尝试导入 wandb。
+# 当 use_wandb=False 时，训练只使用 TensorBoard，不应因环境未安装
+# wandb 而无法启动；只有显式开启 WandB 时才要求该依赖存在。
+try:
+    import wandb
+except ImportError:
+    wandb = None
 
 
 # 定义 TensorBoardLogger 类
@@ -43,34 +47,26 @@ class TensorBoardLogger():
         # 这样可以避免分布式训练时多个进程重复写日志
         if rank == 0:
 
-            # 根据 args.use_wandb 决定 wandb 工作模式
-            # 如果 args.use_wandb=True，则使用 online 模式，将日志同步到 wandb 云端
-            # 如果 args.use_wandb=False，则使用 offline 模式，只在本地记录
-            os.environ["WANDB_MODE"] = "online" if args.use_wandb else "offline"
-
-            # 初始化 wandb 实验
-            # project：wandb 项目名称
-            # name：当前 run 的名称
-            # notes：实验备注
-            # resume="allow"：允许根据 id 恢复已有 run，如果 id 不存在则创建新 run
-            # id=wandb_resume_id：指定要恢复或继续记录的 wandb run id
-            # sync_tensorboard=True：自动同步 TensorBoard 日志到 wandb
-            # dir=f'{save_path}'：wandb 本地文件保存目录
-            wandb_writer = wandb.init(project='Diffusion-Planner', 
-                name=run_name, 
-                notes=notes,
-                resume="allow",
-                id = wandb_resume_id,
-                sync_tensorboard=True,
-                dir=f'{save_path}')
-
-            # 将 args 中的训练配置写入 wandb config
-            # 这样可以在 wandb 页面中查看当前实验的超参数设置
-            wandb.config.update(args)
-
-            # 保存当前 wandb run 的 id
-            # 后续可以在保存 checkpoint 时一并保存，用于断点恢复同一个 wandb run
-            self.id = wandb_writer.id
+            if args.use_wandb:
+                # 显式开启 WandB 时才初始化 WandB。
+                if wandb is None:
+                    raise ImportError(
+                        "wandb is required when --use_wandb=true; "
+                        "install it or set --use_wandb=false."
+                    )
+                os.environ["WANDB_MODE"] = "online"
+                wandb_writer = wandb.init(project='Diffusion-Planner',
+                    name=run_name,
+                    notes=notes,
+                    resume="allow",
+                    id=wandb_resume_id,
+                    sync_tensorboard=True,
+                    dir=f'{save_path}')
+                wandb.config.update(args)
+                self.id = wandb_writer.id
+            else:
+                # 关闭 WandB 时不创建 offline run，避免不必要的依赖和文件。
+                os.environ["WANDB_MODE"] = "disabled"
             
             # 创建 TensorBoard SummaryWriter
             # 日志文件会保存在 save_path/tb 目录下

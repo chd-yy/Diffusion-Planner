@@ -1,0 +1,99 @@
+{
+  "summary_file": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/test14_full_remote_subset/three_model_eval/test14-random_three_models.json",
+  "baseline": "hdp_b_epoch10",
+  "candidate": "hdp_rl_epoch2",
+  "same_scenario_set": true,
+  "evaluation_complete": true,
+  "metrics": {
+    "score": {
+      "count": 261,
+      "mean_delta": 0.006875681498777179,
+      "median_delta": 0.0,
+      "wins": 81,
+      "losses": 58,
+      "ties": 122,
+      "baseline_mean": 0.8242700731993302,
+      "candidate_mean": 0.8311457546981075
+    },
+    "no_ego_at_fault_collisions": {
+      "count": 261,
+      "mean_delta": 0.0038314176245210726,
+      "median_delta": 0.0,
+      "wins": 2,
+      "losses": 1,
+      "ties": 258,
+      "baseline_mean": 0.9080459770114943,
+      "candidate_mean": 0.9118773946360154
+    },
+    "drivable_area_compliance": {
+      "count": 261,
+      "mean_delta": -0.007662835249042145,
+      "median_delta": 0.0,
+      "wins": 0,
+      "losses": 2,
+      "ties": 259,
+      "baseline_mean": 0.9655172413793104,
+      "candidate_mean": 0.9578544061302682
+    },
+    "ego_is_making_progress": {
+      "count": 261,
+      "mean_delta": 0.007662835249042145,
+      "median_delta": 0.0,
+      "wins": 2,
+      "losses": 0,
+      "ties": 259,
+      "baseline_mean": 0.9808429118773946,
+      "candidate_mean": 0.9885057471264368
+    },
+    "driving_direction_compliance": {
+      "count": 261,
+      "mean_delta": 0.0,
+      "median_delta": 0.0,
+      "wins": 0,
+      "losses": 0,
+      "ties": 261,
+      "baseline_mean": 0.9980842911877394,
+      "candidate_mean": 0.9980842911877394
+    },
+    "ego_progress_along_expert_route": {
+      "count": 261,
+      "mean_delta": 0.004943605348760957,
+      "median_delta": 0.0,
+      "wins": 95,
+      "losses": 37,
+      "ties": 129,
+      "baseline_mean": 0.9102697618215604,
+      "candidate_mean": 0.9152133671703213
+    },
+    "time_to_collision_within_bound": {
+      "count": 261,
+      "mean_delta": 0.007662835249042145,
+      "median_delta": 0.0,
+      "wins": 3,
+      "losses": 1,
+      "ties": 257,
+      "baseline_mean": 0.8697318007662835,
+      "candidate_mean": 0.8773946360153256
+    },
+    "speed_limit_compliance": {
+      "count": 261,
+      "mean_delta": -0.0020415699670029287,
+      "median_delta": 0.0,
+      "wins": 6,
+      "losses": 53,
+      "ties": 202,
+      "baseline_mean": 0.9664543403309176,
+      "candidate_mean": 0.9644127703639147
+    },
+    "ego_is_comfortable": {
+      "count": 261,
+      "mean_delta": 0.0,
+      "median_delta": 0.0,
+      "wins": 0,
+      "losses": 0,
+      "ties": 261,
+      "baseline_mean": 0.9770114942528736,
+      "candidate_mean": 0.9770114942528736
+    }
+  }
+}

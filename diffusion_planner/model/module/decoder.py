@@ -248,7 +248,9 @@ class Decoder(nn.Module):
         #
         # 如果该值不为 None，
         # 则 DPM-Solver 会在采样过程中应用 classifier guidance。
-        self._guidance_fn = config.guidance_fn
+        # 训练入口的 argparse 配置没有 guidance_fn；没有显式提供时，
+        # 采用 None，保持原始无 guidance 的训练/采样路径。
+        self._guidance_fn = getattr(config, "guidance_fn", None)
         
     # 将 sde 暴露为只读属性。
     #

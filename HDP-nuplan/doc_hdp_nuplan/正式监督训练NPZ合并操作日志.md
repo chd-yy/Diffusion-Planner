@@ -3334,3 +3334,1029 @@ NuPlan 并不是不能并行；它提供了 `single_machine_thread_pool`，可�
 - 同一 filter 下场景集合仍然可以保持一致，但执行顺序可能改变。
 
 因此当前已启动的正式 fixed200 对比不在中途切换；等本次结果完成后，再用固定 10～20 个场景比较 sequential 与 2-worker thread pool，确认 `0 failed simulation` 且指标一致，再决定是否用并行重跑全量。
+
+### 16.51 AutoDL 代码、checkpoint 与 fixed200 评测同步（2026-08-23 CST）
+
+目标：在 AutoDL 主机上使用与本地相同的 HDP 代码、NuPlan devkit、B Epoch 10/RL seed2026 checkpoint、200 场景筛选器和 mini DB，启动 RL seed2026 的 200 场景闭环评测。
+
+#### 同步目标
+
+- SSH：`root@connect.cqa1.seetacloud.com:11156`，实例主机 `autodl-container-b8e548a0d5-61312194`。
+- 远端项目：`/root/autodl-tmp/workspace/Diffusion-Planner`。
+- 远端 Python：`/root/autodl-tmp/conda_envs/diffusion_planner/bin/python`，Python `3.9.25`，RTX 4090 可见。
+- 远端 NuPlan 数据：`/root/autodl-tmp/nuplan/dataset`；地图：`/root/autodl-tmp/nuplan/maps`。
+- 代码提交：`b13841bd57586849bcd9a62e591f0f4a7da0c69b`。
+- NuPlan devkit 提交：`e9241677997dd86bfc0bcd44817ab04fe631405b`。
+- fixed200 filter：`mini-val-fixed-200-rl-v4`；manifest 中场景数为 `200`。
+
+#### 一致性校验
+
+以下关键文件已在本地与远端逐一计算 SHA256，结果一致：
+
+- `HDP-nuplan/hdp_nuplan/rl/train_epoch_rl.py`
+- `HDP-nuplan/hdp_nuplan/rl/loss.py`
+- `HDP-nuplan/hdp_nuplan/model/hyper_diffusion_planner.py`
+- `HDP-nuplan/scripts/run_mini_closed_loop.sh`
+- `mini-val-fixed-200-rl-v4.yaml`
+- `mini_val_fixed_200_rl_v4_manifest.json`
+- RL seed2026 的 `args.json`
+- RL seed2026 的 `model_epoch_2_trainloss_0.0003.pth`
+
+已同步的关键 checkpoint SHA256：
+
+```text
+B Epoch 10: 22ec0cf6be7cc89a3cf8414cddd0c7446ce2737ddc4e44b23e50dbeeeb0b29ce
+RL seed2026: 8cd630d0780521268a6a425c63dab3bb03e7f5897a5199f2ef7c1c3633fa2c3c
+```
+
+#### 发现并处理的问题
+
+1. 第一次源码整体归档包含约 `1.68 GiB` 已跟踪历史数据，已停止该低效传输；改为只同步评测依赖的代码、配置、脚本和测试。
+2. 第一次远端启动使用了错误的相对 NuPlan 数据路径，启动前置检查立即退出，没有执行场景；该日志保留在 `rl_v4_autodl_seed2026_fixed200_eval/remote_eval.log`。
+3. 第二次启动改用正确绝对路径，但远端 mini DB 正在断点同步，SQLite 报 `database disk image is malformed`。该次也在场景构建阶段退出，没有产生有效评测结果。
+4. 当前保留原有 mini DB 断点同步任务，不删除或覆盖其数据；待目标 DB 完整后先执行 SQLite `PRAGMA integrity_check`，再重新启动评测。
+
+#### 当前状态
+
+- 本地 RL seed42 fixed200：约 `144/200`，仍在运行；不停止。
+- 本地 B10 fixed200：已完成 `200/200`，结果目录约 `3.9G`。
+- AutoDL：GPU 空闲，远端 RL seed2026 当前未运行，等待 DB 完整性检查通过后重启。
+- B10 完整 simulation_log 的上传因 mini DB 断点同步占用链路而暂缓，checkpoint、代码、filter、manifest 和 metric 配置已同步。
+
+补充：远端原有完整 mini DB 同步随后被暂时暂停，保留 `--append-verify` 可续传；fixed200 所需 4 个缺失 DB 改用 gzip 流式传输。已部署远端等待脚本 `HDP-nuplan/tmp/remote_fixed200_watch.sh`，其行为是：等待 4 个 DB 字节数与本地一致，执行 SQLite `PRAGMA integrity_check`，通过后自动启动 `rl-seed2026-closed-loop200-autodl-v3`。截至记录时，第一个目标 DB 已完整到达，第二个正在传输，评测尚未启动。
+
+### 16.52 当前状态快照（2026-08-23 02:15 CST）
+
+- 本地 RL seed42 fixed200：`158/200`，仍在运行。
+- AutoDL required DB：第 1 个已完成；第 2 个约 `96/282 MB`；第 3、4 个等待 gzip 流继续写入。
+- AutoDL watcher：PID `4574`，持续等待并在完整性检查通过后自动启动 seed2026 fixed200。
+- AutoDL 当前尚未产生有效 RL seed2026 评测结果；GPU 仍未进入正式评测阶段。
+
+### 16.53 AutoDL fixed200 评测失败诊断（2026-08-23 CST）
+
+4 个缺失 DB 完成传输后，4 个 DB 的 `PRAGMA integrity_check` 均为 `ok`，并且 8 个 fixed200 相关 DB 与本地逐个 SHA256 一致。为隔离其他尚未同步完成的 mini DB，远端建立了 `/root/autodl-tmp/nuplan/mini_fixed200_db`，其中仅包含实际覆盖 200 个 manifest token 的 8 个 DB 硬链接。
+
+随后启动了 AutoDL RL seed2026 fixed200 v4。场景构建成功，日志明确显示 `Building simulations from 200 scenarios`，但闭环阶段累计 `201` 条失败记录，主要错误为：
+
+```text
+AssertionError: angle is not finite
+numpy.linalg.LinAlgError: SVD did not converge
+```
+
+这表明该次不能产生有效指标，已停止，不作为 RL 结果使用。随后用同一远端环境、同一批 3 场景和 seed42 checkpoint 做最小复现，GPU 与 CPU 两种模式均为 `4` 个场景失败；因此暂时不能把问题归因于 seed2026 checkpoint 或 4090 GPU。当前需要继续检查远端运行时的 planner 输入/模型输出，以及与本地已成功闭环的场景 filter 选择是否完全一致。
+
+### 16.54 fixed200 场景集合直接比对（2026-08-23 CST）
+
+为确认“远端成功构建 200 个场景”是否与本地完全相同，将远端 v4 的 `runner_report.parquet` 拉回本地，并按 `log_name + scenario_name` 排序后逐条比较。
+
+结果：
+
+- 本地报告：200 行，200 个成功、0 个失败；
+- 远端报告：200 行，0 个成功、200 个失败；
+- 两份报告的场景键集合完全相同；
+- 两份报告的场景键 SHA256 均为：
+
+```text
+02007777c7d4d54f6f194ccc6787b9d1e3e76a840088e584da159c738ed3f28c
+```
+
+结论：远端 v4 与本地使用的是完全相同的 200 个场景；差异不在场景选择，而在远端闭环执行阶段全部失败。因此远端 v4 不能用于比较规划指标，只能证明场景集合和同步输入一致。
+
+### 16.55 暂停 AutoDL 评测（2026-08-23 CST）
+
+用户已关闭 AutoDL 实例，当前放弃远端 fixed200 评测，不再继续启动或排查远端运行环境。
+
+当前结论：
+
+- 云端与本地的 200 个场景集合已确认完全一致；
+- 云端 v4 评测的 200 个场景均在闭环执行阶段失败，未产生可用规划指标；
+- 后续实验暂时全部回到本地环境进行；
+- 云端已同步的代码、checkpoint、配置和 200 场景相关 DB 保留在云端数据盘中，之后如需恢复可继续使用。
+
+### 16.56 本地 fixed200 评测进度更新（2026-08-23 CST）
+
+- B Epoch 10：`200/200` 成功；
+- RL seed42：`200/200` 成功，`0` 个失败；
+- RL seed2026：已开始执行，当前约 `19/200`，尚未生成最终报告；
+- 三组评测使用同一个 `mini-val-fixed-200-rl-v4` 场景集合，完成后再进行统一指标汇总。
+
+### 16.57 设置评测完成后的自动分析（2026-08-23 CST）
+
+为避免只查看均值而忽略逐场景差异，在 fixed200 三组评测完成后自动执行：
+
+1. 检查 B Epoch 10、RL seed42、RL seed2026 是否均为 200 个成功场景；
+2. 以 B Epoch 10 为基线，按相同 `scenario` 计算两个 RL seed 的逐场景指标差值；
+3. 统计每项指标的均值差、 中位数差和胜/负/平场景数；
+4. 根据两个 seed 的 `score` 和责任碰撞指标，给出 `consistent_positive`、`mixed` 或 `not_positive` 状态。
+
+本次评测因启动时旧脚本已经在运行，另启动后台等待器 `auto_analysis_watcher.pid`；它等待三组评测汇总文件生成后运行同一分析程序。后续新启动的 `run_fixed_200_eval_rl_v4.sh` 已直接内置该自动分析步骤。
+
+### 16.58 fixed200 三组最终结果（2026-08-23 CST）
+
+三组评测均完成 `200/200`，失败场景均为 `0`：
+
+| 模型 | mean score | 相对 B10 | score 胜/负/平 | mean progress | mean speed compliance |
+|---|---:|---:|---:|---:|---:|
+| B Epoch 10 | 0.90456672 | 基线 | - | 0.91206773 | 0.99543114 |
+| RL seed42 | 0.90449693 | -0.00006979 | 33/60/107 | 0.91164599 | 0.99555687 |
+| RL seed2026 | 0.90606500 | +0.00149828 | 71/23/106 | 0.91726361 | 0.99523515 |
+
+安全和基本合规指标在三组间保持一致：责任碰撞 `0.9575`、drivable area `0.95`、making progress `0.99`、行驶方向 `1.0`、TTC `0.935`、舒适性 `0.995`。
+
+自动判断为 `mixed`：seed42 的总体得分几乎持平但略降，seed2026 小幅提升，两个随机种子方向不一致。当前证据表明 RL 确实改变了部分场景行为，但不足以宣称 RL 在 fixed200 上稳定带来正收益；seed2026 的主要收益来自路线进度提升，同时限速合规有极小下降。
+
+### 16.59 RL 不稳定原因与改进优先级（2026-08-23 CST）
+
+根据两次训练日志、checkpoint 参数差异和 fixed200 配对结果，当前不稳定主要不是“RL 天生无效”，而是实现配置造成了高方差、低有效信号：
+
+1. `rl_buffer_size=1024`，但 rollout 数据集有约 `10000` 个场景。`NuPlanReplayBuffer` 使用 `deque(maxlen=1024)`，因此一次 rollout 后只保留最后 1024 个场景；不同 seed 的 `DistributedSampler` 顺序不同，导致两个 seed 实际更新的数据子集不同。
+2. 只训练 2 个 epoch，按 `rl_buffer_update_epoch=2` 实际只有 1 次 rollout 和 1 次 update，统计平均不足。
+3. 两次 update 的 `reward_std_mean` 只有约 `0.0043/0.0057`，而 `rl_min_reward_std=1e-6` 仍把几乎所有组判为有效；组内极小差异被标准化后可能放大数值/采样噪声。
+4. RL loss 约 `-2e-5`，expert anchor 的加权项约 `3.3e-4`，后者约大一个数量级；checkpoint 相对 B10 的参数变化也只有约 `1.2e-4` 的相对 L2，更新过于保守。
+5. reward 的 `base_rewards` 实际由 risk、follow、lane 和 progress guard 组成；collision、route、comfort 等量在当前实现中主要作为诊断详情，未直接进入总 reward。因此优化目标与 NuPlan 的 speed-limit、舒适性等闭环指标并不完全一致。
+
+建议顺序：先将 buffer 扩大到覆盖完整 rollout 数据集，并保持其他参数不变做控制实验；随后增加到至少 4～6 个 epoch，再根据 reward 标准差分布调整 `rl_min_reward_std` 和候选多样性。不要同时修改 reward 权重、学习率和训练轮数，否则无法判断收益来源。
+
+### 16.60 启动 buffer 覆盖范围控制实验（2026-08-23 CST）
+
+已启动独立入口：`HDP-nuplan/scripts/run_rl_buffer10k_control_multiseed.sh`。
+
+实验只改变：
+
+```text
+rl_buffer_size: 1024 -> 10000
+```
+
+其余参数保持上一轮 safetygate/anchor 配置不变：2 epoch、`learning_rate=4e-7`、`rl_expert_anchor_weight=0.1`、`rl_detach_window_size=0`、冻结 encoder、`rl_group_size=32`、采样噪声 `0.1`。
+
+原先误启动了多 seed 总控；发现流程顺序不符合当前阶段目标后，已停止 seed42 的未完成进程，不使用其未完成结果。当前只运行之前约定的单 seed `2026`，输出目录为：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_buffer10k_anchor01_2ep_seed{seed}_from_b10
+```
+
+当前 seed2026 已开始 rollout，进度约 `47/5000` batch；GPU 训练进程正常运行。seed42 的部分日志保留在对应目录，但没有生成可用 checkpoint。当前单 seed PID 保存在 `rl_buffer10k_control_single_seed2026.pid`。
+
+训练结果更新：单 seed2026 已完成 2 epoch 控制实验。Epoch 1 rollout 的 `buffer_size=10000`，Epoch 2 完成 `500` 个 update step，并生成 checkpoint：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_buffer10k_anchor01_2ep_seed2026_from_b10/training_log/hdp-rl-buffer10k_anchor01_2ep-seed2026-from-full-mini-b10/2026-08-23-11:47:11/model_epoch_2_trainloss_0.0003.pth
+```
+
+本次 update 指标：`loss=0.0003151`、`rl_loss=-0.00002145`、加权 expert anchor loss `0.00033655`、`reward_std_mean=0.00635`、`buffer_size=10000`。当前尚未启动 fixed200 闭环评测。
+
+### 16.61 启动 6 epoch 与 reward std 分位数实验（2026-08-23 CST）
+
+为完成步骤 2～4，已从同一个 B Epoch 10 checkpoint 重新启动单 seed2026 的 6 epoch 训练：
+
+- `rl_buffer_size=10000`；
+- `train_epochs=6`，即 3 次 rollout 和 3 次 update；
+- 初始 `rl_sampling_noise_scale=0.1`；
+- 其他参数保持步骤 1 控制实验不变；
+- update 指标新增 `reward_std_p10`、`reward_std_p50`、`reward_std_p90`。
+
+训练输出目录：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_buffer10k_6ep_seed2026_from_b10
+```
+
+当前已开始第一个 rollout，仍未进行 fixed200 评测。第一个 6 epoch 阶段完成后，根据 reward std 分位数判断是否启动 `noise_scale=0.2` 的第二阶段；最终只评测通过步骤 1～4 确定的 checkpoint。
+
+`noise_scale=0.1` 的 6 epoch 阶段已完成，生成 Epoch 2/4/6 三个 checkpoint。三个 update 的 reward std 分位数为：
+
+| Epoch | p10 | p50 | p90 | mean |
+|---:|---:|---:|---:|---:|
+| 2 | 0.00190 | 0.00635 | 0.01079 | 0.00635 |
+| 4 | 0.00182 | 0.00588 | 0.00994 | 0.00588 |
+| 6 | 0.00155 | 0.00499 | 0.00844 | 0.00499 |
+
+候选组内 reward 差异没有扩大，反而逐轮收缩；相对平均 reward 约 `5.4` 仍然很小。因此触发步骤 4：保持 B10 起点、buffer、epoch、reward、anchor 和学习率不变，只把 `rl_sampling_noise_scale` 从 `0.1` 提高到 `0.2`，重新启动单 seed2026 的 6 epoch 训练。
+
+第二阶段输出目录：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_buffer10k_6ep_noise02_seed2026_from_b10
+```
+
+当前第二阶段已开始第一个 rollout；仍未启动 fixed200 评测。
+
+`noise_scale=0.2` 的 6 epoch 阶段已完成。reward std 分位数如下：
+
+| Epoch | p10 | p50 | p90 | mean |
+|---:|---:|---:|---:|---:|
+| 2 | 0.00427 | 0.01392 | 0.02356 | 0.01392 |
+| 4 | 0.00385 | 0.01278 | 0.02170 | 0.01278 |
+| 6 | 0.00348 | 0.01208 | 0.02067 | 0.01208 |
+
+相对于 `noise_scale=0.1` 的 Epoch 6（p50=`0.00499`、p90=`0.00844`），候选 reward 区分度约提高到 2 倍以上。步骤 1～4 已完成，选用 noise02 的 Epoch 6 checkpoint 开始 fixed200 闭环评测：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_buffer10k_noise02_fixed200_eval
+```
+
+该评测与已有 B Epoch 10 结果使用同一个 `mini-val-fixed-200-rl-v4` 场景集合；评测完成后再比较 score、安全、进度和舒适性指标。
+
+首次启动因评测脚本中 checkpoint 目录名的连字符/下划线写法错误而立即退出，未执行任何场景；已修正路径并重新启动。当前日志已显示 `Building simulations from 200 scenarios`，正式进入 fixed200 评测阶段。
+
+fixed200 已完成：`200/200` 成功、`0` 个仿真失败。结果如下：
+
+| 指标 | B Epoch 10 | RL buffer10k/noise02 Epoch 6 | 差值 |
+|---|---:|---:|---:|
+| score | 0.90456672 | 0.89151622 | -0.01305050 |
+| no ego-at-fault collision | 0.9575 | 0.9575 | 0 |
+| drivable area compliance | 0.9500 | 0.9350 | -0.0150 |
+| progress along expert route | 0.91206773 | 0.91309464 | +0.00102691 |
+| TTC | 0.9350 | 0.9350 | 0 |
+| speed-limit compliance | 0.99543114 | 0.99548354 | +0.00005240 |
+| comfort | 0.9950 | 0.9950 | 0 |
+
+score 逐场景为 `55/39/106` 胜/负/平。总分下降由 3 个 `following_lane_without_lead` 场景触发 drivable-area 从 `1` 降到 `0` 导致，这 3 个场景都来自日志 `2021.10.05.07.10.04_veh-52_01442_01802`。排除这 3 个硬退化场景后，其余 197 个场景的 score 平均差为 `+0.00031412`。
+
+结论：扩大 buffer、增加 update 轮数和提高采样噪声后，RL 在大多数场景中呈现小幅正向趋势，但当前 reward 缺少 drivable-area 硬约束，少数越界场景会通过 NuPlan 乘法/硬门控指标把总收益完全抹掉；当前 checkpoint 不能判为正收益模型。
+
+### 16.62 负收益原因与实际改动核对（2026-08-23 CST）
+
+将此前 fixed200 小幅正收益的 seed2026 `args.json` 与本次 noise02 Epoch 6 的 `args.json` 逐项比较，除实验名称/输出路径外，行为相关参数只有三个差异：
+
+```text
+rl_buffer_size:            1024 -> 10000
+train_epochs:                 2 -> 6
+rl_sampling_noise_scale:    0.1 -> 0.2
+```
+
+未修改 reward 权重、reward 计算逻辑、学习率、expert anchor、encoder 冻结、detach、模型结构、planner 推理噪声或 fixed200 场景集合。代码层面只在 `rl/loss.py` 增加了 p10/p50/p90 日志指标，这些值不参与 total loss 和反向传播。
+
+负收益的数值来源非常集中：3 个场景各自从约 `0.88～0.90` 降为 `0`，三者合计对 200 场景均值造成约 `-0.01336`；其余 197 个场景贡献约 `+0.00031`，最终净差为 `-0.01305`。NuPlan 的 drivable-area 是硬乘法/门控类指标，单个场景从 1 降为 0 会把该场景总分清零。
+
+机制上，buffer 扩大和 3 次 update 使策略比原 1 次 update 更充分地偏离 B10；`noise_scale=0.2` 又让训练候选具有更大的几何差异。当前 reward 用 soft lane reward 和 progress guard 排序，但没有使用 NuPlan drivable-area polygon 的同等硬门槛，因此少数推进更积极但越界的候选仍可能形成更新信号。需要强调：由于最终实验同时改变了 buffer、update 次数和候选噪声，仅凭最终 fixed200 不能严谨地把退化单独归因于其中一个参数；应利用现有 Epoch 2/4/6、noise01/noise02 checkpoint 在 3 个失败场景上做阶梯消融定位。
+
+### 16.63 增加 drivable-area 硬约束并完成训练前验证（2026-08-23 CST）
+
+#### 目标
+
+针对 noise02 Epoch 6 fixed200 中 3 个场景 drivable-area 从 1 降为 0 的问题，
+在 RL reward 的 safety gate 中加入候选级 drivable-area 硬约束，然后再重新训练。
+
+#### 数据与实现边界
+
+当前 NPZ 没有保存 NuPlan 原生 drivable-area polygon，只保存了 lane 的中心线、方向
+以及到左右边界的相对向量。因此实现的是“基于缓存 lane 边界的 drivable-area 代理硬门”，
+不是直接调用 NuPlan polygon scorer。候选车辆包络需要位于至少一条附近 lane corridor
+内，且同时满足已有 risk/TTC 门；越界候选在组内存在合格候选时不能通过更高的
+progress/follow/lane 奖励重新成为优选。
+
+#### 代码修改
+
+1. `HDP-nuplan/hdp_nuplan/rl/reward.py`
+
+   - 新增 `safety_gate_require_drivable_area` 和
+     `safety_gate_drivable_area_margin` 配置；默认关闭，避免改变历史实验。
+   - 新增 `_drivable_area_compliance()`：计算候选轨迹每个时间点的自车矩形在 lane
+     横向的投影余量，检查最近 8 条 lane，而不是只检查最近 1 条，兼容路口和换道。
+   - 将 drivable-area 条件并入 `_apply_safety_gate()` 的 eligible 判定。
+   - 如果专家轨迹本身无法被当前缓存 lane corridor 覆盖，则关闭该场景的硬门，避免
+     把换道、路口或地图查询范围不足误判成候选越界。
+   - 输出 `drivable_area_compliance`、`drivable_area_min_clearance` 和
+     `drivable_area_gate_active` 供训练日志审计。
+
+2. `HDP-nuplan/train_predictor_rl.py`
+
+   - 新增两个命令行参数并写入 `args.json`：
+     `--reward_safety_gate_require_drivable_area`、
+     `--reward_safety_gate_drivable_area_margin`。
+
+3. `HDP-nuplan/scripts/run_rl_buffer10k_6ep_seed2026.sh`
+
+   - 正式重训练命令显式开启 `--reward_safety_gate_require_drivable_area true`；
+   - 保留 `margin=0.1`、seed2026、buffer10000、6 epoch、noise0.2、no-detach、
+     冻结 encoder 和其余既定参数不变。
+
+#### 训练前验证
+
+执行的代码检查和测试：
+
+```bash
+/home/yanjun/NewDisk/conda_envs/diffusion_planner/bin/python -m py_compile \
+  HDP-nuplan/hdp_nuplan/rl/reward.py HDP-nuplan/train_predictor_rl.py
+CUDA_VISIBLE_DEVICES='' /home/yanjun/NewDisk/conda_envs/diffusion_planner/bin/python \
+  -m pytest -q HDP-nuplan/tests
+```
+
+结果：`50 passed`；代码编译通过。
+
+在当前 10,000 NPZ cache 的前 1,000 个样本上，用专家未来轨迹进行 corridor sanity
+check：`expert_pass=939/1000`，通过率 `0.939`；最小边界余量 p10=`0.0649978 m`、
+p50=`0.6033382 m`，全体最小值=`-1.5934360 m`。
+
+前 200 个样本的专家通过率为 `185/200=92.5%`。最近 1 条 lane 的初版只有
+`104/200=52%`，已通过最近 8 条 lane 的候选检查修复，说明该修复不是为了放松
+越界判定，而是减少路口/换道时的错误 lane 归属。仍有少量专家轨迹因 lane-change
+或缓存覆盖不足无法通过；代码会在这些场景关闭硬门并记录 `drivable_area_gate_active`。
+
+#### 下一步
+
+训练前代码和单元测试已完成，尚未启动长时间 RL 重训练。下一步使用修改后的
+`run_rl_buffer10k_6ep_seed2026.sh`，从同一个 B Epoch 10 checkpoint 重新训练，
+完成后在同一个 `mini-val-fixed-200-rl-v4` 场景集合闭环评测，重点比较总 score、
+drivable-area compliance、3 个原始退化场景、硬门 active/eligible 比例，以及
+碰撞、TTC、进度和舒适性指标。
+
+#### 重训练启动记录
+
+第一次启动发现脚本默认 `RL_SAMPLING_NOISE_SCALE=0.1`，与本阶段应沿用的
+noise02 配置不一致；该进程运行约 15 秒、尚未完成有效 batch，已安全停止且不作为
+实验结果。随后使用 `RL_SAMPLING_NOISE_SCALE=0.2` 正确启动：
+
+```bash
+RL_SAMPLING_NOISE_SCALE=0.2 \
+RL_RUN_TAG=buffer10k_6ep_gate_drivable_noise02_seed2026 \
+nohup bash HDP-nuplan/scripts/run_rl_buffer10k_6ep_seed2026.sh \
+  > HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/\
+  rl_buffer10k_6ep_gate_drivable_noise02_seed2026_launcher.out 2>&1 &
+```
+
+正确训练进程已确认使用：
+
+```text
+rl_sampling_noise_scale=0.2
+rl_buffer_size=10000
+train_epochs=6
+rl_detach_window_size=0
+reward_safety_gate_require_drivable_area=true
+seed=2026
+```
+
+当前日志已进入第 1 个 rollout，约 `367/5000` batch，速度约 `12 batch/s`，GPU
+进程正常运行；训练完成后再启动 fixed200 闭环评测。
+
+#### 训练性能修正
+
+接入 top-k lane corridor 后，实际训练速度降至约 `3.5 batch/s`，原因是每个 batch
+对 32 条候选轨迹和约 1,400 个地图点进行两次全量距离计算。该次训练在第 2 rollout
+早期安全停止，已生成的 Epoch 2 checkpoint 保留作中间调试，不作为最终结果。
+
+随后在 `_drivable_area_compliance()` 中对每条 20 点 lane 保留首点、尾点和每隔一个
+中间点，将地图点数约减半。重新执行全套测试仍为 `50 passed`；前 1,000 个专家样本
+通过率由 `0.939` 变为 `0.942`，说明这是计算优化而不是放松硬门。最终训练使用新的
+`...gate_drivable_noise02_seed2026_v2_from_b10` 输出目录，从 B Epoch 10 重新开始。
+
+#### v2 最终训练结果
+
+最终训练于 `2026-08-23 19:19:57 CST` 完成，输出目录为：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_buffer10k_6ep_gate_drivable_noise02_seed2026_v2_from_b10/training_log/hdp-rl-buffer10k_6ep_gate_drivable_noise02_seed2026_v2-from-full-mini-b10/2026-08-23-18:49:02/
+```
+
+关键 rollout 结果：
+
+| epoch 阶段 | drivable gate active | drivable candidate pass | reward mean | reward std p50 |
+|---|---:|---:|---:|---:|
+| Epoch 1 rollout | 0.8504 | 0.9518 | 5.4361 | - |
+| Epoch 3 rollout | 0.8504 | 0.9583 | 5.5205 | - |
+| Epoch 5 rollout | 0.8504 | 0.9605 | 5.5436 | - |
+| Epoch 6 update | - | - | 5.2363 | 0.01287 |
+
+三次 update 均完成 `500` 个有效 update step，最终 total loss=`2.7787e-4`、
+RL loss=`-2.5914e-5`、expert anchor loss=`3.0379e-3`。训练进程已正常退出，
+当前正在执行同一 fixed200 闭环评测。
+
+#### fixed200 评测启动
+
+已启动脚本：
+
+```bash
+bash HDP-nuplan/scripts/evaluate_rl_buffer10k_gate_drivable_fixed200.sh
+```
+
+输出目录：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_buffer10k_gate_drivable_noise02_fixed200_eval/
+```
+
+评测确认使用 `mini-val-fixed-200-rl-v4`、`Sequential`、同一 NuPlan mini DB 根目录，
+并与 B Epoch 10 采用相同 runner 配置。启动后已完成 `2/200`；单场景约 40–45 秒，
+预计总耗时约 2–2.5 小时。评测完成后脚本自动生成
+`b10_vs_rl_gate_drivable_fixed200.json`，不需要手动合并结果。
+
+#### fixed200 最终评测结果
+
+评测已于 `2026-08-23 21:52:04 CST` 完成，200 个场景全部成功，失败数为 0。
+RL 模型与 B Epoch 10 使用完全相同的 `mini-val-fixed-200-rl-v4` 场景集合和闭环
+评测流程。结果如下：
+
+| 指标 | B Epoch 10 | RL + drivable-area gate | 变化 |
+|---|---:|---:|---:|
+| score | 0.90457 | 0.89144 | -0.01313 |
+| drivable_area_compliance | 0.95000 | 0.93500 | -0.01500 |
+| no_ego_at_fault_collisions | 0.95750 | 0.95750 | 0 |
+| time_to_collision_within_bound | 0.93500 | 0.93500 | 0 |
+| ego_progress_along_expert_route | 0.91207 | 0.91248 | +0.00041 |
+| speed_limit_compliance | 0.99543 | 0.99555 | +0.00011 |
+| ego_is_comfortable | 0.99500 | 0.99500 | 0 |
+
+本次实验没有观察到正收益：综合 score 下降约 `1.31` 个百分点，主要原因是
+drivable-area compliance 从 `0.950` 降至 `0.935`，而碰撞、TTC、进度和舒适性
+基本没有改善。该结果说明当前 lane-boundary 代理硬约束并没有等价于 NuPlan 的
+精确 drivable-area polygon 约束，且 RL 更新仍可能改变闭环轨迹分布。
+
+结果文件：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_buffer10k_gate_drivable_noise02_fixed200_eval/b10_vs_rl_gate_drivable_fixed200.json
+```
+
+#### reward 与 RL 更新目标重构
+
+根据 fixed200 结果，下一轮实验不再启用 lane-boundary 代理形式的
+drivable-area gate，仅保留代码、单元测试和诊断字段。训练脚本现在明确传入：
+
+```text
+reward_safety_gate_require_drivable_area=false
+```
+
+同时增加 `reward_objective_mode=nuplan_aligned`。该模式不再把安全、进度、路线、
+舒适性和跟车指标直接相加，而是先转换为 `[0,1]` 质量分，再进行加权几何组合：
+
+```text
+R = safety^0.45
+    * progress^0.25
+    * route^0.15
+    * comfort^0.10
+    * follow^0.05
+```
+
+其中 `safety = risk_reward * no_collision`，碰撞会使安全质量降为 0；舒适性使用
+`exp(-comfort_cost)` 转换。drivable-area 不进入该 reward，因为当前 NPZ 没有
+NuPlan 原生 drivable-area polygon，继续使用 lane 边界代理会把地图表示误差带入
+RL 目标。
+
+RL 更新目标也从旧的指数权重改为 `softmax_positive`：
+
+```text
+w_g = G * softmax(advantage_g / temperature)
+L_rollout = mean(w_g * L_diffusion_g)
+L_total = 1.0 * L_rollout + 0.1 * L_expert_anchor
+```
+
+新权重始终为正，组内均值为 1，不再使用 `(w-1)` 产生负的回归权重。专家 anchor
+继续使用真实 `ego_future` 的监督损失，限制 reward-weighted self-distillation
+偏离 B Epoch 10 的原有能力。新实验的权重温度设为 `0.5`，其余训练设置保持
+10,000 NPZ、seed 2026、6 epoch、buffer 10,000、noise 0.2、detach 关闭和
+encoder 冻结。
+
+#### 重构后的验证
+
+修改后的代码通过：
+
+```text
+52 passed, 15 warnings
+```
+
+在真实 10,000 NPZ cache 的前 100 个样本上运行新的 aligned reward sanity check，
+结果为 `accepted=true`：
+
+| 检查项 | 通过率 |
+|---|---:|
+| lateral 增大路线代价 | 99/100 |
+| jitter 增大舒适性代价 | 100/100 |
+| reverse 降低前进进度 | 88/88 |
+| reverse 增大倒退代价 | 88/88 |
+| 移动场景 expert 优于 stop | 88/88 |
+| collision 增大碰撞代价 | 79/79 |
+
+sanity 报告：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/reward_sanity_nuplan_aligned.json
+```
+
+#### 重构后 RL 重训练启动
+
+已从同一个 B Epoch 10 checkpoint 启动新的单 seed RL 训练：
+
+```text
+RL_RUN_TAG=buffer10k_6ep_aligned_reward_softmax_seed2026_v1
+seed=2026
+train_epochs=6
+rl_buffer_size=10000
+rl_weighting_mode=softmax_positive
+rl_reward_temperature=0.5
+rl_center_reward_weights=false
+rl_expert_anchor_weight=0.1
+reward_objective_mode=nuplan_aligned
+reward_safety_gate_require_drivable_area=false
+rl_detach_window_size=0
+rl_freeze_encoder=true
+```
+
+训练输出目录：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_buffer10k_6ep_aligned_reward_softmax_seed2026_v1_from_b10/
+```
+
+启动时已完成 10,000 NPZ、manifest 和 B Epoch 10 checkpoint 校验，rollout 运行
+正常，速度约 `12 batch/s`。训练完成后仍需使用相同的 fixed200 场景集合进行闭环
+评测，不能仅根据训练 reward 判断是否带来正收益。
+
+#### 重构后 fixed200 闭环评测启动
+
+6 epoch RL 训练已于 `2026-08-23 23:19:22 CST` 正常结束，最终 checkpoint 为：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_buffer10k_6ep_aligned_reward_softmax_seed2026_v1_from_b10/training_log/hdp-rl-buffer10k_6ep_aligned_reward_softmax_seed2026_v1-from-full-mini-b10/2026-08-23-22:46:17/model_epoch_6_trainloss_0.0025.pth
+```
+
+随后启动与 B Epoch 10 完全相同的 `mini-val-fixed-200-rl-v4` 顺序闭环评测：
+
+```text
+HDP-nuplan/scripts/evaluate_rl_aligned_reward_fixed200.sh
+```
+
+评测输出目录：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_buffer10k_aligned_reward_softmax_fixed200_eval/
+```
+
+评测完成后脚本将生成：
+
+```text
+b10_vs_rl_aligned_reward_fixed200.json
+```
+
+#### 重构后 fixed200 最终评测结果
+
+评测于 `2026-08-24 02:09:54 CST` 完成，200 个场景全部成功，失败数为 0。
+
+| 指标 | B Epoch 10 | aligned reward RL | 变化 |
+|---|---:|---:|---:|
+| score | 0.90457 | 0.87568 | -0.02889 |
+| no_ego_at_fault_collisions | 0.95750 | 0.95250 | -0.00500 |
+| drivable_area_compliance | 0.95000 | 0.93500 | -0.01500 |
+| time_to_collision_within_bound | 0.93500 | 0.93000 | -0.00500 |
+| ego_progress_along_expert_route | 0.91207 | 0.87370 | -0.03837 |
+| ego_is_making_progress | 0.99000 | 0.99000 | 0 |
+| driving_direction_compliance | 1.00000 | 1.00000 | 0 |
+| speed_limit_compliance | 0.99543 | 0.99726 | +0.00183 |
+| ego_is_comfortable | 0.99500 | 0.99500 | 0 |
+
+本次重构没有带来正收益，综合 score 相对 B Epoch 10 下降约 `2.89` 个百分点。
+虽然 speed-limit compliance 略有提高，但不足以抵消路线进度下降 `0.03837`、
+drivable-area compliance 下降 `0.015`，以及碰撞/TTC 各下降 `0.005`。
+
+这一结果否定了当前 `nuplan_aligned` 几何 reward 加 `softmax_positive` 自蒸馏目标
+作为主方案。关闭 drivable-area gate 并没有恢复 drivable-area 指标，说明主要问题
+不是 gate 本身，而是 reward-weighted rollout 回归仍然使策略偏离了监督模型；此外，
+离线 NPZ reward 与真实闭环 NuPlan 指标之间仍存在明显模型误差。
+
+结果文件：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_buffer10k_aligned_reward_softmax_fixed200_eval/b10_vs_rl_aligned_reward_fixed200.json
+```
+
+#### v4 评测集扩展：test14-hard 启动
+
+根据项目已有的 `val14`、`test14-random` 和 `test14-hard` 评测协议，停止继续
+扩大失败的 aligned-reward 实验，改用已经在 fixed200 上获得正收益的 v4 配置。
+第一阶段先运行 `test14-hard`，同时评测 B Epoch 10、RL v4 seed42 和 RL v4
+seed2026；只有困难集没有新增安全退化，才继续运行 `test14-random` 和 `val14`。
+
+启动脚本：
+
+```text
+HDP-nuplan/scripts/evaluate_v4_test14_hard.sh
+```
+
+评测配置：
+
+```text
+filter: test14-hard
+explicit scenario tokens: 272
+runner: Sequential
+planner: HDP
+models: B Epoch 10, RL v4 seed42, RL v4 seed2026
+```
+
+输出目录：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_v4_test14_hard_eval/
+```
+
+当前 B Epoch 10 已开始执行，三个模型共约 816 个闭环场景，按当前单卡顺序
+评测速度预计需要约 9～11 小时。该时间只是 test14-hard 阶段，后续 random/val14
+会根据安全门禁结果决定是否启动。
+
+#### v4 评测集扩展：test14-hard 实际结果与场景覆盖修正
+
+评测于 `2026-08-24 03:30:33 CST` 完成。需要修正启动时的场景数量估计：
+`test14-hard.yaml` 中虽然列出了 272 个显式 token，但当前配置的本地 mini DB
+实际只解析出 7 个可用场景，因此三个模型各自评测 7 个相同场景，共 21 次闭环，
+不是 272 × 3 = 816 次。
+
+| 模型 | 场景数 | 成功/失败 | score | 相对 B10 | route progress | 相对 B10 | 碰撞 | TTC | drivable area |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| B Epoch 10 | 7 | 7/0 | 0.733806810 | — | 0.916825280 | — | 0.785714 | 0.714286 | 1.000000 |
+| RL v4 seed42 | 7 | 7/0 | 0.733512116 | -0.000294693 | 0.915894315 | -0.000930965 | 0.785714 | 0.714286 | 1.000000 |
+| RL v4 seed2026 | 7 | 7/0 | 0.734574737 | +0.000767928 | 0.920013698 | +0.003188418 | 0.785714 | 0.714286 | 1.000000 |
+
+在这个 7 场景子集上，两个 RL seed 的碰撞、TTC 和 drivable-area 指标均与 B10
+完全相同；seed42 的 score 略降，seed2026 的 score 略升。但样本数只有 7，
+不能据此判断 RL 已经稳定带来正收益，也不能把它等同于完整 test14-hard。
+
+结果文件：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_v4_test14_hard_eval/b10_vs_rl_v4_test14_hard.json
+```
+
+#### v4 评测集扩展：test14-random 与 val14 启动
+
+由于当前 mini DB 对官方筛选 token 的实际覆盖有限，先在同一数据源上统计并运行
+可用场景，而不把配置文件中的理论数量误认为实际闭环数量：
+
+| 评测配置 | 配置理论范围 | 当前 mini DB 实际可用场景 |
+|---|---:|---:|
+| test14-random | 14 类 × 20 | 186 |
+| val14 | 显式 token / 官方 val split | 12 |
+
+已于 `2026-08-24 03:55:39 CST` 启动三模型配对评测，顺序为 B Epoch 10、RL v4
+seed42、RL v4 seed2026；先完成 `test14-random`，再自动完成 `val14`。所有模型
+使用同一个 mini DB、同一个 filter 和顺序执行器，保证场景集合与推理流程一致。
+
+启动脚本：
+
+```text
+HDP-nuplan/scripts/evaluate_v4_random_val14.sh
+```
+
+输出目录与日志：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_v4_random_val14_eval/
+```
+
+预计 `test14-random` 约需 3～4 小时，随后 `val14` 约需 20～30 分钟；完成后分别
+生成 `b10_vs_rl_v4_test14_random.json` 和 `b10_vs_rl_v4_val14.json`。
+
+启动后复核：`2026-08-24 03:55:47 CST` 已成功进入 `test14-random`，NuPlan
+日志确认本轮构建 `186 scenarios`，当前正在评测 B Epoch 10；后台脚本仍在运行，
+不会提前进入 `val14`。脚本完成随机集三模型评测并生成汇总后，会自动继续 val14。
+
+`2026-08-24 03:57 CST` 再次检查：当前进度为 B Epoch 10 的 `1/186`，进程 CPU
+占用正常，日志没有异常或 traceback；GPU 显存仅约 296 MiB，说明当前闭环执行主要
+由 CPU/仿真流程承担，不能用 GPU 利用率判断任务是否卡住。
+
+`2026-08-24 03:59 CST` 检查：B Epoch 10 已推进到 `2/186`，后台进程仍正常运行，
+尚未生成该模型的最终 `runner_report.parquet`；因此暂不启动下一个模型，保持严格
+顺序和相同场景集合。
+
+`2026-08-24 06:01 CST`，B Epoch 10 的 test14-random 已完成：`186/186`
+成功、`0` 失败，耗时约 `2:05:47`，并已生成完整 runner report。原自动脚本随后
+没有进入 seed42：原因是在 B10 长时间运行期间修改了同一 Bash 文件，旧 Bash
+进程继续读取文件时出现行偏移并报语法错误。这是评测编排操作错误，不是模型、
+checkpoint 或 NuPlan 场景失败；B10 结果无需重跑。
+
+脚本已改为可恢复方式：每个阶段启动前检查 `runner_report.parquet`，完整报告存在
+就跳过，否则执行该阶段。`2026-08-24 08:55:41 CST` 已恢复，日志确认跳过已完成
+的 B10，当前开始 `rl-v4-seed42-test14-random`。恢复后不再修改正在运行的脚本。
+
+`2026-08-24` 随后收到暂停指令。第一次 `SIGINT` 未能结束 NuPlan 子进程，之后使用
+`SIGTERM` 结束整个评测进程组。暂停时 seed42 已运行到约 `15/186`，但没有生成
+完整 `runner_report.parquet`，因此该部分不会被计入结果；B10 的完整报告仍保留。
+当前所有评测进程已停止，后续恢复时脚本会跳过 B10，并重新完成 seed42、seed2026
+以及 val14。
+
+#### 按要求恢复 test14-random，并在其完成后暂停
+
+收到“继续，当 `test14-random` 测试完就暂停”的指令后，未使用会自动进入 val14
+的总脚本，而是新建并启动：
+
+```text
+HDP-nuplan/scripts/resume_v4_test14_random_only.sh
+```
+
+该脚本只执行 seed42 和 seed2026 的 test14-random；B Epoch 10 已有完整报告会被
+跳过，随机集汇总生成后脚本立即结束，不启动 val14。启动时间：`2026-08-24
+12:24:36 CST`；当前已进入 seed42 的 186 场景评测。
+
+#### test14-random 最终结果
+
+`2026-08-24 16:21:28 CST`，test14-random 三模型评测与汇总全部完成，三个模型
+均为 `186/186` 成功、`0` 失败；脚本已按要求结束，未启动 val14。
+
+| 指标 | B Epoch 10 | RL v4 seed42 | seed42 - B10 | RL v4 seed2026 | seed2026 - B10 |
+|---|---:|---:|---:|---:|---:|
+| score | 0.877131 | 0.874905 | -0.002226 | 0.870830 | -0.006301 |
+| route progress | 0.941122 | 0.940656 | -0.000467 | 0.946382 | +0.005259 |
+| no ego-at-fault collisions | 0.946237 | 0.946237 | 0 | 0.930108 | -0.016129 |
+| drivable-area compliance | 0.946237 | 0.946237 | 0 | 0.951613 | +0.005376 |
+| TTC within bound | 0.919355 | 0.908602 | -0.010753 | 0.892473 | -0.026882 |
+| speed-limit compliance | 0.984241 | 0.984503 | +0.000262 | 0.983699 | -0.000541 |
+| comfort | 0.967742 | 0.978495 | +0.010753 | 0.983871 | +0.016129 |
+
+结论：在 186 场景 test14-random 上，两个 RL seed 都没有带来综合正收益。seed42
+综合分下降约 `0.00223`，碰撞不变，但 TTC 下降约 `0.01075`；seed2026 虽然路线
+进度、可行驶区域和舒适性提高，但碰撞下降约 `0.01613`、TTC 下降约 `0.02688`，
+导致综合分下降约 `0.00630`。这表明 fixed200 上 seed2026 的微弱正收益没有推广到
+test14-random，当前 RL v4 仍存在安全指标退化和跨场景集不稳定问题。
+
+结果文件：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_v4_random_val14_eval/b10_vs_rl_v4_test14_random.json
+```
+
+#### RL v5 test14-random 闭环评测启动（2026-08-24）
+
+RL v5 训练完成后，启动了 B Epoch 10 与 RL v5 seed2026 的配对闭环评测：
+
+```text
+HDP-nuplan/scripts/evaluate_v5_test14_random.sh
+```
+
+两种模型均使用同一 `test14-random` 过滤器、同一 mini DB 目录、同一 `run_mini_closed_loop.sh`、同一 HDP planner 配置和顺序执行方式。输出目录：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_safety_filtered_positive_10k_seed2026_test14_random_eval/
+```
+
+启动时间：`2026-08-24 18:46:54 CST`。当前 NuPlan 已确认构建 `186 scenarios`，正在先评测 B Epoch 10；完成后自动评测 RL v5，并生成配对汇总 JSON。
+
+随后复核发现，B Epoch 10 的完整逐场景汇总已经保存在：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_v4_random_val14_eval/b10_vs_rl_v4_test14_random.json
+```
+
+其中 B Epoch 10 为 `186/186` 成功，指标和逐场景记录完整。因此已停止刚刚重复启动的 B10 闭环进程，避免重复消耗评测时间；新的评测脚本改为复用该 B10 汇总，只运行 RL v5。RL v5 评测于 `2026-08-24 18:48:36 CST` 重新启动，仍使用同一 `test14-random` 过滤器和 186 个场景。完成后将把旧 B10 汇总与新 RL v5 汇总合并为最终比较文件。
+
+#### RL v5 test14-random 最终结果
+
+`2026-08-24 20:53:41 CST`，RL v5 的 186 场景评测完成，`186/186` 成功、`0` 失败。与同一 B Epoch 10 逐场景汇总比较如下：
+
+| 指标 | B Epoch 10 | RL v5 seed2026 | RL v5 - B10 |
+|---|---:|---:|---:|
+| score | 0.877131 | 0.871810 | -0.005322 |
+| route progress | 0.941122 | 0.930414 | -0.010708 |
+| no ego-at-fault collisions | 0.946237 | 0.946237 | 0 |
+| drivable-area compliance | 0.946237 | 0.951613 | +0.005376 |
+| TTC within bound | 0.919355 | 0.908602 | -0.010753 |
+| speed-limit compliance | 0.984241 | 0.985456 | +0.001216 |
+| comfort | 0.967742 | 0.973118 | +0.005376 |
+
+逐场景比较确认两者 token 完全相同，共 186 个。score 提升 8 个、下降 108 个、相同 70 个；route progress 提升 1 个、下降 126 个、相同 59 个。碰撞指标没有任何场景退化；TTC 有两个场景从 1 下降到 0：`850050d6ef405220`（starting_left_turn）和 `ca949cb6eec45dd8`（waiting_for_pedestrian_to_cross）。
+
+结论：安全候选筛选和正权重消除了 v4 seed2026 的碰撞退化，并将 TTC 退化从 `-0.026882` 缩小为 `-0.010753`，说明安全更新方向部分有效；但正权重 rollout 自蒸馏仍把大量场景拉向低路线进度的安全候选，导致 route progress 下降 `0.010708`，最终 score 仍下降 `0.005322`。因此 v5 不能判定为正收益模型，下一步应优先增加“候选路线进度不得显著低于专家/基线”的硬筛选或相对进度门槛，而不是继续扩大 epoch。
+
+最终汇总：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_safety_filtered_positive_10k_seed2026_test14_random_eval/b10_vs_rl_v5_test14_random.json
+```
+
+#### RL v6 进度保护实验启动（2026-08-24）
+
+针对 v5 路线进度下降，新增候选级进度保护门：候选必须同时满足 safety gate 和 `progress_guard_reward >= 0.9` 才能进入 rollout 自蒸馏。进度保护门默认关闭，不改变旧实验；本次 v6 显式开启。
+
+启动脚本：
+
+```text
+HDP-nuplan/scripts/run_rl_v6_safety_progress_filtered_10k_seed2026.sh
+```
+
+本次仍从 B Epoch 10 分叉，使用同一 10,000 NPZ、buffer=10,000、正权重、seed2026、2 个 epoch；相对于 v5 只新增：
+
+```text
+rl_filter_progress_guard_candidates=true
+rl_min_progress_guard_reward=0.9
+```
+
+输出目录：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_safety_progress_filtered_10k_seed2026_from_b10/
+```
+
+启动前完整测试结果：`55 passed, 15 warnings`。训练已后台启动，训练完成后先检查有效候选比例和 RL loss，再使用同一 `test14-random` 评测。
+
+#### RL v5 正式训练启动（2026-08-24）
+
+已从 B Epoch 10 checkpoint 启动单 seed2026 的 10,000 NPZ RL v5 训练。启动脚本：
+
+```text
+HDP-nuplan/scripts/run_rl_v5_safety_filtered_10k_seed2026.sh
+```
+
+训练输出目录：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_safety_filtered_positive_10k_seed2026_from_b10/
+```
+
+本次配置：`train_epochs=2`、`rl_buffer_size=10000`、`rl_weighting_mode=softmax_positive`、`rl_filter_safety_eligible_candidates=true`、`rl_center_reward_weights=false`、`rl_expert_anchor_weight=0.1`，其余关键 v4 参数保持不变。启动前已校验 cache 中存在 10,000 个 NPZ、manifest 包含 10,000 条记录，且起点 checkpoint 为 B Epoch 10 并包含 `model` 和 `ema_state_dict`。
+
+启动时间：`2026-08-24 18:06:07 CST`。当前进程正常运行，GPU 利用率约 `80%`，显存约 `487 MiB`。训练完成后再进行固定 `test14-random` 闭环评测，不将训练中的中间状态作为最终结果。
+
+#### RL v4 负收益原因分析与安全更新实现（2026-08-24）
+
+本节针对 `test14-random` 的负收益进行代码和日志复核。186 个场景的结果如下：
+
+| 模型 | score | route progress | collision | TTC | comfort |
+|---|---:|---:|---:|---:|---:|
+| B Epoch 10 | 0.877131 | 0.941122 | 0.946237 | 0.919355 | 0.967742 |
+| RL v4 seed42 | 0.874905 | 0.940656 | 0.946237 | 0.908602 | 0.978495 |
+| RL v4 seed2026 | 0.870830 | 0.946382 | 0.930108 | 0.892473 | 0.983871 |
+
+seed42 的综合分下降 `0.002226`，seed2026 下降 `0.006301`。seed2026 虽然路线进度和舒适性提高，但碰撞指标下降 `0.016129`、TTC 指标下降 `0.026882`。因此问题不是“RL 完全没有改变策略”，而是 rollout 更新改变了策略，同时安全退化超过了进度和舒适性收益。
+
+代码与训练日志显示有三个直接原因：
+
+1. `rl_buffer_size=1024`。训练 rollout 约为 10,000 个场景，但 replay buffer 只保留最后 1,024 个样本，存在明显的末尾数据覆盖偏置。
+2. v4 的 safety gate 只约有 `55.6%` 的场景组存在至少一个 TTC 合格候选；其余场景没有安全候选，但旧实现仍会用全部候选进行相对奖励更新。
+3. v4 开启了 `rl_center_reward_weights=true`。原实现使用 `regression_weights = weights - 1`，低奖励候选会得到负权重。日志已直接记录：seed42 的 `reward_weighted_diffusion_loss=-5.97e-6`、`reward_weighted_waypoint_loss=-1.48e-3`、`rl_loss=-2.08e-5`；seed2026 的 `rl_loss=-1.88e-5`。负的 MSE 权重不是普通的“惩罚项”，而是在最小化目标中主动鼓励增大该候选的回归误差，容易造成碰撞/TTC 退化和 seed 敏感性。
+
+#### 已实现的改进
+
+在以下文件中加入了保守安全更新：
+
+```text
+HDP-nuplan/hdp_nuplan/rl/replay_buffer.py
+HDP-nuplan/hdp_nuplan/rl/train_epoch_rl.py
+HDP-nuplan/hdp_nuplan/rl/loss.py
+HDP-nuplan/train_predictor_rl.py
+HDP-nuplan/tests/test_rl_components.py
+```
+
+具体行为：
+
+- rollout 时保存每个候选是否通过 safety gate 的 `candidate_mask`；
+- 组内均值和标准差只在合格候选上计算；
+- 没有安全候选，或只有一个安全候选的场景组，rollout loss 权重置零；该组仍可通过 expert anchor 保持原监督能力；
+- 新增 `softmax_positive` 权重模式，保证 rollout 回归权重始终为正，不再使用 `w-1` 形成负损失；
+- 新增 `eligible_candidate_fraction`、`eligible_candidates_per_group`、`no_eligible_group_fraction` 和 reward std 分位数，便于判断 RL 是否有足够有效的学习信号；
+- 新增命令行开关 `--rl_filter_safety_eligible_candidates true`，默认关闭，因此不会改变旧实验的复现结果。
+
+#### 100 场景 smoke 验证
+
+启动脚本：
+
+```text
+HDP-nuplan/scripts/run_rl_safety_filtered_smoke100.sh
+```
+
+输出目录：
+
+```text
+HDP-nuplan/tmp/mini_train_smoke_100_v2/rl-safety-filtered-positive-smoke/
+```
+
+本次使用 100 个场景、2 个 epoch、`softmax_positive`、安全候选筛选和 expert anchor=0.1。结果 checkpoint 已生成：
+
+```text
+HDP-nuplan/tmp/mini_train_smoke_100_v2/rl-safety-filtered-positive-smoke/training_log/hdp-rl-safety-filtered-positive-smoke100/2026-08-24-17:55:56/model_epoch_2_trainloss_0.6671.pth
+```
+
+关键日志：rollout 更新的 `rl_loss=0.004024`、`reward_weighted_diffusion_loss=0.002343`，均为正；安全合格候选比例为 `0.0375`，`no_eligible_group_fraction=0.9625`。这说明新逻辑确实屏蔽了绝大多数没有可靠安全候选的组，没有把它们错误地变成负向回归目标。由于 100 场景 smoke 的安全候选很少，不能据此宣称综合指标已经提升，只能说明实现和梯度方向符合预期。
+
+验证命令及结果：
+
+```bash
+/home/yanjun/NewDisk/conda_envs/diffusion_planner/bin/python -m pytest -q HDP-nuplan/tests
+```
+
+```text
+54 passed, 15 warnings in 5.00s
+```
+
+#### 下一步正式实验建议
+
+正式 RL v5 应从 B Epoch 10 分叉，只改变为“完整覆盖 + 正权重 + 安全候选筛选”：
+
+```text
+rl_buffer_size=10000
+rl_weighting_mode=softmax_positive
+rl_filter_safety_eligible_candidates=true
+rl_center_reward_weights=false
+rl_expert_anchor_weight=0.1
+train_epochs=2（先做短实验）
+```
+
+其余 v4 参数先保持不变。先在固定的 `test14-random` 上与 B Epoch 10 做配对评测，重点观察 score、collision、TTC 以及 `no_eligible_group_fraction`；若安全指标不退化，再扩大到 `val14`、`test14-hard`。
+
+#### RL v5 训练完成与空间清理（2026-08-24）
+
+在 smoke 通过后，已启动并完成上述 10,000 NPZ、seed2026、2 epoch 的正式 RL v5 训练。训练日志：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_safety_filtered_positive_10k_seed2026_from_b10/rl_train.log
+```
+
+训练结果 checkpoint：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_safety_filtered_positive_10k_seed2026_from_b10/training_log/hdp-rl-safety_filtered_positive_10k_seed2026-from-full-mini-b10/2026-08-24-18:06:12/model_epoch_2_trainloss_0.0011.pth
+```
+
+关键训练指标：`rl_loss=0.000755`、`reward_weighted_diffusion_loss=0.000458`、`reward_weighted_waypoint_loss=0.029751`，均为正；`buffer_size=10000`，`eligible_candidate_fraction=0.5271`，`no_eligible_group_fraction=0.47`。这只是训练阶段结果，是否带来闭环正收益仍需与 B Epoch 10 在相同 `test14-random` 场景上评测后确认。
+
+随后清理了明确可再生的缓存：
+
+- `NewDisk/wheels/torch241_py38_cu12`，约 2.7 GB 的离线 wheel 安装包缓存；
+- `NewDisk/conda_pkgs/cache`、`NewDisk/.cache/pip`；
+- 项目中的 `.mypy_cache`、`.pytest_cache`、`.ipynb_checkpoints` 和 `__pycache__`。
+
+未删除 `HDP-nuplan/tmp` 中的 NPZ、DB、checkpoint、训练日志和评测结果。清理前可用空间约 9.3 GB，清理后约 12 GB；当前 10,000 个 RL 训练 NPZ 和 v5 checkpoint 均已复核存在。
+
+#### HDP-nuplan/tmp 空间盘点（2026-08-24）
+
+`HDP-nuplan/tmp` 当前约占 `126 GB`，主要不是缓存，而是以下三类文件：
+
+| 目录 | 大小 | 内容 | 建议 |
+|---|---:|---|---|
+| `mini_train_full_306801_seed3407_v1` | 约 50 GB | 306,801 个完整 mini-train NPZ，约 46 GB；监督训练 checkpoint 约 1.4 GB | 若还要继续完整 mini-train 训练，保留；否则可只删除 `cache`，保留 B Epoch 10 checkpoint |
+| `mini_train_balanced_10000_seed3407_v1` | 约 47 GB | 当前 10k NPZ 约 1.5 GB，历史 RL 闭环评测 `exp` 约 45 GB | 保留 `cache`、RL checkpoint、汇总 JSON；旧评测的 `exp` 可删除，但会失去逐场景 parquet |
+| `mini_train_pilot_1000_seed3407_v1` | 约 6.7 GB | 早期 pilot NPZ、RL checkpoint 和闭环实验 | 当前正式流程不依赖，通常可整体删除 |
+| `nuplan_train_formal_union_35869_seed3407_v1` | 约 8.5 GB | 35,869 NPZ 和两组监督训练结果 | 若不再复现实验 B/35,869 监督训练，可删除；否则保留 |
+| `nuplan_train_formal_union_existing_v2` | 约 3.4 GB | 22,369 NPZ | 与当前 10k RL 训练无直接依赖，可在确认不再复现该数据集后删除 |
+| `closed_loop_eval` | 约 4.9 GB | 历史闭环逐场景报告；汇总 JSON 很小 | 若只保留汇总指标，可删除其中 `exp`，保留 JSON |
+
+当前 RL v5 只直接依赖：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/cache
+HDP-nuplan/tmp/mini_train_full_306801_seed3407_v1/experiment_b_constant5e5_from_epoch4/model_epoch_10_trainloss_0.0091.pth
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_safety_filtered_positive_10k_seed2026_from_b10/
+```
+
+因此，若目标是尽量保留当前 RL 项目且快速释放空间，第一优先级是删除历史闭环目录中的 `exp`，第二优先级是删除 `mini_train_pilot_1000_seed3407_v1`。完整 mini-train cache、35,869 NPZ 和 22,369 NPZ 暂不删除，等待用户确认是否放弃后续复现实验。
+
+#### 用户确认后的实际清理（2026-08-24）
+
+收到确认后，实际删除了以下内容：
+
+```text
+HDP-nuplan/tmp/mini_train_pilot_1000_seed3407_v1/
+HDP-nuplan/tmp/nuplan_train_formal_union_35869_seed3407_v1/
+HDP-nuplan/tmp/nuplan_train_formal_union_existing_v2/
+HDP-nuplan/tmp/closed_loop_eval/exp/
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_v4_fixed200_eval_retry/exp/
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_v4_random_val14_eval/exp/
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_buffer10k_aligned_reward_softmax_fixed200_eval/exp/
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_buffer10k_gate_drivable_noise02_fixed200_eval/exp/
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_buffer10k_noise02_fixed200_eval/exp/
+```
+
+删除的是旧数据集、早期 pilot 实验和逐场景闭环仿真中间文件；保留了当前 10,000 NPZ、RL v5 checkpoint、B Epoch 10 checkpoint、历史汇总 JSON、训练日志和项目文档。`HDP-nuplan/tmp` 从约 `126 GB` 降至约 `74 GB`，`NewDisk` 可用空间从约 `12 GB` 增加至约 `61 GB`。已复核当前 10,000 NPZ 数量仍为 `10,000`。
+
+#### RL v6 训练完成（2026-08-24）
+
+`2026-08-24 21:20:02 CST`，RL v6 训练正常完成。Epoch 2 的关键指标：
+
+```text
+rl_loss=0.00067096
+reward_weighted_diffusion_loss=0.00039750
+reward_weighted_waypoint_loss=0.02734637
+expert_anchor_loss=0.00342975
+eligible_candidate_fraction=0.48028125
+no_eligible_group_fraction=0.514
+```
+
+v6 的进度保护门实际生效：`progress_guard_eligible=0.503153125`，与 safety mask 取交集后，最终有效候选比例约 48.0%。Checkpoint：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_safety_progress_filtered_10k_seed2026_from_b10/training_log/hdp-rl-safety_progress_filtered_10k_seed2026-from-full-mini-b10/2026-08-24-21:11:55/model_epoch_2_trainloss_0.0010.pth
+```
+
+#### RL v6 并行闭环评测启动（2026-08-24）
+
+为缩短 186 场景 `test14-random` 闭环评测时间，采用 NuPlan devkit 已提供的 `SingleMachineParallelExecutor`，设置 2 个 thread worker。只改变场景调度方式，不改变 checkpoint、planner、scenario filter、NuPlan DB、metric 配置和场景内容；B Epoch 10 继续复用已有汇总 JSON，不重复运行。
+
+启动脚本：
+
+```text
+HDP-nuplan/scripts/evaluate_v6_test14_random_parallel2.sh
+```
+
+输出目录：
+
+```text
+HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_safety_progress_filtered_10k_seed2026_test14_random_eval_parallel2/
+```
+
+启动时间：`2026-08-24 21:26:11 CST`。NuPlan 已构建 `186 scenarios` 并进入 `SingleMachineParallelExecutor`；启动后已确认至少 2 个场景并行产生结果，显存约 `417 MiB`，没有 OOM 或 traceback。预计总耗时约 1～1.5 小时。
+
+#### RL v6 并行评测中断与恢复（2026-08-24）
+
+后续检查发现并行进程已经退出，但没有生成完整 `runner_report.parquet` 或最终 JSON。输出目录中已完成 `152/186` 个场景的 metric 临时文件，未发现 OOM 或 Python traceback；因此不能把 152 个部分结果当成最终评测结果。
+
+通过原 `test14-random` 汇总中的场景 token 与现有临时文件名比对，确定缺失场景数为 `34`。新建 `HDP-nuplan/hdp_nuplan/config/scenario_filter/test14-random-v6-missing34.yaml`，仅包含这 34 个 token；原有 152 个结果保留不动。
+
+恢复脚本为 `HDP-nuplan/scripts/resume_v6_test14_random_missing34.sh`。它使用原实验 UID、原输出目录、同一个 v6 checkpoint 和 NuPlan 配置串行补跑缺失场景，随后检查临时文件总数必须为 `186`，再聚合全部 186 个场景的指标。最终结果写入 `b10_vs_rl_v6_test14_random.json`。恢复过程的详细说明另见 `HDP-nuplan/doc_hdp_nuplan/test14_random_v6评测恢复说明.md`。
+
+恢复任务已于 `2026-08-24 23:43:42 CST` 启动。NuPlan 已确认本次只构建 `34 scenarios`，截至 `23:45` 已完成第 `1/34` 个补跑场景，metric 临时文件总数为 `153`（原有 152 个 + 新增 1 个）。

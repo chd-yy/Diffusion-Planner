@@ -267,7 +267,9 @@ class LaneFusionEncoder(nn.Module):
         self._channel = channels_mlp_dim
 
         # 已知限速通过 Linear 编码；未知限速使用一个可学习 embedding；交通灯为 4 维输入。
+        # 把“具体限速值”编码成一个高维向量。
         self.speed_limit_emb = nn.Linear(1, channels_mlp_dim)
+        # 专门学习一个“限速未知”的高维向量。
         self.unknown_speed_emb = nn.Embedding(1, channels_mlp_dim)
         self.traffic_emb = nn.Linear(4, channels_mlp_dim)
 

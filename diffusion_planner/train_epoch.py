@@ -230,8 +230,16 @@ def train_epoch(data_loader, model, optimizer, args, ema, aug: StatePerturbation
             # 在 tqdm 进度条右侧显示当前 batch 的 loss
             data_epoch.set_postfix(loss='{:.4f}'.format(total_loss))
 
-            # 保存当前 batch 的 loss 字典
-            epoch_loss.append(loss)
+            # 只保存脱离计算图的 Python 标量。
+            # 如果直接保存 loss 张量，会跨 batch 保留整张计算图；在完整
+            # mini-train（38,350 batch/epoch）上内存会持续增长并触发 OOM。
+            # 这里不改变反向传播和参数更新，只改变 epoch 均值的统计存储。
+            epoch_loss.append(
+                {
+                    key: value.detach().item() if torch.is_tensor(value) else value
+                    for key, value in loss.items()
+                }
+            )
 
     # 统计当前 epoch 中每个 loss 项的平均值
     epoch_mean_loss = get_epoch_mean_loss(epoch_loss)
