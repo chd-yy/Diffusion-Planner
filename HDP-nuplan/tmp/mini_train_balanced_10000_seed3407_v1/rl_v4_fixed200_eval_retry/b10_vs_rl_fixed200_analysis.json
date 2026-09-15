@@ -1,0 +1,155 @@
+{
+  "summary_file": "HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_v4_fixed200_eval_retry/b10_vs_rl_fixed200.json",
+  "baseline": "hdp_b_epoch10",
+  "status": "mixed",
+  "pairs": {
+    "rl_seed42": {
+      "score": {
+        "count": 200,
+        "mean_delta": -6.979362596646498e-05,
+        "median_delta": 0.0,
+        "wins": 33,
+        "losses": 60,
+        "ties": 107
+      },
+      "no_ego_at_fault_collisions": {
+        "count": 200,
+        "mean_delta": 0.0,
+        "median_delta": 0.0,
+        "wins": 0,
+        "losses": 0,
+        "ties": 200
+      },
+      "drivable_area_compliance": {
+        "count": 200,
+        "mean_delta": 0.0,
+        "median_delta": 0.0,
+        "wins": 0,
+        "losses": 0,
+        "ties": 200
+      },
+      "ego_is_making_progress": {
+        "count": 200,
+        "mean_delta": 0.0,
+        "median_delta": 0.0,
+        "wins": 0,
+        "losses": 0,
+        "ties": 200
+      },
+      "driving_direction_compliance": {
+        "count": 200,
+        "mean_delta": 0.0,
+        "median_delta": 0.0,
+        "wins": 0,
+        "losses": 0,
+        "ties": 200
+      },
+      "ego_progress_along_expert_route": {
+        "count": 200,
+        "mean_delta": -0.0004217379349181197,
+        "median_delta": 0.0,
+        "wins": 26,
+        "losses": 69,
+        "ties": 105
+      },
+      "time_to_collision_within_bound": {
+        "count": 200,
+        "mean_delta": 0.0,
+        "median_delta": 0.0,
+        "wins": 0,
+        "losses": 0,
+        "ties": 200
+      },
+      "speed_limit_compliance": {
+        "count": 200,
+        "mean_delta": 0.000125727953627921,
+        "median_delta": 0.0,
+        "wins": 14,
+        "losses": 0,
+        "ties": 186
+      },
+      "ego_is_comfortable": {
+        "count": 200,
+        "mean_delta": 0.0,
+        "median_delta": 0.0,
+        "wins": 0,
+        "losses": 0,
+        "ties": 200
+      }
+    },
+    "rl_seed2026": {
+      "score": {
+        "count": 200,
+        "mean_delta": 0.0014982780138337482,
+        "median_delta": 0.0,
+        "wins": 71,
+        "losses": 23,
+        "ties": 106
+      },
+      "no_ego_at_fault_collisions": {
+        "count": 200,
+        "mean_delta": 0.0,
+        "median_delta": 0.0,
+        "wins": 0,
+        "losses": 0,
+        "ties": 200
+      },
+      "drivable_area_compliance": {
+        "count": 200,
+        "mean_delta": 0.0,
+        "median_delta": 0.0,
+        "wins": 0,
+        "losses": 0,
+        "ties": 200
+      },
+      "ego_is_making_progress": {
+        "count": 200,
+        "mean_delta": 0.0,
+        "median_delta": 0.0,
+        "wins": 0,
+        "losses": 0,
+        "ties": 200
+      },
+      "driving_direction_compliance": {
+        "count": 200,
+        "mean_delta": 0.0,
+        "median_delta": 0.0,
+        "wins": 0,
+        "losses": 0,
+        "ties": 200
+      },
+      "ego_progress_along_expert_route": {
+        "count": 200,
+        "mean_delta": 0.0051958773996318855,
+        "median_delta": 0.0,
+        "wins": 78,
+        "losses": 18,
+        "ties": 104
+      },
+      "time_to_collision_within_bound": {
+        "count": 200,
+        "mean_delta": 0.0,
+        "median_delta": 0.0,
+        "wins": 0,
+        "losses": 0,
+        "ties": 200
+      },
+      "speed_limit_compliance": {
+        "count": 200,
+        "mean_delta": -0.00019598359172916745,
+        "median_delta": 0.0,
+        "wins": 2,
+        "losses": 12,
+        "ties": 186
+      },
+      "ego_is_comfortable": {
+        "count": 200,
+        "mean_delta": 0.0,
+        "median_delta": 0.0,
+        "wins": 0,
+        "losses": 0,
+        "ties": 200
+      }
+    }
+  }
+}

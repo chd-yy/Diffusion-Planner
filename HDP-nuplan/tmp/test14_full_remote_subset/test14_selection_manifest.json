@@ -1,0 +1,4522 @@
+{
+  "source_url": "https://motional-nuplan.s3-ap-northeast-1.amazonaws.com/public/nuplan-v1.1/nuplan-v1.1_test.zip",
+  "archive_size": 95919476643,
+  "scan": {
+    "db_count": 1349,
+    "candidate_count": 757844
+  },
+  "test14_hard": {
+    "configured_token_count": 272,
+    "found_token_count": 272,
+    "missing_tokens": [],
+    "scenarios": [
+      {
+        "db_name": "data/cache/test/2021.05.25.12.30.39_veh-25_00321_01196.db",
+        "row_index": 219,
+        "token": "8de10fd86b825304",
+        "timestamp": 1621960743300063,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.12.30.39_veh-25_03774_03886.db",
+        "row_index": 9,
+        "token": "93c583b46398560e",
+        "timestamp": 1621964101800079,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.12.30.39_veh-25_04267_04848.db",
+        "row_index": 749,
+        "token": "a2ec5056da3c5c67",
+        "timestamp": 1621964873650086,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.12.40.06_veh-47_01110_01596.db",
+        "row_index": 44,
+        "token": "0a1adb702c0f5949",
+        "timestamp": 1621962231399559,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.12.40.06_veh-47_01110_01596.db",
+        "row_index": 93,
+        "token": "d173d3a1c8fb5e8a",
+        "timestamp": 1621962241049636,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.12.40.06_veh-47_01110_01596.db",
+        "row_index": 129,
+        "token": "d417ec1ee7295c5f",
+        "timestamp": 1621962247249620,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.12.40.06_veh-47_01110_01596.db",
+        "row_index": 1001,
+        "token": "0681f7fa37dd5f63",
+        "timestamp": 1621962305299901,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.12.40.06_veh-47_05213_05515.db",
+        "row_index": 66,
+        "token": "bc962c4b185859a6",
+        "timestamp": 1621966144850058,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.14.16.10_veh-35_01100_01664.db",
+        "row_index": 2793,
+        "token": "067d36d6568657f4",
+        "timestamp": 1621968023249921,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.14.16.10_veh-35_01100_01664.db",
+        "row_index": 3606,
+        "token": "33b448fab23a5d03",
+        "timestamp": 1621968143199961,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.14.16.10_veh-35_01100_01664.db",
+        "row_index": 3760,
+        "token": "f67f6478ccf65687",
+        "timestamp": 1621968176851355,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.14.16.10_veh-35_01100_01664.db",
+        "row_index": 4060,
+        "token": "56cdd36746c85788",
+        "timestamp": 1621968225949820,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.14.16.10_veh-35_01690_02183.db",
+        "row_index": 614,
+        "token": "98c66f5373705fd7",
+        "timestamp": 1621968488350582,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.14.16.10_veh-35_04561_05104.db",
+        "row_index": 237,
+        "token": "420653bda4b2575b",
+        "timestamp": 1621971247150750,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.14.26.37_veh-27_01774_01960.db",
+        "row_index": 9,
+        "token": "7c64bfeda7ca5f22",
+        "timestamp": 1621969137799734,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.14.26.37_veh-27_03603_04010.db",
+        "row_index": 1338,
+        "token": "0f1513c4f8285ab1",
+        "timestamp": 1621971209399642,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.15.14.31_veh-47_01863_02344.db",
+        "row_index": 501,
+        "token": "820bf3685bc955ef",
+        "timestamp": 1621972267050504,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.15.14.31_veh-47_03238_03528.db",
+        "row_index": 333,
+        "token": "0a2be0a8f9c75775",
+        "timestamp": 1621973471949984,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.15.14.31_veh-47_03238_03528.db",
+        "row_index": 719,
+        "token": "e0834d617d8d5453",
+        "timestamp": 1621973556749760,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.15.59.03_veh-30_00885_01251.db",
+        "row_index": 228,
+        "token": "c532a0844ee35bde",
+        "timestamp": 1621973797450049,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.16.37.23_veh-25_01099_01453.db",
+        "row_index": 960,
+        "token": "f8c717165ff15ff7",
+        "timestamp": 1621976375000014,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.17.38.43_veh-27_00048_00406.db",
+        "row_index": 481,
+        "token": "f9ac8947d2c55c1b",
+        "timestamp": 1621978916049717,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.17.54.41_veh-35_03671_04070.db",
+        "row_index": 3850,
+        "token": "9891d19fd245546a",
+        "timestamp": 1621983679850158,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.17.54.41_veh-35_04299_04847.db",
+        "row_index": 331,
+        "token": "06533b6b947357f7",
+        "timestamp": 1621984131750374,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.18.38.25_veh-25_00859_01445.db",
+        "row_index": 494,
+        "token": "ae6691cb57175db6",
+        "timestamp": 1621983486100107,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.18.38.25_veh-25_02309_03344.db",
+        "row_index": 1981,
+        "token": "16a890626fa9570d",
+        "timestamp": 1621984882050008,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.12.02.06_veh-35_01805_02034.db",
+        "row_index": 479,
+        "token": "4095fd4af9a45b18",
+        "timestamp": 1622738110501086,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.12.06.21_veh-47_03366_03599.db",
+        "row_index": 106,
+        "token": "88ac8fc4c8b25a22",
+        "timestamp": 1622739884900552,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.12.06.21_veh-47_03822_04409.db",
+        "row_index": 999,
+        "token": "37947d83063255ea",
+        "timestamp": 1622740520300144,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.12.36.43_veh-38_03953_04248.db",
+        "row_index": 459,
+        "token": "d453b49dafae5dd5",
+        "timestamp": 1622742483150110,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.13.55.17_veh-35_02572_02855.db",
+        "row_index": 373,
+        "token": "df68e9d709e65b1e",
+        "timestamp": 1622745727500016,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.13.55.17_veh-35_02866_03582.db",
+        "row_index": 490,
+        "token": "3cd758f0d51a55e5",
+        "timestamp": 1622745959950812,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.14.29.58_veh-16_03836_04336.db",
+        "row_index": 3188,
+        "token": "3f9e713baeec55a9",
+        "timestamp": 1622749250199854,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.14.29.58_veh-16_05573_06071.db",
+        "row_index": 1398,
+        "token": "338ca19e3fde5381",
+        "timestamp": 1622750962200145,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.14.29.58_veh-16_06171_06386.db",
+        "row_index": 209,
+        "token": "7289414e82da5b00",
+        "timestamp": 1622751355149965,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.17.06.58_veh-35_01615_02220.db",
+        "row_index": 150,
+        "token": "4e8af2b28cea5133",
+        "timestamp": 1622756142051277,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.17.06.58_veh-35_01615_02220.db",
+        "row_index": 2360,
+        "token": "2703f12098405703",
+        "timestamp": 1622756404850723,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.17.06.58_veh-35_01615_02220.db",
+        "row_index": 4133,
+        "token": "cf87d58064425ee7",
+        "timestamp": 1622756605200428,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.17.06.58_veh-35_02943_03220.db",
+        "row_index": 3,
+        "token": "4570000dd1685c5d",
+        "timestamp": 1622757487551230,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.17.55.42_veh-38_01484_01672.db",
+        "row_index": 67,
+        "token": "18a8fe4997e053fe",
+        "timestamp": 1622759060699508,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.18.47.39_veh-35_00881_02426.db",
+        "row_index": 7789,
+        "token": "ff4d69f4dd0c5474",
+        "timestamp": 1622762484100309,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.18.47.39_veh-35_02673_03602.db",
+        "row_index": 455,
+        "token": "b87bd5af8ff75bc5",
+        "timestamp": 1622763324300122,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.18.47.39_veh-35_02673_03602.db",
+        "row_index": 3543,
+        "token": "ebf09047e62a5fb8",
+        "timestamp": 1622763681350957,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.18.47.39_veh-35_03613_04352.db",
+        "row_index": 1488,
+        "token": "4236a1f3c9e35f9d",
+        "timestamp": 1622764456600805,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.18.57.27_veh-47_00932_01793.db",
+        "row_index": 440,
+        "token": "be2efbeede795568",
+        "timestamp": 1622762202600278,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.18.57.27_veh-47_05047_05368.db",
+        "row_index": 79,
+        "token": "4f3e807c698a5335",
+        "timestamp": 1622766197100025,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.13.47.12_veh-12_00956_02040.db",
+        "row_index": 452,
+        "token": "535516116fa35117",
+        "timestamp": 1624889328200602,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.13.47.12_veh-12_02139_02676.db",
+        "row_index": 2104,
+        "token": "0795bcd734235cf5",
+        "timestamp": 1624890688200120,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.13.53.26_veh-26_00707_03205.db",
+        "row_index": 1825,
+        "token": "b6f48c3ca32750d5",
+        "timestamp": 1624889547446093,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.13.53.26_veh-26_00707_03205.db",
+        "row_index": 4939,
+        "token": "40e1f34c92255a0e",
+        "timestamp": 1624890069551592,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.13.53.26_veh-26_00707_03205.db",
+        "row_index": 10282,
+        "token": "edc971e9dc7f5165",
+        "timestamp": 1624890765849345,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.13.59.32_veh-38_00015_00936.db",
+        "row_index": 4649,
+        "token": "f9f0880607a15639",
+        "timestamp": 1624889671000258,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.13.59.32_veh-38_01933_03338.db",
+        "row_index": 2820,
+        "token": "003445cf99235331",
+        "timestamp": 1624891492800247,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.13.59.32_veh-38_01933_03338.db",
+        "row_index": 5387,
+        "token": "660d375c109f5eed",
+        "timestamp": 1624892039550107,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.13.59.32_veh-38_01933_03338.db",
+        "row_index": 5699,
+        "token": "45aa9e8713fa5bee",
+        "timestamp": 1624892055500039,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.51.28_veh-26_00135_02642.db",
+        "row_index": 3258,
+        "token": "ffbae8b71907545c",
+        "timestamp": 1624892675798878,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.51.28_veh-26_00135_02642.db",
+        "row_index": 4275,
+        "token": "a1a3d628e53c5d75",
+        "timestamp": 1624892888447111,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.51.28_veh-26_00135_02642.db",
+        "row_index": 5267,
+        "token": "8629ab5781b853d3",
+        "timestamp": 1624892977101096,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.51.28_veh-26_00135_02642.db",
+        "row_index": 8263,
+        "token": "0586b3fb1ffb5fba",
+        "timestamp": 1624893652046335,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.51.28_veh-26_02653_05399.db",
+        "row_index": 1271,
+        "token": "96b881f39d3a55f2",
+        "timestamp": 1624894860098371,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.51.28_veh-26_02653_05399.db",
+        "row_index": 14930,
+        "token": "a22b2b1e04595a0e",
+        "timestamp": 1624896724147875,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.55.14_veh-12_00384_00671.db",
+        "row_index": 8,
+        "token": "afd9603706985285",
+        "timestamp": 1624892715150068,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.55.14_veh-12_01602_04021.db",
+        "row_index": 1524,
+        "token": "69e91c91e4e65848",
+        "timestamp": 1624894360550348,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.55.14_veh-12_01602_04021.db",
+        "row_index": 3321,
+        "token": "6639a4f7873a56dc",
+        "timestamp": 1624894730899866,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.55.14_veh-12_01602_04021.db",
+        "row_index": 4879,
+        "token": "5bebf2e252ec5367",
+        "timestamp": 1624894890050467,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.55.14_veh-12_01602_04021.db",
+        "row_index": 7265,
+        "token": "a3b20f60c7835df8",
+        "timestamp": 1624895358999927,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.55.14_veh-12_01602_04021.db",
+        "row_index": 9429,
+        "token": "9fd5ec2b453d556e",
+        "timestamp": 1624895755699914,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.55.14_veh-12_04032_04916.db",
+        "row_index": 1065,
+        "token": "13f3028945475a79",
+        "timestamp": 1624896664799903,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.02.02_veh-38_01222_01779.db",
+        "row_index": 779,
+        "token": "72a3637d375155d9",
+        "timestamp": 1624894011299916,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.02.02_veh-38_01222_01779.db",
+        "row_index": 875,
+        "token": "b56eda3b0d1c5f67",
+        "timestamp": 1624894042699513,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.02.02_veh-38_01966_02377.db",
+        "row_index": 84,
+        "token": "7d365cae2cd45ad8",
+        "timestamp": 1624894726700292,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.02.02_veh-38_02398_02848.db",
+        "row_index": 67,
+        "token": "ac286967ed895963",
+        "timestamp": 1624895089800274,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.02.02_veh-38_02398_02848.db",
+        "row_index": 277,
+        "token": "a10ebe68a57c5dda",
+        "timestamp": 1624895106550109,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.02.02_veh-38_02398_02848.db",
+        "row_index": 549,
+        "token": "88aa2ad613205556",
+        "timestamp": 1624895122350435,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.02.02_veh-38_02398_02848.db",
+        "row_index": 810,
+        "token": "577d4f456cd65460",
+        "timestamp": 1624895167699518,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.02.02_veh-38_02869_03012.db",
+        "row_index": 3,
+        "token": "ba4883a772905c39",
+        "timestamp": 1624895549850449,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.07.02_veh-35_00260_05954.db",
+        "row_index": 4731,
+        "token": "ae0ace575c775f82",
+        "timestamp": 1624894025450924,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.07.02_veh-35_00260_05954.db",
+        "row_index": 7978,
+        "token": "d07309ff567b5953",
+        "timestamp": 1624894501401451,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.07.02_veh-35_00260_05954.db",
+        "row_index": 12341,
+        "token": "698b38a35cc95956",
+        "timestamp": 1624895099699214,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.07.02_veh-35_00260_05954.db",
+        "row_index": 23699,
+        "token": "62ec1599159e5af6",
+        "timestamp": 1624896423301117,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.07.02_veh-35_00260_05954.db",
+        "row_index": 28971,
+        "token": "65d4717562ea5d95",
+        "timestamp": 1624897054001411,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.07.02_veh-35_00260_05954.db",
+        "row_index": 30118,
+        "token": "cb57c23a2cc05786",
+        "timestamp": 1624897260250368,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.07.02_veh-35_00260_05954.db",
+        "row_index": 30999,
+        "token": "ca050f5421925415",
+        "timestamp": 1624897440851432,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.07.02_veh-35_00260_05954.db",
+        "row_index": 37113,
+        "token": "42ad59cd4b2b5205",
+        "timestamp": 1624898473850915,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.10.57_veh-16_01001_02195.db",
+        "row_index": 3359,
+        "token": "11f773b0b19055e9",
+        "timestamp": 1624894769100337,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.10.57_veh-16_01001_02195.db",
+        "row_index": 5807,
+        "token": "96074214b9645952",
+        "timestamp": 1624895072300081,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.10.57_veh-16_01001_02195.db",
+        "row_index": 6337,
+        "token": "0e165b03aae35700",
+        "timestamp": 1624895129000061,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.10.57_veh-16_02686_03731.db",
+        "row_index": 519,
+        "token": "134e675d2807537f",
+        "timestamp": 1624896005400506,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.10.57_veh-16_03742_04746.db",
+        "row_index": 712,
+        "token": "2fad34f49b825d6b",
+        "timestamp": 1624897109600719,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.59.39_veh-47_00016_01074.db",
+        "row_index": 433,
+        "token": "cbdc3e2a73e15687",
+        "timestamp": 1624896386049839,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.59.39_veh-47_01085_01534.db",
+        "row_index": 1215,
+        "token": "9b039177b43b5260",
+        "timestamp": 1624897407849369,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.59.39_veh-47_01555_03368.db",
+        "row_index": 1950,
+        "token": "e94b99e48b355de6",
+        "timestamp": 1624898186399575,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.59.39_veh-47_01555_03368.db",
+        "row_index": 4418,
+        "token": "26c1cae14e5b5ce8",
+        "timestamp": 1624898525899651,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.59.39_veh-47_01555_03368.db",
+        "row_index": 6820,
+        "token": "1e502e7fc8745e0a",
+        "timestamp": 1624899157149650,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.59.39_veh-47_03379_04184.db",
+        "row_index": 2109,
+        "token": "9c711bed4f175f6d",
+        "timestamp": 1624900013749513,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.59.39_veh-47_04537_05600.db",
+        "row_index": 19,
+        "token": "00af7480d144507f",
+        "timestamp": 1624900731599594,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.59.39_veh-47_04537_05600.db",
+        "row_index": 43,
+        "token": "855985a401ab59ea",
+        "timestamp": 1624900733699787,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.29.11_veh-38_00750_01393.db",
+        "row_index": 1797,
+        "token": "9e7b8fa4248d55de",
+        "timestamp": 1624899016299633,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.29.11_veh-38_03006_03242.db",
+        "row_index": 45,
+        "token": "c6277e74a4f054a7",
+        "timestamp": 1624901000100360,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.29.11_veh-38_04607_06901.db",
+        "row_index": 2885,
+        "token": "1796b59d5f16581f",
+        "timestamp": 1624903204800098,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.29.11_veh-38_04607_06901.db",
+        "row_index": 5667,
+        "token": "c9f1e5d3c8325ac4",
+        "timestamp": 1624903889499570,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.29.11_veh-38_06912_07220.db",
+        "row_index": 6,
+        "token": "71544041acf754bc",
+        "timestamp": 1624904899350026,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.29.11_veh-38_06912_07220.db",
+        "row_index": 1393,
+        "token": "d63776b80fbd5d4b",
+        "timestamp": 1624905016849727,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.35.45_veh-12_00029_00514.db",
+        "row_index": 0,
+        "token": "5fa2710018705849",
+        "timestamp": 1624898317449980,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.35.45_veh-12_00525_02226.db",
+        "row_index": 5015,
+        "token": "217131c79adf588d",
+        "timestamp": 1624899421449685,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.35.45_veh-12_00525_02226.db",
+        "row_index": 5383,
+        "token": "33187fb09d0e52f8",
+        "timestamp": 1624899448500204,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.35.45_veh-12_02247_03143.db",
+        "row_index": 5,
+        "token": "1c3d3a5bb86c5d97",
+        "timestamp": 1624900555300195,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.35.45_veh-12_02247_03143.db",
+        "row_index": 3008,
+        "token": "2cf6ac2d997a5dff",
+        "timestamp": 1624900915700004,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.35.45_veh-12_04331_04784.db",
+        "row_index": 2501,
+        "token": "d908073d216b5e04",
+        "timestamp": 1624902855450161,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.57.59_veh-26_00016_00484.db",
+        "row_index": 2025,
+        "token": "c5171ce6d7f05d80",
+        "timestamp": 1624899911097505,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.57.59_veh-26_01702_02475.db",
+        "row_index": 1919,
+        "token": "763bb5fb88d2556f",
+        "timestamp": 1624901542497860,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.57.59_veh-26_02496_04017.db",
+        "row_index": 4,
+        "token": "1c17b9dad1f65970",
+        "timestamp": 1624902125798113,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.57.59_veh-26_02496_04017.db",
+        "row_index": 6905,
+        "token": "74874f782e725aec",
+        "timestamp": 1624903037296715,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.57.59_veh-26_04038_04724.db",
+        "row_index": 346,
+        "token": "a61d56930e9b5f36",
+        "timestamp": 1624903664496984,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.57.59_veh-26_04745_06261.db",
+        "row_index": 3939,
+        "token": "57441c7185bc5b30",
+        "timestamp": 1624904864546600,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.13.34_veh-16_00015_01780.db",
+        "row_index": 2826,
+        "token": "d10a8714a31b58b4",
+        "timestamp": 1624901255099934,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.13.34_veh-16_00015_01780.db",
+        "row_index": 5600,
+        "token": "bcf52e9ad12c5ce4",
+        "timestamp": 1624901560000023,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.13.34_veh-16_01791_04035.db",
+        "row_index": 3445,
+        "token": "f15c28ffb0ea5a7a",
+        "timestamp": 1624902891900036,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.13.34_veh-16_01791_04035.db",
+        "row_index": 8059,
+        "token": "521a9f9977d351da",
+        "timestamp": 1624903690349922,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.13.34_veh-16_04046_04493.db",
+        "row_index": 208,
+        "token": "f7700356e6d85410",
+        "timestamp": 1624904751050087,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.13.34_veh-16_04504_06163.db",
+        "row_index": 2387,
+        "token": "3150573de84e5ea9",
+        "timestamp": 1624905590050176,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.13.34_veh-16_04504_06163.db",
+        "row_index": 7461,
+        "token": "2ddc6c9887915bc9",
+        "timestamp": 1624906065899855,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.13.34_veh-16_04504_06163.db",
+        "row_index": 9934,
+        "token": "7803717ee46c58cc",
+        "timestamp": 1624906271150065,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.56.29_veh-47_00016_01367.db",
+        "row_index": 402,
+        "token": "094db8d50cf95250",
+        "timestamp": 1624903469149573,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.56.29_veh-47_00016_01367.db",
+        "row_index": 2767,
+        "token": "63aa10eaed9f53c5",
+        "timestamp": 1624903929299450,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.56.29_veh-47_01378_02853.db",
+        "row_index": 508,
+        "token": "159942fd13675580",
+        "timestamp": 1624904887699509,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.56.29_veh-47_01378_02853.db",
+        "row_index": 1308,
+        "token": "c136ba64909b5ffe",
+        "timestamp": 1624904953399546,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.56.29_veh-47_01378_02853.db",
+        "row_index": 1434,
+        "token": "f352e2c4378b5ea1",
+        "timestamp": 1624904963949362,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.56.29_veh-47_01378_02853.db",
+        "row_index": 2706,
+        "token": "e569500a38a256bf",
+        "timestamp": 1624905072949536,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.56.29_veh-47_01378_02853.db",
+        "row_index": 3573,
+        "token": "0488dbdf03b55f00",
+        "timestamp": 1624905315299511,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.56.29_veh-47_01378_02853.db",
+        "row_index": 9043,
+        "token": "0d3490827eb45df7",
+        "timestamp": 1624906094200387,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.56.29_veh-47_03034_04012.db",
+        "row_index": 3331,
+        "token": "daa841dbda985ed0",
+        "timestamp": 1624906968949643,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.03.27_veh-14_03140_03856.db",
+        "row_index": 866,
+        "token": "97237e8269415fb0",
+        "timestamp": 1624906738699563,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.03.27_veh-14_03140_03856.db",
+        "row_index": 974,
+        "token": "c2b222d1f0715c00",
+        "timestamp": 1624906818150038,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.30.41_veh-12_00572_01613.db",
+        "row_index": 593,
+        "token": "8181c455582c5623",
+        "timestamp": 1624905984800279,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.30.41_veh-12_00572_01613.db",
+        "row_index": 2171,
+        "token": "5a79cd2161c754c9",
+        "timestamp": 1624906144249891,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.30.41_veh-12_00572_01613.db",
+        "row_index": 3937,
+        "token": "80a05e5b3037536a",
+        "timestamp": 1624906512400570,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.30.41_veh-12_01624_02831.db",
+        "row_index": 2478,
+        "token": "5cb7891d29545bd4",
+        "timestamp": 1624907213250552,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.30.41_veh-12_02870_04378.db",
+        "row_index": 991,
+        "token": "d3be3fa904135dd9",
+        "timestamp": 1624908449649501,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.30.41_veh-12_02870_04378.db",
+        "row_index": 2888,
+        "token": "99e63d494deb5808",
+        "timestamp": 1624908908849916,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.30.41_veh-12_04521_05146.db",
+        "row_index": 670,
+        "token": "62db9dc16ffd5135",
+        "timestamp": 1624909864650569,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.44.16_veh-35_00682_02674.db",
+        "row_index": 9982,
+        "token": "a9407c1ea38959d5",
+        "timestamp": 1624907897449654,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.44.16_veh-35_02695_04087.db",
+        "row_index": 10389,
+        "token": "80ababf8dcfb5914",
+        "timestamp": 1624909616000134,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.20.24.43_veh-38_01668_02298.db",
+        "row_index": 1113,
+        "token": "e9faae87fb83540d",
+        "timestamp": 1624914057450429,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.20.24.43_veh-38_04976_05979.db",
+        "row_index": 5389,
+        "token": "c0c385cbdd47536b",
+        "timestamp": 1624917557000183,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.16.05_veh-14_00016_00935.db",
+        "row_index": 1846,
+        "token": "9914f87b536b5c23",
+        "timestamp": 1624915607899654,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.16.05_veh-14_01338_02740.db",
+        "row_index": 666,
+        "token": "be2029b5dc2c5b78",
+        "timestamp": 1624916669299757,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.16.05_veh-14_01338_02740.db",
+        "row_index": 3134,
+        "token": "2c5af3c1152c5e69",
+        "timestamp": 1624917089799567,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.16.05_veh-14_01338_02740.db",
+        "row_index": 3956,
+        "token": "e4bc04cbc7eb5940",
+        "timestamp": 1624917316300225,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_00334_01865.db",
+        "row_index": 0,
+        "token": "2e56997063c057a0",
+        "timestamp": 1624915961850367,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_00334_01865.db",
+        "row_index": 45,
+        "token": "35265fcdd0be5579",
+        "timestamp": 1624915969749937,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 3315,
+        "token": "cb0c11da557650db",
+        "timestamp": 1624917920000604,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 3319,
+        "token": "e8ec64ceb6d050ff",
+        "timestamp": 1624917923499530,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 3350,
+        "token": "5bc4f584c6325e50",
+        "timestamp": 1624917932349937,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 7981,
+        "token": "b8fc7d499e705b68",
+        "timestamp": 1624918791449752,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 8140,
+        "token": "ae6e6bd7567d56bc",
+        "timestamp": 1624918803499676,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 9278,
+        "token": "840f360aea765a57",
+        "timestamp": 1624918903549604,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 15276,
+        "token": "96c975c46cac5a49",
+        "timestamp": 1624919687349737,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 15582,
+        "token": "8a29aecff22b5657",
+        "timestamp": 1624919702649558,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 15888,
+        "token": "e7b473cea10954cb",
+        "timestamp": 1624919717949811,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 16194,
+        "token": "4836b2dd09895237",
+        "timestamp": 1624919733249646,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 16500,
+        "token": "f3702a1cc1cb5c64",
+        "timestamp": 1624919748549722,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 16806,
+        "token": "014ad27ed9da5b86",
+        "timestamp": 1624919763849926,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 17112,
+        "token": "990551bed2555351",
+        "timestamp": 1624919779149826,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_04712_05316.db",
+        "row_index": 173,
+        "token": "a112ea9f3d2b5d5b",
+        "timestamp": 1624920343549556,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_04712_05316.db",
+        "row_index": 376,
+        "token": "d13124fa683654b4",
+        "timestamp": 1624920372099565,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.29.28_veh-16_00034_00843.db",
+        "row_index": 1648,
+        "token": "74914e4a95025d59",
+        "timestamp": 1624916247999512,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.29.28_veh-16_00034_00843.db",
+        "row_index": 1797,
+        "token": "938b0223319957ef",
+        "timestamp": 1624916319199730,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.29.28_veh-16_00034_00843.db",
+        "row_index": 2506,
+        "token": "89b7bd3592505a26",
+        "timestamp": 1624916463999450,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.29.28_veh-16_00034_00843.db",
+        "row_index": 2772,
+        "token": "9c7f7922e3225dec",
+        "timestamp": 1624916514249514,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.29.28_veh-16_01912_03183.db",
+        "row_index": 2111,
+        "token": "5cfbb108eb5f584f",
+        "timestamp": 1624918075999424,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.29.28_veh-16_01912_03183.db",
+        "row_index": 4776,
+        "token": "d91351e4615859fb",
+        "timestamp": 1624918470799567,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.29.39_veh-12_00811_01199.db",
+        "row_index": 82,
+        "token": "0d17d16b86e65700",
+        "timestamp": 1624916864950051,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.29.39_veh-12_01856_02160.db",
+        "row_index": 868,
+        "token": "7dde022f98be574c",
+        "timestamp": 1624917962499935,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.29.39_veh-12_02171_02725.db",
+        "row_index": 1,
+        "token": "6262500c70275443",
+        "timestamp": 1624918205349409,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.29.39_veh-12_02171_02725.db",
+        "row_index": 154,
+        "token": "442523fcce0950e8",
+        "timestamp": 1624918243099955,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.47.53_veh-35_00972_02652.db",
+        "row_index": 2249,
+        "token": "db363d844b3754f1",
+        "timestamp": 1624918455399579,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.47.53_veh-35_00972_02652.db",
+        "row_index": 3150,
+        "token": "1e3f5ab092335059",
+        "timestamp": 1624918570000123,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.47.53_veh-35_02673_03342.db",
+        "row_index": 1376,
+        "token": "b327b4d0432a51a1",
+        "timestamp": 1624919852351474,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.22.48.36_veh-14_00005_00762.db",
+        "row_index": 47,
+        "token": "d8834251f07a597f",
+        "timestamp": 1624920625699258,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.22.48.36_veh-14_01175_02603.db",
+        "row_index": 3477,
+        "token": "752323a35a825d22",
+        "timestamp": 1624922354699397,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.22.48.36_veh-14_02625_03479.db",
+        "row_index": 783,
+        "token": "179a1bf034c650ce",
+        "timestamp": 1624923586449311,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.22.48.36_veh-14_02625_03479.db",
+        "row_index": 859,
+        "token": "88431143abe45625",
+        "timestamp": 1624923652200076,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.22.48.36_veh-14_02625_03479.db",
+        "row_index": 2001,
+        "token": "01010f1fc37b5321",
+        "timestamp": 1624923835849951,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.23.51.43_veh-14_00169_01681.db",
+        "row_index": 7017,
+        "token": "54da00bc66c7575d",
+        "timestamp": 1624925675299723,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.23.51.43_veh-14_01692_02372.db",
+        "row_index": 1280,
+        "token": "00de3f6da9205a0c",
+        "timestamp": 1624926320750501,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.08.16.17.03.12_veh-08_00172_00582.db",
+        "row_index": 524,
+        "token": "90a02e90433d5137",
+        "timestamp": 1629133826699528,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.08.16.17.03.12_veh-08_00172_00582.db",
+        "row_index": 564,
+        "token": "45df14109a3a5937",
+        "timestamp": 1629133832749723,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.08.16.17.03.12_veh-08_00641_01035.db",
+        "row_index": 48,
+        "token": "56022a77c9fd5a1e",
+        "timestamp": 1629134255349900,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.08.30.11.18.32_veh-40_00019_00275.db",
+        "row_index": 238,
+        "token": "61380daa1b275ce0",
+        "timestamp": 1630322523550478,
+        "map_name": "us-ma-boston",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.08.30.16.16.44_veh-40_00256_00716.db",
+        "row_index": 141,
+        "token": "688caa7560c05d03",
+        "timestamp": 1630340633500425,
+        "map_name": "us-ma-boston",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.08.30.16.16.44_veh-40_00779_01088.db",
+        "row_index": 111,
+        "token": "c88e29a426805b27",
+        "timestamp": 1630341108900206,
+        "map_name": "us-ma-boston",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.08.30.16.16.44_veh-40_01099_01351.db",
+        "row_index": 99,
+        "token": "9ef2cc51be4c51ed",
+        "timestamp": 1630341465150309,
+        "map_name": "us-ma-boston",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.09.14.18.22_veh-48_00322_00895.db",
+        "row_index": 304,
+        "token": "577c248204055c02",
+        "timestamp": 1631197802250309,
+        "map_name": "us-ma-boston",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.09.17.18.51_veh-48_01248_01450.db",
+        "row_index": 2,
+        "token": "60ad86e2dbf156b5",
+        "timestamp": 1631209381448974,
+        "map_name": "us-ma-boston",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.09.17.18.51_veh-48_02055_02269.db",
+        "row_index": 0,
+        "token": "edbc6fe0dfbf51f1",
+        "timestamp": 1631210169550419,
+        "map_name": "us-ma-boston",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.09.17.18.51_veh-48_02055_02269.db",
+        "row_index": 5,
+        "token": "2b3f110c96995dd1",
+        "timestamp": 1631210170100024,
+        "map_name": "us-ma-boston",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.09.17.18.51_veh-48_02055_02269.db",
+        "row_index": 317,
+        "token": "7f7cd65cacff5f22",
+        "timestamp": 1631210217099419,
+        "map_name": "us-ma-boston",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.09.19.49.25_veh-39_00453_00713.db",
+        "row_index": 9,
+        "token": "c2c649fcd5325b3d",
+        "timestamp": 1631217507200227,
+        "map_name": "us-ma-boston",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.13.05.51_veh-42_02215_02389.db",
+        "row_index": 1,
+        "token": "32aea40a777c5156",
+        "timestamp": 1631799942800079,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.14.39.34_veh-42_00297_00935.db",
+        "row_index": 355,
+        "token": "6eb38f317f2251f2",
+        "timestamp": 1631803615100019,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.14.39.34_veh-42_00297_00935.db",
+        "row_index": 530,
+        "token": "9a92b5bf8d735034",
+        "timestamp": 1631803656849645,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.14.39.34_veh-42_01111_01448.db",
+        "row_index": 198,
+        "token": "eb2ac6cc24f55f6e",
+        "timestamp": 1631804438349782,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.15.00.21_veh-45_00359_00751.db",
+        "row_index": 222,
+        "token": "40e5fc0034035139",
+        "timestamp": 1631804942049749,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.15.00.21_veh-45_01380_01959.db",
+        "row_index": 163,
+        "token": "88a42c466d2b5ebd",
+        "timestamp": 1631806208100193,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.15.12.03_veh-42_00275_00620.db",
+        "row_index": 201,
+        "token": "beba883bb6285cee",
+        "timestamp": 1631805568349571,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.15.12.03_veh-42_00275_00620.db",
+        "row_index": 507,
+        "token": "6db7f9f43c655149",
+        "timestamp": 1631805583649276,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.15.12.03_veh-42_00275_00620.db",
+        "row_index": 552,
+        "token": "7c34e3a807965fc1",
+        "timestamp": 1631805618150226,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.15.12.03_veh-42_01037_01434.db",
+        "row_index": 54,
+        "token": "91c272aacfc6511b",
+        "timestamp": 1631806348849694,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.16.20.27_veh-08_00119_00399.db",
+        "row_index": 21,
+        "token": "070345fd69165e11",
+        "timestamp": 1631809542099476,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.16.20.27_veh-08_00119_00399.db",
+        "row_index": 444,
+        "token": "68e943391ab65773",
+        "timestamp": 1631809628699764,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.16.20.27_veh-08_00119_00399.db",
+        "row_index": 605,
+        "token": "6fd36832e6925f74",
+        "timestamp": 1631809644399996,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.16.20.27_veh-08_01562_02066.db",
+        "row_index": 109,
+        "token": "ff02a16ae6c95a42",
+        "timestamp": 1631811128499477,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.17.40.09_veh-45_02539_02745.db",
+        "row_index": 1,
+        "token": "1075ba60960c564e",
+        "timestamp": 1631816655100016,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.17.40.35_veh-08_00032_01780.db",
+        "row_index": 2051,
+        "token": "e10289f39c5f5bea",
+        "timestamp": 1631814850999653,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.17.40.35_veh-08_00032_01780.db",
+        "row_index": 2194,
+        "token": "698cc78af2d154d2",
+        "timestamp": 1631815030599487,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.17.40.35_veh-08_00032_01780.db",
+        "row_index": 2987,
+        "token": "66f5844016ec5134",
+        "timestamp": 1631815517899788,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.17.40.35_veh-08_02269_02956.db",
+        "row_index": 437,
+        "token": "cfa05ee317245c9f",
+        "timestamp": 1631816876799588,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.18.31.12_veh-45_01952_02416.db",
+        "row_index": 56,
+        "token": "fd1a947d104956f8",
+        "timestamp": 1631819324300570,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.18.31.12_veh-45_01952_02416.db",
+        "row_index": 108,
+        "token": "8c8e9b7de9bf541a",
+        "timestamp": 1631819366401148,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.18.31.12_veh-45_02447_02656.db",
+        "row_index": 830,
+        "token": "295432d96052578e",
+        "timestamp": 1631819748199578,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.18.41.38_veh-08_01472_01832.db",
+        "row_index": 240,
+        "token": "ba267dbeb0c853b5",
+        "timestamp": 1631819413299826,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.19.27.01_veh-45_01749_03230.db",
+        "row_index": 280,
+        "token": "643114dca0825b3f",
+        "timestamp": 1631822451200246,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.19.27.01_veh-45_01749_03230.db",
+        "row_index": 665,
+        "token": "4fde9018255c5f96",
+        "timestamp": 1631822775799741,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.19.27.01_veh-45_01749_03230.db",
+        "row_index": 796,
+        "token": "61f6e42143cf5eb9",
+        "timestamp": 1631822898300673,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.19.27.01_veh-45_01749_03230.db",
+        "row_index": 1545,
+        "token": "63352660f02f5e3d",
+        "timestamp": 1631823367000565,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.19.47.47_veh-08_01278_01633.db",
+        "row_index": 79,
+        "token": "2b34e2a1fc6b543c",
+        "timestamp": 1631823076149667,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.19.47.47_veh-08_02366_03150.db",
+        "row_index": 204,
+        "token": "78fb87b881535792",
+        "timestamp": 1631824333449839,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.19.47.47_veh-08_02366_03150.db",
+        "row_index": 250,
+        "token": "230a1a270a105821",
+        "timestamp": 1631824367949781,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.19.47.47_veh-08_02366_03150.db",
+        "row_index": 254,
+        "token": "904819e474565d84",
+        "timestamp": 1631824372900283,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.19.49.00_veh-42_00990_01609.db",
+        "row_index": 0,
+        "token": "6f2ce5e5530b5e3c",
+        "timestamp": 1631822922349982,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.19.49.00_veh-42_00990_01609.db",
+        "row_index": 217,
+        "token": "3e673b48bbf15727",
+        "timestamp": 1631823095299770,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.20.23.58_veh-45_00508_00757.db",
+        "row_index": 4,
+        "token": "6bdb5f343c355f98",
+        "timestamp": 1631824441899578,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.20.23.58_veh-45_01161_01367.db",
+        "row_index": 8,
+        "token": "914f752db44d5143",
+        "timestamp": 1631825106250179,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.20.30.08_veh-42_00658_00910.db",
+        "row_index": 133,
+        "token": "de3cc0dd7ac45a65",
+        "timestamp": 1631825026600201,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.20.30.08_veh-42_00995_01436.db",
+        "row_index": 87,
+        "token": "59199b4d340558b4",
+        "timestamp": 1631825359649635,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.20.30.08_veh-42_00995_01436.db",
+        "row_index": 88,
+        "token": "295154d51713573f",
+        "timestamp": 1631825370099585,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.20.30.08_veh-42_00995_01436.db",
+        "row_index": 96,
+        "token": "35c3787707ce5deb",
+        "timestamp": 1631825398000260,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.20.43.47_veh-08_00783_01358.db",
+        "row_index": 103,
+        "token": "3454842a96ef511e",
+        "timestamp": 1631826014250179,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.20.43.47_veh-08_00783_01358.db",
+        "row_index": 224,
+        "token": "6d0875dbcec45b3a",
+        "timestamp": 1631826106400460,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.22.01.45.32_veh-53_00298_00432.db",
+        "row_index": 6,
+        "token": "75d56d4c7b6f5013",
+        "timestamp": 1632275565100043,
+        "map_name": "sg-one-north",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.22.02.20.43_veh-53_00915_01150.db",
+        "row_index": 12,
+        "token": "46236093f497573f",
+        "timestamp": 1632278333149818,
+        "map_name": "sg-one-north",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.22.02.55.42_veh-53_01340_01564.db",
+        "row_index": 25,
+        "token": "8e355342a0115145",
+        "timestamp": 1632280905249772,
+        "map_name": "sg-one-north",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.22.03.46.15_veh-51_01522_02013.db",
+        "row_index": 10,
+        "token": "03d25c49fbc6550e",
+        "timestamp": 1632284067598972,
+        "map_name": "sg-one-north",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.22.06.36.13_veh-53_01137_01583.db",
+        "row_index": 11,
+        "token": "51b40354373a5fac",
+        "timestamp": 1632293976699636,
+        "map_name": "sg-one-north",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.22.07.43.38_veh-49_01489_01803.db",
+        "row_index": 117,
+        "token": "70ee68fbecd354b0",
+        "timestamp": 1632298275900083,
+        "map_name": "sg-one-north",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.22.07.49.35_veh-53_00016_00431.db",
+        "row_index": 823,
+        "token": "a2fc81fb19985d60",
+        "timestamp": 1632297400150097,
+        "map_name": "sg-one-north",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.22.08.18.52_veh-49_00482_00882.db",
+        "row_index": 0,
+        "token": "48d3ee048cff55d6",
+        "timestamp": 1632299491849848,
+        "map_name": "sg-one-north",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.29.14.44.26_veh-28_00528_00992.db",
+        "row_index": 358,
+        "token": "3a0b1987ce79508f",
+        "timestamp": 1632927470699551,
+        "map_name": "us-ma-boston",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.29.18.19.40_veh-28_01268_01685.db",
+        "row_index": 2,
+        "token": "c24af34deb6f54bf",
+        "timestamp": 1632940945199758,
+        "map_name": "us-ma-boston",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.29.19.02.14_veh-28_00540_00917.db",
+        "row_index": 52,
+        "token": "20f2e6f4bf3f5e80",
+        "timestamp": 1632942915149649,
+        "map_name": "us-ma-boston",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.02.32.50_veh-53_01292_01787.db",
+        "row_index": 144,
+        "token": "6ff0d0bb90d852b9",
+        "timestamp": 1633489078849861,
+        "map_name": "sg-one-north",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.02.32.50_veh-53_01292_01787.db",
+        "row_index": 275,
+        "token": "b1cef3eeb5445447",
+        "timestamp": 1633489106200238,
+        "map_name": "sg-one-north",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.02.32.50_veh-53_01292_01787.db",
+        "row_index": 432,
+        "token": "0b7bb38b72ff5034",
+        "timestamp": 1633489185150156,
+        "map_name": "sg-one-north",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.03.07.17_veh-53_00121_00293.db",
+        "row_index": 45,
+        "token": "d4edda3ab1d75034",
+        "timestamp": 1633489963400153,
+        "map_name": "sg-one-north",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.03.07.17_veh-53_00703_00974.db",
+        "row_index": 244,
+        "token": "efa032e2bf055c96",
+        "timestamp": 1633490573249914,
+        "map_name": "sg-one-north",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.03.07.17_veh-53_01278_02139.db",
+        "row_index": 445,
+        "token": "be8d080bf7cf5835",
+        "timestamp": 1633491290799800,
+        "map_name": "sg-one-north",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.03.07.17_veh-53_01278_02139.db",
+        "row_index": 469,
+        "token": "a36c1b943871552a",
+        "timestamp": 1633491310799987,
+        "map_name": "sg-one-north",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.03.07.17_veh-53_01278_02139.db",
+        "row_index": 1228,
+        "token": "044a3924d9e15bc1",
+        "timestamp": 1633491726149841,
+        "map_name": "sg-one-north",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.04.07.24_veh-49_00776_01719.db",
+        "row_index": 492,
+        "token": "5d392fa38ff65c3f",
+        "timestamp": 1633494683250792,
+        "map_name": "sg-one-north",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.04.07.24_veh-49_00776_01719.db",
+        "row_index": 497,
+        "token": "9e220701888b5ab2",
+        "timestamp": 1633494746300194,
+        "map_name": "sg-one-north",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.04.07.24_veh-49_01831_02115.db",
+        "row_index": 14,
+        "token": "99ef05a2e6a45454",
+        "timestamp": 1633495171999961,
+        "map_name": "sg-one-north",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.06.13.06_veh-51_00927_01219.db",
+        "row_index": 6,
+        "token": "c921e9258bdf5c0c",
+        "timestamp": 1633501888649639,
+        "map_name": "sg-one-north",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.06.13.06_veh-51_00927_01219.db",
+        "row_index": 19,
+        "token": "0cd6cff135c25fa9",
+        "timestamp": 1633501908799260,
+        "map_name": "sg-one-north",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.07.15.13_veh-49_00400_00884.db",
+        "row_index": 178,
+        "token": "75025613e3935595",
+        "timestamp": 1633505142950286,
+        "map_name": "sg-one-north",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.07.15.13_veh-49_00400_00884.db",
+        "row_index": 384,
+        "token": "7995b9b53ef55e80",
+        "timestamp": 1633505293850271,
+        "map_name": "sg-one-north",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.08.13.16_veh-51_00692_01123.db",
+        "row_index": 236,
+        "token": "d8a23f0cb78e5938",
+        "timestamp": 1633508826999197,
+        "map_name": "sg-one-north",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.08.13.16_veh-51_00692_01123.db",
+        "row_index": 371,
+        "token": "2754fbd9c2445dce",
+        "timestamp": 1633508865999536,
+        "map_name": "sg-one-north",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.08.13.16_veh-51_00692_01123.db",
+        "row_index": 392,
+        "token": "15d232cebce05616",
+        "timestamp": 1633508895699381,
+        "map_name": "sg-one-north",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.08.13.16_veh-51_00692_01123.db",
+        "row_index": 440,
+        "token": "752db4af7e2754e7",
+        "timestamp": 1633508959949515,
+        "map_name": "sg-one-north",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.08.13.16_veh-51_00692_01123.db",
+        "row_index": 585,
+        "token": "b703d99845f45666",
+        "timestamp": 1633509043849746,
+        "map_name": "sg-one-north",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.08.34.20_veh-53_00259_00711.db",
+        "row_index": 233,
+        "token": "fa6b31fc16f251c9",
+        "timestamp": 1633509879999540,
+        "map_name": "sg-one-north",
+        "scenario_type": "behind_long_vehicle"
+      }
+    ]
+  },
+  "test14_random": {
+    "scenario_count": 261,
+    "scenarios": [
+      {
+        "db_name": "data/cache/test/2021.05.25.12.30.39_veh-25_00321_01196.db",
+        "row_index": 248,
+        "token": "0ef918a26914564e",
+        "timestamp": 1621960800300135,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.18.38.25_veh-25_00859_01445.db",
+        "row_index": 38,
+        "token": "5af50221d55658e4",
+        "timestamp": 1621983314450016,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.14.29.58_veh-16_05573_06071.db",
+        "row_index": 1404,
+        "token": "33a3eb36641857e6",
+        "timestamp": 1622750962500136,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.13.53.26_veh-26_00707_03205.db",
+        "row_index": 10034,
+        "token": "1b1aafb5916e5534",
+        "timestamp": 1624890650001667,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.55.14_veh-12_01602_04021.db",
+        "row_index": 8047,
+        "token": "b6f238f681bf5a09",
+        "timestamp": 1624895505600260,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.59.39_veh-47_01555_03368.db",
+        "row_index": 5159,
+        "token": "93b3c95f3fea5812",
+        "timestamp": 1624898735799786,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.57.59_veh-26_04745_06261.db",
+        "row_index": 2487,
+        "token": "af3681f002005504",
+        "timestamp": 1624904718946542,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.30.41_veh-12_02870_04378.db",
+        "row_index": 1777,
+        "token": "b83ee0e949e45520",
+        "timestamp": 1624908620699749,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.47.53_veh-35_00972_02652.db",
+        "row_index": 6289,
+        "token": "3c0e98e1b77b5d44",
+        "timestamp": 1624919136550416,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.08.30.17.34.35_veh-40_01546_01786.db",
+        "row_index": 5,
+        "token": "a0f50ac13caa51ac",
+        "timestamp": 1630346536850187,
+        "map_name": "us-ma-boston",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.14.39.34_veh-42_00297_00935.db",
+        "row_index": 525,
+        "token": "1772467d58bb5dec",
+        "timestamp": 1631803650249688,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.16.20.27_veh-08_00526_00962.db",
+        "row_index": 74,
+        "token": "c4f2b1f170eb5649",
+        "timestamp": 1631810006449509,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.17.40.35_veh-08_00032_01780.db",
+        "row_index": 2486,
+        "token": "d8633b984d75530e",
+        "timestamp": 1631815331299666,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.18.41.38_veh-08_00515_01113.db",
+        "row_index": 120,
+        "token": "fd31b918c10b56e2",
+        "timestamp": 1631818486500060,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.19.27.01_veh-45_01749_03230.db",
+        "row_index": 311,
+        "token": "48b0081cd2385220",
+        "timestamp": 1631822498799696,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.20.23.58_veh-45_00054_00389.db",
+        "row_index": 45,
+        "token": "279e166bd5fb5429",
+        "timestamp": 1631824022000677,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.21.13.20_veh-45_00680_01017.db",
+        "row_index": 82,
+        "token": "38e301b3cbad5707",
+        "timestamp": 1631827632200844,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.22.03.46.15_veh-51_00553_00813.db",
+        "row_index": 34,
+        "token": "c700656703ec57bc",
+        "timestamp": 1632283075599199,
+        "map_name": "sg-one-north",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.02.32.50_veh-53_01292_01787.db",
+        "row_index": 46,
+        "token": "e5d69d5a0b135831",
+        "timestamp": 1633489004300885,
+        "map_name": "sg-one-north",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.07.54.27_veh-49_00391_00875.db",
+        "row_index": 27,
+        "token": "d3dfcbb4c7be5e8b",
+        "timestamp": 1633507490649981,
+        "map_name": "sg-one-north",
+        "scenario_type": "starting_left_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.12.30.39_veh-25_00321_01196.db",
+        "row_index": 219,
+        "token": "8de10fd86b825304",
+        "timestamp": 1621960743300063,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.16.54.14_veh-47_03317_03698.db",
+        "row_index": 149,
+        "token": "812679cd23f45d5d",
+        "timestamp": 1621979614249927,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.17.55.42_veh-38_05161_05786.db",
+        "row_index": 4,
+        "token": "9eb227aec6dc5e23",
+        "timestamp": 1622762691349408,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.07.02_veh-35_00260_05954.db",
+        "row_index": 4739,
+        "token": "d69084e4a3385ad3",
+        "timestamp": 1624894025851009,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.51.28_veh-26_00135_02642.db",
+        "row_index": 12034,
+        "token": "27fb96d75d4759a2",
+        "timestamp": 1624894221100032,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.59.39_veh-47_03379_04184.db",
+        "row_index": 349,
+        "token": "704c05ebeb5959e6",
+        "timestamp": 1624899625949708,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.57.59_veh-26_02496_04017.db",
+        "row_index": 3507,
+        "token": "80a406698e2c5442",
+        "timestamp": 1624902529447250,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.30.41_veh-12_00572_01613.db",
+        "row_index": 2858,
+        "token": "70086024fed658cf",
+        "timestamp": 1624906260749941,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_00334_01865.db",
+        "row_index": 2620,
+        "token": "dd117e2e2dfa560d",
+        "timestamp": 1624916552449673,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.22.48.36_veh-14_01175_02603.db",
+        "row_index": 3783,
+        "token": "ead9590e094d5a8f",
+        "timestamp": 1624922402700251,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.08.30.18.49.17_veh-40_00699_01061.db",
+        "row_index": 34,
+        "token": "2f8c75dfca3f50b9",
+        "timestamp": 1630350359250099,
+        "map_name": "us-ma-boston",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.15.00.21_veh-45_00806_01354.db",
+        "row_index": 282,
+        "token": "5051ccd75314515c",
+        "timestamp": 1631805533300669,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.17.40.35_veh-08_00032_01780.db",
+        "row_index": 1652,
+        "token": "4e0c8ec081805052",
+        "timestamp": 1631814481300155,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.18.31.12_veh-45_02447_02656.db",
+        "row_index": 846,
+        "token": "770a7cb9f1585e38",
+        "timestamp": 1631819753850598,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.19.49.00_veh-42_00990_01609.db",
+        "row_index": 98,
+        "token": "78c5b673402b5861",
+        "timestamp": 1631822946350605,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.19.27.01_veh-45_01749_03230.db",
+        "row_index": 1430,
+        "token": "281b1fe38bdc5467",
+        "timestamp": 1631823138199739,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.22.03.46.15_veh-51_00553_00813.db",
+        "row_index": 3,
+        "token": "3094b2c29265536a",
+        "timestamp": 1632283031999857,
+        "map_name": "sg-one-north",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.29.19.02.14_veh-28_03198_03360.db",
+        "row_index": 4,
+        "token": "4871b9b151905c45",
+        "timestamp": 1632945462449446,
+        "map_name": "us-ma-boston",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.04.07.24_veh-49_00776_01719.db",
+        "row_index": 397,
+        "token": "10e36bd6966e54b4",
+        "timestamp": 1633494513600678,
+        "map_name": "sg-one-north",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.07.54.27_veh-49_00391_00875.db",
+        "row_index": 120,
+        "token": "0393fbf49cd55295",
+        "timestamp": 1633507614300152,
+        "map_name": "sg-one-north",
+        "scenario_type": "starting_right_turn"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.12.30.39_veh-25_00321_01196.db",
+        "row_index": 135,
+        "token": "1939feda817551d5",
+        "timestamp": 1621960706799780,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.14.26.37_veh-27_00753_01258.db",
+        "row_index": 1085,
+        "token": "6c6ddf6740d355ef",
+        "timestamp": 1621968309599803,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.17.54.41_veh-35_02169_02608.db",
+        "row_index": 835,
+        "token": "fcedb0da569c518b",
+        "timestamp": 1621982080099967,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.14.16.46_veh-47_01877_02158.db",
+        "row_index": 293,
+        "token": "3452d2d6fb655c2b",
+        "timestamp": 1622746339049911,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.18.08.45_veh-16_04254_04640.db",
+        "row_index": 334,
+        "token": "07874767a6d55ad7",
+        "timestamp": 1622762548149663,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.13.53.26_veh-26_00707_03205.db",
+        "row_index": 4326,
+        "token": "64986687478f5338",
+        "timestamp": 1624889951596727,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.51.28_veh-26_00135_02642.db",
+        "row_index": 7598,
+        "token": "155505762e1d5cc0",
+        "timestamp": 1624893359648244,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.55.14_veh-12_01602_04021.db",
+        "row_index": 9429,
+        "token": "9fd5ec2b453d556e",
+        "timestamp": 1624895755699914,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.07.02_veh-35_00260_05954.db",
+        "row_index": 18931,
+        "token": "5e33493023b75f33",
+        "timestamp": 1624895843450421,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.10.57_veh-16_03742_04746.db",
+        "row_index": 3220,
+        "token": "dca16f92a1015a7f",
+        "timestamp": 1624897458149931,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.57.59_veh-26_02496_04017.db",
+        "row_index": 4497,
+        "token": "2fd784c6bf4f572c",
+        "timestamp": 1624902660546684,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.29.11_veh-38_04607_06901.db",
+        "row_index": 1167,
+        "token": "bac6f1145eef5bf2",
+        "timestamp": 1624902786649615,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.13.34_veh-16_04046_04493.db",
+        "row_index": 257,
+        "token": "9ba0cad0c3e7580f",
+        "timestamp": 1624904758350019,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.30.41_veh-12_00572_01613.db",
+        "row_index": 2481,
+        "token": "29a854ae1aee58ff",
+        "timestamp": 1624906178100410,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.20.24.43_veh-38_01668_02298.db",
+        "row_index": 1113,
+        "token": "e9faae87fb83540d",
+        "timestamp": 1624914057450429,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_00334_01865.db",
+        "row_index": 5745,
+        "token": "9031cf5175f253cf",
+        "timestamp": 1624916974749754,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.47.53_veh-35_00972_02652.db",
+        "row_index": 1237,
+        "token": "713972db4cf35d09",
+        "timestamp": 1624918240150023,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.08.30.16.16.44_veh-40_00256_00716.db",
+        "row_index": 270,
+        "token": "399986448051533a",
+        "timestamp": 1630340867650327,
+        "map_name": "us-ma-boston",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.17.40.35_veh-08_00032_01780.db",
+        "row_index": 3225,
+        "token": "2fa51997ae9554cb",
+        "timestamp": 1631815738050403,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.29.14.44.26_veh-28_00528_00992.db",
+        "row_index": 0,
+        "token": "d21b22d6c0405ad7",
+        "timestamp": 1632927356299627,
+        "map_name": "us-ma-boston",
+        "scenario_type": "starting_straight_traffic_light_intersection_traversal"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.14.16.10_veh-35_00854_01089.db",
+        "row_index": 0,
+        "token": "0cc3d9bb137b5a2b",
+        "timestamp": 1621967511650304,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.15.14.31_veh-47_00118_00905.db",
+        "row_index": 2170,
+        "token": "7721f05072a85928",
+        "timestamp": 1621970675549851,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.12.02.06_veh-35_00233_00609.db",
+        "row_index": 890,
+        "token": "9bdc15b26c455633",
+        "timestamp": 1622736556751442,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.18.47.39_veh-35_00881_02426.db",
+        "row_index": 5837,
+        "token": "b3b422a58ff35545",
+        "timestamp": 1622762273601147,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.13.59.32_veh-38_00015_00936.db",
+        "row_index": 2214,
+        "token": "f1cd02f2371c5c67",
+        "timestamp": 1624889339100145,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.02.02_veh-38_01222_01779.db",
+        "row_index": 412,
+        "token": "f69d0b59d08d512b",
+        "timestamp": 1624893965599710,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.07.02_veh-35_00260_05954.db",
+        "row_index": 5716,
+        "token": "d5a09eb525e8592a",
+        "timestamp": 1624894222201616,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.07.02_veh-35_00260_05954.db",
+        "row_index": 22852,
+        "token": "6a1ffac82183523e",
+        "timestamp": 1624896353850592,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.10.57_veh-16_02686_03731.db",
+        "row_index": 2946,
+        "token": "c3bdac749eeb5206",
+        "timestamp": 1624896382049840,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.51.28_veh-26_02653_05399.db",
+        "row_index": 16884,
+        "token": "4f9321ffbcb95b55",
+        "timestamp": 1624897068896795,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.57.59_veh-26_02496_04017.db",
+        "row_index": 5228,
+        "token": "a26d34c327365e71",
+        "timestamp": 1624902831997650,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.03.27_veh-14_01603_02530.db",
+        "row_index": 2030,
+        "token": "07db0457ad745d8e",
+        "timestamp": 1624905346399597,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.13.34_veh-16_04504_06163.db",
+        "row_index": 2386,
+        "token": "34a52b2f68f357df",
+        "timestamp": 1624905590000173,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.44.16_veh-35_00682_02674.db",
+        "row_index": 1906,
+        "token": "a88d3779eb535274",
+        "timestamp": 1624906893349828,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.16.05_veh-14_00016_00935.db",
+        "row_index": 114,
+        "token": "daaaa1360bcf5451",
+        "timestamp": 1624915277799469,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.29.39_veh-12_02171_02725.db",
+        "row_index": 163,
+        "token": "ceec28e1943f5d76",
+        "timestamp": 1624918245749687,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 15052,
+        "token": "b0f8ae874f2b5e78",
+        "timestamp": 1624919564549554,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.22.48.36_veh-14_00005_00762.db",
+        "row_index": 245,
+        "token": "da64279ff31552d1",
+        "timestamp": 1624920815099571,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.23.51.43_veh-14_01692_02372.db",
+        "row_index": 1426,
+        "token": "845645e7c5665590",
+        "timestamp": 1624926359199868,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.17.40.35_veh-08_00032_01780.db",
+        "row_index": 2257,
+        "token": "7be9d726f1be5003",
+        "timestamp": 1631815051649617,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "stopping_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.13.47.12_veh-12_00424_00934.db",
+        "row_index": 774,
+        "token": "7f50df6eea5c54e9",
+        "timestamp": 1624888798300617,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.51.28_veh-26_02653_05399.db",
+        "row_index": 663,
+        "token": "33624e1585945551",
+        "timestamp": 1624894806250636,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.07.02_veh-35_00260_05954.db",
+        "row_index": 25693,
+        "token": "35dd043cd64e5537",
+        "timestamp": 1624896671250838,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.56.29_veh-47_00016_01367.db",
+        "row_index": 1041,
+        "token": "c167ed0e96e455c4",
+        "timestamp": 1624903529749886,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.29.11_veh-38_04607_06901.db",
+        "row_index": 6646,
+        "token": "714dffb0115b5071",
+        "timestamp": 1624904072000409,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.30.41_veh-12_01624_02831.db",
+        "row_index": 2468,
+        "token": "6c37bc8ac424562b",
+        "timestamp": 1624907211100688,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.16.05_veh-14_00016_00935.db",
+        "row_index": 110,
+        "token": "c1027e45d3b956e4",
+        "timestamp": 1624915260250121,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.29.39_veh-12_02171_02725.db",
+        "row_index": 220,
+        "token": "28d5868f9d6e5035",
+        "timestamp": 1624918309498948,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.08.16.17.03.12_veh-08_00641_01035.db",
+        "row_index": 454,
+        "token": "0fa049c07b5b57c0",
+        "timestamp": 1629134362049833,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.13.05.51_veh-42_00428_00700.db",
+        "row_index": 97,
+        "token": "2664bb314a155875",
+        "timestamp": 1631798158649737,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.14.39.34_veh-42_00297_00935.db",
+        "row_index": 335,
+        "token": "8ec9c713f4fc5d52",
+        "timestamp": 1631803572049748,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.15.47.30_veh-45_00370_00612.db",
+        "row_index": 32,
+        "token": "7dea428154ad5d8a",
+        "timestamp": 1631807723750402,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.17.40.35_veh-08_00032_01780.db",
+        "row_index": 1780,
+        "token": "65af9ce73917587a",
+        "timestamp": 1631814634349735,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.18.31.12_veh-45_00938_01128.db",
+        "row_index": 21,
+        "token": "843eb1eee80b529e",
+        "timestamp": 1631818117600263,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.18.41.38_veh-08_02231_02678.db",
+        "row_index": 155,
+        "token": "7cc26b3af3b0557f",
+        "timestamp": 1631820219800436,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.19.27.01_veh-45_01749_03230.db",
+        "row_index": 1466,
+        "token": "17e261bca6435550",
+        "timestamp": 1631823187200284,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.20.30.08_veh-42_01747_02010.db",
+        "row_index": 93,
+        "token": "69b83d7c62d65006",
+        "timestamp": 1631826107599832,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.22.07.49.35_veh-53_00016_00431.db",
+        "row_index": 808,
+        "token": "eaef31406a205542",
+        "timestamp": 1632297399399650,
+        "map_name": "sg-one-north",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.03.07.17_veh-53_00703_00974.db",
+        "row_index": 230,
+        "token": "f9e6e7fc604b5ff9",
+        "timestamp": 1633490572449981,
+        "map_name": "sg-one-north",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.07.15.13_veh-49_00400_00884.db",
+        "row_index": 167,
+        "token": "a1d2f54d8ec1564c",
+        "timestamp": 1633505142300463,
+        "map_name": "sg-one-north",
+        "scenario_type": "high_lateral_acceleration"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.12.30.39_veh-25_00321_01196.db",
+        "row_index": 0,
+        "token": "e5ef6199dc3b5909",
+        "timestamp": 1621960661750041,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.14.26.37_veh-27_00753_01258.db",
+        "row_index": 406,
+        "token": "adc1c85043525786",
+        "timestamp": 1621968254049751,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.16.37.23_veh-25_03311_03550.db",
+        "row_index": 855,
+        "token": "356d80474d1252c0",
+        "timestamp": 1621978577500124,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.13.55.17_veh-35_00073_00426.db",
+        "row_index": 545,
+        "token": "7280988648d05358",
+        "timestamp": 1622743190001130,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.17.06.58_veh-35_03231_03685.db",
+        "row_index": 2353,
+        "token": "e7fc2f835ea95ece",
+        "timestamp": 1622758007101541,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.13.47.12_veh-12_02139_02676.db",
+        "row_index": 198,
+        "token": "0d05468e475657b8",
+        "timestamp": 1624890438349570,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.13.59.32_veh-38_01933_03338.db",
+        "row_index": 6210,
+        "token": "e4bac3a9053955e2",
+        "timestamp": 1624892109349893,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.55.14_veh-12_01602_04021.db",
+        "row_index": 1002,
+        "token": "f5a6ac1890c75f87",
+        "timestamp": 1624894196249956,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.07.02_veh-35_00260_05954.db",
+        "row_index": 7994,
+        "token": "bd345bdaa3715b71",
+        "timestamp": 1624894502751626,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.59.39_veh-47_00016_01074.db",
+        "row_index": 2120,
+        "token": "619533b026ce59f1",
+        "timestamp": 1624896884099390,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.07.02_veh-35_00260_05954.db",
+        "row_index": 38179,
+        "token": "88c66c9df39e5193",
+        "timestamp": 1624898646951307,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.35.45_veh-12_02247_03143.db",
+        "row_index": 1866,
+        "token": "cc4bc91994df5424",
+        "timestamp": 1624900810100576,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.13.34_veh-16_00015_01780.db",
+        "row_index": 2286,
+        "token": "74e550e274f959a4",
+        "timestamp": 1624901184800069,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.56.29_veh-47_01378_02853.db",
+        "row_index": 5685,
+        "token": "b1f9cfc8ac885d91",
+        "timestamp": 1624905736250360,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.44.16_veh-35_00682_02674.db",
+        "row_index": 11106,
+        "token": "2f69576b55305cc8",
+        "timestamp": 1624908029050764,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.29.28_veh-16_00034_00843.db",
+        "row_index": 2804,
+        "token": "0612d791f0825acd",
+        "timestamp": 1624916518699572,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.20.24.43_veh-38_04976_05979.db",
+        "row_index": 3414,
+        "token": "c139820a97455f83",
+        "timestamp": 1624917258249608,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.23.51.43_veh-14_00169_01681.db",
+        "row_index": 2574,
+        "token": "c28d662b14b05c83",
+        "timestamp": 1624924818199513,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.16.20.27_veh-08_00119_00399.db",
+        "row_index": 57,
+        "token": "b7485487d49853ca",
+        "timestamp": 1631809549900482,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.22.06.07.17_veh-49_00166_00716.db",
+        "row_index": 181,
+        "token": "a438e0b5c26351dd",
+        "timestamp": 1632291202850223,
+        "map_name": "sg-one-north",
+        "scenario_type": "high_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.12.30.39_veh-25_00321_01196.db",
+        "row_index": 229,
+        "token": "94ce7eff6722572c",
+        "timestamp": 1621960765650073,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.15.14.31_veh-47_01863_02344.db",
+        "row_index": 460,
+        "token": "9bb232eead8e525d",
+        "timestamp": 1621972188899555,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.18.38.25_veh-25_02309_03344.db",
+        "row_index": 4779,
+        "token": "29b77c53a46956af",
+        "timestamp": 1621985333700072,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.14.16.46_veh-47_01047_01550.db",
+        "row_index": 1112,
+        "token": "936b015ebca15109",
+        "timestamp": 1622745642449744,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.17.55.42_veh-38_05161_05786.db",
+        "row_index": 1177,
+        "token": "1173af87b1e551ce",
+        "timestamp": 1622763003849514,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.51.28_veh-26_00135_02642.db",
+        "row_index": 3651,
+        "token": "51933e2f44775d6a",
+        "timestamp": 1624892719900352,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.10.57_veh-16_01001_02195.db",
+        "row_index": 2364,
+        "token": "52e1da615adf57c4",
+        "timestamp": 1624894607650547,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.35.45_veh-12_00525_02226.db",
+        "row_index": 5399,
+        "token": "c9d8621d7c2255e6",
+        "timestamp": 1624899449299819,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.59.39_veh-47_04537_05600.db",
+        "row_index": 100,
+        "token": "15a3339778d058db",
+        "timestamp": 1624900808899718,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.13.34_veh-16_00015_01780.db",
+        "row_index": 4331,
+        "token": "84008abb23955152",
+        "timestamp": 1624901411250111,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.56.29_veh-47_00016_01367.db",
+        "row_index": 2787,
+        "token": "c299dae1f0745da8",
+        "timestamp": 1624903932099586,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.03.27_veh-14_03140_03856.db",
+        "row_index": 936,
+        "token": "99c06a975b465903",
+        "timestamp": 1624906760449852,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.30.41_veh-12_04521_05146.db",
+        "row_index": 1968,
+        "token": "33ef46dbce1c577f",
+        "timestamp": 1624910094299082,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.16.05_veh-14_00016_00935.db",
+        "row_index": 3853,
+        "token": "6582d5ea9e2e5fa8",
+        "timestamp": 1624915916050213,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.29.28_veh-16_00854_01891.db",
+        "row_index": 4881,
+        "token": "e51649556f215dd9",
+        "timestamp": 1624917426999393,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 4057,
+        "token": "2574c2dbef5850f1",
+        "timestamp": 1624918045749979,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.22.48.36_veh-14_01175_02603.db",
+        "row_index": 2241,
+        "token": "071b206ea836546e",
+        "timestamp": 1624922053349474,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.09.17.18.51_veh-48_00889_01147.db",
+        "row_index": 632,
+        "token": "1039c939079950f4",
+        "timestamp": 1631209117599126,
+        "map_name": "us-ma-boston",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.19.27.01_veh-45_01749_03230.db",
+        "row_index": 264,
+        "token": "0409c3925f245965",
+        "timestamp": 1631822449050227,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.22.07.49.35_veh-53_00846_01126.db",
+        "row_index": 28,
+        "token": "80c56ad735545de3",
+        "timestamp": 1632298033250074,
+        "map_name": "sg-one-north",
+        "scenario_type": "low_magnitude_speed"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.12.30.39_veh-25_00321_01196.db",
+        "row_index": 268,
+        "token": "f3895453b6c35e51",
+        "timestamp": 1621960808150088,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.14.24.08_veh-25_04711_04979.db",
+        "row_index": 593,
+        "token": "9e507708119c5596",
+        "timestamp": 1621971918099975,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.16.37.23_veh-25_01099_01453.db",
+        "row_index": 657,
+        "token": "81ecd0ddcc4e5c1f",
+        "timestamp": 1621976311600148,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.12.02.06_veh-35_02593_03002.db",
+        "row_index": 1237,
+        "token": "b086f30875e65add",
+        "timestamp": 1622739042400817,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.17.06.58_veh-35_01615_02220.db",
+        "row_index": 1028,
+        "token": "382951755d8e5e77",
+        "timestamp": 1622756270400906,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.18.57.27_veh-47_00932_01793.db",
+        "row_index": 1443,
+        "token": "f0be7cf0e03e58db",
+        "timestamp": 1622762410949840,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.13.59.32_veh-38_00015_00936.db",
+        "row_index": 4544,
+        "token": "2df19b9bf2fe5c88",
+        "timestamp": 1624889598449278,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.02.02_veh-38_01222_01779.db",
+        "row_index": 2066,
+        "token": "9f006885686852e7",
+        "timestamp": 1624894205700127,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.51.28_veh-26_02653_05399.db",
+        "row_index": 10649,
+        "token": "011118ec4f9952bc",
+        "timestamp": 1624896234850167,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.59.39_veh-47_01555_03368.db",
+        "row_index": 3199,
+        "token": "8efa8475e103598e",
+        "timestamp": 1624898268199513,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.07.02_veh-35_00260_05954.db",
+        "row_index": 37122,
+        "token": "ee479ca0620c5077",
+        "timestamp": 1624898474300588,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.13.34_veh-16_00015_01780.db",
+        "row_index": 112,
+        "token": "a874cefaca8e5b69",
+        "timestamp": 1624900761549984,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.35.45_veh-12_02247_03143.db",
+        "row_index": 3399,
+        "token": "b497992774675304",
+        "timestamp": 1624900935450326,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.29.11_veh-38_04607_06901.db",
+        "row_index": 2247,
+        "token": "c757a4faf12f52be",
+        "timestamp": 1624903164150156,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.56.29_veh-47_00016_01367.db",
+        "row_index": 3193,
+        "token": "144473d8f03a57f4",
+        "timestamp": 1624903958449625,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.03.27_veh-14_01603_02530.db",
+        "row_index": 3050,
+        "token": "c998657ba1535677",
+        "timestamp": 1624905611050105,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.30.41_veh-12_04521_05146.db",
+        "row_index": 686,
+        "token": "29686b1e8e6859ca",
+        "timestamp": 1624909865450233,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.20.24.43_veh-38_03385_04952.db",
+        "row_index": 7708,
+        "token": "e9d360ea046554d6",
+        "timestamp": 1624916577749471,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 2003,
+        "token": "09ca86cc9ae65428",
+        "timestamp": 1624917743800394,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.29.39_veh-12_01856_02160.db",
+        "row_index": 1114,
+        "token": "ac67e458c88d5d78",
+        "timestamp": 1624917979549245,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "traversing_pickup_dropoff"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.12.40.06_veh-47_01110_01596.db",
+        "row_index": 129,
+        "token": "d417ec1ee7295c5f",
+        "timestamp": 1621962247249620,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.12.40.06_veh-47_05213_05515.db",
+        "row_index": 94,
+        "token": "e3342e2e8b535405",
+        "timestamp": 1621966146249451,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.16.54.14_veh-47_05169_05524.db",
+        "row_index": 67,
+        "token": "a09bce6cb8eb591b",
+        "timestamp": 1621981410849615,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.14.16.46_veh-47_03046_03520.db",
+        "row_index": 1290,
+        "token": "dc98be51b7155407",
+        "timestamp": 1622747589649850,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.13.53.26_veh-26_00277_00481.db",
+        "row_index": 48,
+        "token": "8fd7ccd629615f24",
+        "timestamp": 1624888853151952,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.02.02_veh-38_01966_02377.db",
+        "row_index": 81,
+        "token": "1ce0f41f0d9754f5",
+        "timestamp": 1624894726550368,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.29.11_veh-38_01894_02598.db",
+        "row_index": 263,
+        "token": "1c8be883a97a575e",
+        "timestamp": 1624899921499851,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.59.39_veh-47_04537_05600.db",
+        "row_index": 55,
+        "token": "b342971fb07451f9",
+        "timestamp": 1624900734299740,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.29.11_veh-38_04607_06901.db",
+        "row_index": 306,
+        "token": "0c88901b6cfb53d0",
+        "timestamp": 1624902647299784,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.56.29_veh-47_00016_01367.db",
+        "row_index": 5304,
+        "token": "beb18cddda575028",
+        "timestamp": 1624904355949712,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.29.11_veh-38_04607_06901.db",
+        "row_index": 10052,
+        "token": "d77598de12fb5f46",
+        "timestamp": 1624904690549571,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.56.29_veh-47_01378_02853.db",
+        "row_index": 3582,
+        "token": "0908906ecbed58df",
+        "timestamp": 1624905315749730,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.56.29_veh-47_04034_05100.db",
+        "row_index": 682,
+        "token": "22022119f3bd53f3",
+        "timestamp": 1624907539949413,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.30.41_veh-12_02870_04378.db",
+        "row_index": 2633,
+        "token": "a88f9e60e43c5ebc",
+        "timestamp": 1624908891700006,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.16.05_veh-14_00016_00935.db",
+        "row_index": 1861,
+        "token": "f5d7ec43b9415862",
+        "timestamp": 1624915608649485,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.29.39_veh-12_00811_01199.db",
+        "row_index": 116,
+        "token": "098144ba356652a5",
+        "timestamp": 1624916866649818,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 4261,
+        "token": "309f7078255050b7",
+        "timestamp": 1624918170999848,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 14209,
+        "token": "0eb1eb9046925cf8",
+        "timestamp": 1624919424799859,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.22.48.36_veh-14_01175_02603.db",
+        "row_index": 3805,
+        "token": "1f5dc80046035f11",
+        "timestamp": 1624922419199620,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.04.07.24_veh-49_00776_01719.db",
+        "row_index": 496,
+        "token": "aff9a658a9e450cb",
+        "timestamp": 1633494746250189,
+        "map_name": "sg-one-north",
+        "scenario_type": "waiting_for_pedestrian_to_cross"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.13.59.32_veh-38_01933_03338.db",
+        "row_index": 5387,
+        "token": "660d375c109f5eed",
+        "timestamp": 1624892039550107,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.02.02_veh-38_02398_02848.db",
+        "row_index": 69,
+        "token": "ccdca0ce28565318",
+        "timestamp": 1624895089900322,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.02.02_veh-38_02398_02848.db",
+        "row_index": 417,
+        "token": "62db31b428315ae8",
+        "timestamp": 1624895114700174,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 15316,
+        "token": "e5fd3465d00b57ae",
+        "timestamp": 1624919689349806,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 15658,
+        "token": "2e82153ebbed5d67",
+        "timestamp": 1624919706449594,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 16000,
+        "token": "957e6a7dec135b62",
+        "timestamp": 1624919723549592,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 16342,
+        "token": "9fb968b3cea6507a",
+        "timestamp": 1624919740649813,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 16684,
+        "token": "d6dde3e83ebe5b53",
+        "timestamp": 1624919757749494,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 17026,
+        "token": "a762a67013d4550e",
+        "timestamp": 1624919774849558,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.15.12.03_veh-42_00275_00620.db",
+        "row_index": 218,
+        "token": "f00be015e344557c",
+        "timestamp": 1631805569199446,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.08.34.20_veh-53_00259_00711.db",
+        "row_index": 218,
+        "token": "341ca59d11c15742",
+        "timestamp": 1633509879249870,
+        "map_name": "sg-one-north",
+        "scenario_type": "behind_long_vehicle"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.12.30.39_veh-25_04267_04848.db",
+        "row_index": 749,
+        "token": "a2ec5056da3c5c67",
+        "timestamp": 1621964873650086,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.14.26.37_veh-27_02736_03564.db",
+        "row_index": 4570,
+        "token": "bc2485198080598a",
+        "timestamp": 1621970577199564,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.18.38.25_veh-25_00859_01445.db",
+        "row_index": 1890,
+        "token": "2be476b6b8db5693",
+        "timestamp": 1621983656750133,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.14.29.58_veh-16_01163_01937.db",
+        "row_index": 1227,
+        "token": "8b8cdc059d585494",
+        "timestamp": 1622746580100142,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.18.08.45_veh-16_00831_01343.db",
+        "row_index": 992,
+        "token": "fa75094937835cf0",
+        "timestamp": 1622759264199652,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.13.53.26_veh-26_00707_03205.db",
+        "row_index": 8317,
+        "token": "bb0e6c0c719a5e7f",
+        "timestamp": 1624890534797005,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.07.02_veh-35_00260_05954.db",
+        "row_index": 6171,
+        "token": "72038bf480a55042",
+        "timestamp": 1624894319801181,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.10.57_veh-16_01001_02195.db",
+        "row_index": 368,
+        "token": "40bcab2def635436",
+        "timestamp": 1624894367549855,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.51.28_veh-26_02653_05399.db",
+        "row_index": 12022,
+        "token": "7e4a2d822a2e55e0",
+        "timestamp": 1624896472899981,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.59.39_veh-47_01555_03368.db",
+        "row_index": 4436,
+        "token": "bff3663d750c5ee1",
+        "timestamp": 1624898526799538,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.35.45_veh-12_00525_02226.db",
+        "row_index": 6949,
+        "token": "24cc8621c8595a92",
+        "timestamp": 1624899790399918,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.57.59_veh-26_01702_02475.db",
+        "row_index": 1459,
+        "token": "bd5783916d995801",
+        "timestamp": 1624901515346597,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.03.27_veh-14_01603_02530.db",
+        "row_index": 462,
+        "token": "a614ad720a76576c",
+        "timestamp": 1624905170949565,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.57.59_veh-26_04745_06261.db",
+        "row_index": 8098,
+        "token": "1a278d6ef4435e69",
+        "timestamp": 1624905467046918,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.13.34_veh-16_04504_06163.db",
+        "row_index": 7585,
+        "token": "e257ace5273058ae",
+        "timestamp": 1624906095849779,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.44.16_veh-35_00682_02674.db",
+        "row_index": 8747,
+        "token": "7dc66aff7ac85f5f",
+        "timestamp": 1624907799551090,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.44.16_veh-35_04358_04600.db",
+        "row_index": 908,
+        "token": "e095899901a75a56",
+        "timestamp": 1624910390099775,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_00334_01865.db",
+        "row_index": 1162,
+        "token": "c00c5e8e89e3571c",
+        "timestamp": 1624916238150248,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.29.28_veh-16_01912_03183.db",
+        "row_index": 2147,
+        "token": "5dec4c8bfd49502f",
+        "timestamp": 1624918077799615,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.22.48.36_veh-14_01175_02603.db",
+        "row_index": 358,
+        "token": "9a81702c38d757b8",
+        "timestamp": 1624921840849453,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "stationary_in_traffic"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.12.40.06_veh-47_05213_05515.db",
+        "row_index": 1652,
+        "token": "7d094d765a8f5ffa",
+        "timestamp": 1621966264399776,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.16.54.14_veh-47_03317_03698.db",
+        "row_index": 198,
+        "token": "63e48fa44d7c5aa4",
+        "timestamp": 1621979654500037,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.14.37.17_veh-38_03002_03226.db",
+        "row_index": 114,
+        "token": "3acc225a64965bd8",
+        "timestamp": 1622748613150038,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.17.55.42_veh-38_04591_04776.db",
+        "row_index": 9,
+        "token": "724cc15d7fc856df",
+        "timestamp": 1622762153199703,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.18.57.27_veh-47_03042_03456.db",
+        "row_index": 58,
+        "token": "ef202cd018ce55e1",
+        "timestamp": 1622764192050065,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.10.57_veh-16_04903_06361.db",
+        "row_index": 2668,
+        "token": "942f6862e6055f62",
+        "timestamp": 1624898473349853,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.29.11_veh-38_03263_03766.db",
+        "row_index": 39,
+        "token": "61d9e27ce6ee5a38",
+        "timestamp": 1624901259699689,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.29.11_veh-38_04607_06901.db",
+        "row_index": 1683,
+        "token": "e7aa83d247dd5cdc",
+        "timestamp": 1624903112900120,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.29.11_veh-38_04607_06901.db",
+        "row_index": 7458,
+        "token": "4eaa9a0e22c95491",
+        "timestamp": 1624904152049926,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.29.11_veh-38_04607_06901.db",
+        "row_index": 9762,
+        "token": "d7a3ae0854575652",
+        "timestamp": 1624904586799661,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.29.11_veh-38_06912_07220.db",
+        "row_index": 1537,
+        "token": "7835a781f6bd5688",
+        "timestamp": 1624905036049525,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.56.29_veh-47_01378_02853.db",
+        "row_index": 9182,
+        "token": "b526edea27bc5f93",
+        "timestamp": 1624906132149528,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 3365,
+        "token": "56726e1f05ae5164",
+        "timestamp": 1624917945350762,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.08.16.17.03.12_veh-08_00641_01035.db",
+        "row_index": 74,
+        "token": "68ea2823677055ff",
+        "timestamp": 1629134256899468,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.08.30.16.16.44_veh-40_00779_01088.db",
+        "row_index": 139,
+        "token": "db0204e9603f59e9",
+        "timestamp": 1630341110300068,
+        "map_name": "us-ma-boston",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.09.14.44.40_veh-40_01595_01714.db",
+        "row_index": 505,
+        "token": "9cab2c90252c549b",
+        "timestamp": 1631200451200147,
+        "map_name": "us-ma-boston",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.15.00.21_veh-45_01380_01959.db",
+        "row_index": 73,
+        "token": "541899555b645329",
+        "timestamp": 1631806125299595,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.18.41.38_veh-08_00016_00493.db",
+        "row_index": 15,
+        "token": "cba0b17c05a9555a",
+        "timestamp": 1631817804249824,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.19.47.47_veh-08_01278_01633.db",
+        "row_index": 44,
+        "token": "fa10175cddfa52fa",
+        "timestamp": 1631823074249881,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.20.30.08_veh-42_00995_01436.db",
+        "row_index": 191,
+        "token": "8f9cbf25d0e655bc",
+        "timestamp": 1631825456100432,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "near_multiple_vehicles"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.12.30.39_veh-25_04267_04848.db",
+        "row_index": 480,
+        "token": "cb153e6cd19851ba",
+        "timestamp": 1621964755900091,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.15.59.03_veh-30_00885_01251.db",
+        "row_index": 225,
+        "token": "3474e3d6c7485935",
+        "timestamp": 1621973748748731,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.12.02.06_veh-35_02593_03002.db",
+        "row_index": 62,
+        "token": "5ffbfd4c2a9a5c84",
+        "timestamp": 1622738924650556,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.17.06.58_veh-35_00957_01604.db",
+        "row_index": 1388,
+        "token": "16ec1d74eb0a5fce",
+        "timestamp": 1622755641751762,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.18.47.39_veh-35_03613_04352.db",
+        "row_index": 1488,
+        "token": "4236a1f3c9e35f9d",
+        "timestamp": 1622764456600805,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.13.59.32_veh-38_00015_00936.db",
+        "row_index": 4114,
+        "token": "477820688c4f5683",
+        "timestamp": 1624889566550296,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.13.47.12_veh-12_00956_02040.db",
+        "row_index": 3915,
+        "token": "7b28cbcdcae35e7e",
+        "timestamp": 1624889876349945,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.55.14_veh-12_01602_04021.db",
+        "row_index": 443,
+        "token": "2f149371d38e5806",
+        "timestamp": 1624894074199798,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.14.51.28_veh-26_00135_02642.db",
+        "row_index": 11153,
+        "token": "33b5947ae3d75a80",
+        "timestamp": 1624894155896500,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.15.10.57_veh-16_01001_02195.db",
+        "row_index": 5807,
+        "token": "96074214b9645952",
+        "timestamp": 1624895072300081,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.16.35.45_veh-12_00029_00514.db",
+        "row_index": 735,
+        "token": "cfbbb77238bd541f",
+        "timestamp": 1624898506200093,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.56.29_veh-47_00016_01367.db",
+        "row_index": 402,
+        "token": "094db8d50cf95250",
+        "timestamp": 1624903469149573,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_00334_01865.db",
+        "row_index": 0,
+        "token": "2e56997063c057a0",
+        "timestamp": 1624915961850367,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 4907,
+        "token": "cada319ebf2b505a",
+        "timestamp": 1624918281399556,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.08.30.13.45.25_veh-40_01116_01336.db",
+        "row_index": 41,
+        "token": "95495f60a1b659f3",
+        "timestamp": 1630332369700621,
+        "map_name": "us-ma-boston",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.16.13.05.51_veh-42_01597_01965.db",
+        "row_index": 731,
+        "token": "4aeaa8bebf7a57f1",
+        "timestamp": 1631799444699987,
+        "map_name": "us-pa-pittsburgh-hazelwood",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.22.02.55.42_veh-53_01340_01564.db",
+        "row_index": 33,
+        "token": "255e819738da54df",
+        "timestamp": 1632280908100402,
+        "map_name": "sg-one-north",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.22.05.32.47_veh-49_00822_01257.db",
+        "row_index": 10,
+        "token": "522cda9d26b1526a",
+        "timestamp": 1632289711250872,
+        "map_name": "sg-one-north",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.09.29.19.02.14_veh-28_00540_00917.db",
+        "row_index": 23,
+        "token": "c1c5dec6bab3598a",
+        "timestamp": 1632942876199679,
+        "map_name": "us-ma-boston",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.10.06.04.07.24_veh-49_00776_01719.db",
+        "row_index": 1,
+        "token": "b85af6bc62cf5e03",
+        "timestamp": 1633494179350045,
+        "map_name": "sg-one-north",
+        "scenario_type": "changing_lane"
+      },
+      {
+        "db_name": "data/cache/test/2021.05.25.12.30.39_veh-25_03774_03886.db",
+        "row_index": 9,
+        "token": "93c583b46398560e",
+        "timestamp": 1621964101800079,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.03.18.47.39_veh-35_00881_02426.db",
+        "row_index": 7796,
+        "token": "561e8b2703f651f5",
+        "timestamp": 1622762484450461,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.17.13.34_veh-16_04046_04493.db",
+        "row_index": 207,
+        "token": "a489a4faafbd5c67",
+        "timestamp": 1624904751000075,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.18.30.41_veh-12_00572_01613.db",
+        "row_index": 2172,
+        "token": "711c54430cae590f",
+        "timestamp": 1624906144299904,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.29.28_veh-16_00034_00843.db",
+        "row_index": 1653,
+        "token": "3ee6e16b65f956a8",
+        "timestamp": 1624916252299651,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.29.28_veh-16_00034_00843.db",
+        "row_index": 1819,
+        "token": "a639bd510b0d5b0a",
+        "timestamp": 1624916320449331,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.20.24.43_veh-38_04976_05979.db",
+        "row_index": 5391,
+        "token": "c7be4ae92b455fa3",
+        "timestamp": 1624917557100230,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+        "row_index": 3328,
+        "token": "462120b01b425182",
+        "timestamp": 1624917925349753,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.29.39_veh-12_02171_02725.db",
+        "row_index": 155,
+        "token": "93e79e172de3521b",
+        "timestamp": 1624918243149980,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      },
+      {
+        "db_name": "data/cache/test/2021.06.28.21.23.50_veh-47_04712_05316.db",
+        "row_index": 392,
+        "token": "8160c5b3a5c9555e",
+        "timestamp": 1624920372899869,
+        "map_name": "us-nv-las-vegas-strip",
+        "scenario_type": "following_lane_with_lead"
+      }
+    ],
+    "counts_by_type": {
+      "starting_left_turn": 20,
+      "starting_right_turn": 20,
+      "starting_straight_traffic_light_intersection_traversal": 20,
+      "stopping_with_lead": 20,
+      "high_lateral_acceleration": 20,
+      "high_magnitude_speed": 20,
+      "low_magnitude_speed": 20,
+      "traversing_pickup_dropoff": 20,
+      "waiting_for_pedestrian_to_cross": 20,
+      "behind_long_vehicle": 11,
+      "stationary_in_traffic": 20,
+      "near_multiple_vehicles": 20,
+      "changing_lane": 20,
+      "following_lane_with_lead": 10
+    }
+  },
+  "required_db_count": 217,
+  "required_dbs": [
+    "data/cache/test/2021.05.25.12.30.39_veh-25_00321_01196.db",
+    "data/cache/test/2021.05.25.12.30.39_veh-25_03774_03886.db",
+    "data/cache/test/2021.05.25.12.30.39_veh-25_04267_04848.db",
+    "data/cache/test/2021.05.25.12.40.06_veh-47_01110_01596.db",
+    "data/cache/test/2021.05.25.12.40.06_veh-47_05213_05515.db",
+    "data/cache/test/2021.05.25.14.16.10_veh-35_00854_01089.db",
+    "data/cache/test/2021.05.25.14.16.10_veh-35_01100_01664.db",
+    "data/cache/test/2021.05.25.14.16.10_veh-35_01690_02183.db",
+    "data/cache/test/2021.05.25.14.16.10_veh-35_04561_05104.db",
+    "data/cache/test/2021.05.25.14.24.08_veh-25_04711_04979.db",
+    "data/cache/test/2021.05.25.14.26.37_veh-27_00753_01258.db",
+    "data/cache/test/2021.05.25.14.26.37_veh-27_01774_01960.db",
+    "data/cache/test/2021.05.25.14.26.37_veh-27_02736_03564.db",
+    "data/cache/test/2021.05.25.14.26.37_veh-27_03603_04010.db",
+    "data/cache/test/2021.05.25.15.14.31_veh-47_00118_00905.db",
+    "data/cache/test/2021.05.25.15.14.31_veh-47_01863_02344.db",
+    "data/cache/test/2021.05.25.15.14.31_veh-47_03238_03528.db",
+    "data/cache/test/2021.05.25.15.59.03_veh-30_00885_01251.db",
+    "data/cache/test/2021.05.25.16.37.23_veh-25_01099_01453.db",
+    "data/cache/test/2021.05.25.16.37.23_veh-25_03311_03550.db",
+    "data/cache/test/2021.05.25.16.54.14_veh-47_03317_03698.db",
+    "data/cache/test/2021.05.25.16.54.14_veh-47_05169_05524.db",
+    "data/cache/test/2021.05.25.17.38.43_veh-27_00048_00406.db",
+    "data/cache/test/2021.05.25.17.54.41_veh-35_02169_02608.db",
+    "data/cache/test/2021.05.25.17.54.41_veh-35_03671_04070.db",
+    "data/cache/test/2021.05.25.17.54.41_veh-35_04299_04847.db",
+    "data/cache/test/2021.05.25.18.38.25_veh-25_00859_01445.db",
+    "data/cache/test/2021.05.25.18.38.25_veh-25_02309_03344.db",
+    "data/cache/test/2021.06.03.12.02.06_veh-35_00233_00609.db",
+    "data/cache/test/2021.06.03.12.02.06_veh-35_01805_02034.db",
+    "data/cache/test/2021.06.03.12.02.06_veh-35_02593_03002.db",
+    "data/cache/test/2021.06.03.12.06.21_veh-47_03366_03599.db",
+    "data/cache/test/2021.06.03.12.06.21_veh-47_03822_04409.db",
+    "data/cache/test/2021.06.03.12.36.43_veh-38_03953_04248.db",
+    "data/cache/test/2021.06.03.13.55.17_veh-35_00073_00426.db",
+    "data/cache/test/2021.06.03.13.55.17_veh-35_02572_02855.db",
+    "data/cache/test/2021.06.03.13.55.17_veh-35_02866_03582.db",
+    "data/cache/test/2021.06.03.14.16.46_veh-47_01047_01550.db",
+    "data/cache/test/2021.06.03.14.16.46_veh-47_01877_02158.db",
+    "data/cache/test/2021.06.03.14.16.46_veh-47_03046_03520.db",
+    "data/cache/test/2021.06.03.14.29.58_veh-16_01163_01937.db",
+    "data/cache/test/2021.06.03.14.29.58_veh-16_03836_04336.db",
+    "data/cache/test/2021.06.03.14.29.58_veh-16_05573_06071.db",
+    "data/cache/test/2021.06.03.14.29.58_veh-16_06171_06386.db",
+    "data/cache/test/2021.06.03.14.37.17_veh-38_03002_03226.db",
+    "data/cache/test/2021.06.03.17.06.58_veh-35_00957_01604.db",
+    "data/cache/test/2021.06.03.17.06.58_veh-35_01615_02220.db",
+    "data/cache/test/2021.06.03.17.06.58_veh-35_02943_03220.db",
+    "data/cache/test/2021.06.03.17.06.58_veh-35_03231_03685.db",
+    "data/cache/test/2021.06.03.17.55.42_veh-38_01484_01672.db",
+    "data/cache/test/2021.06.03.17.55.42_veh-38_04591_04776.db",
+    "data/cache/test/2021.06.03.17.55.42_veh-38_05161_05786.db",
+    "data/cache/test/2021.06.03.18.08.45_veh-16_00831_01343.db",
+    "data/cache/test/2021.06.03.18.08.45_veh-16_04254_04640.db",
+    "data/cache/test/2021.06.03.18.47.39_veh-35_00881_02426.db",
+    "data/cache/test/2021.06.03.18.47.39_veh-35_02673_03602.db",
+    "data/cache/test/2021.06.03.18.47.39_veh-35_03613_04352.db",
+    "data/cache/test/2021.06.03.18.57.27_veh-47_00932_01793.db",
+    "data/cache/test/2021.06.03.18.57.27_veh-47_03042_03456.db",
+    "data/cache/test/2021.06.03.18.57.27_veh-47_05047_05368.db",
+    "data/cache/test/2021.06.28.13.47.12_veh-12_00424_00934.db",
+    "data/cache/test/2021.06.28.13.47.12_veh-12_00956_02040.db",
+    "data/cache/test/2021.06.28.13.47.12_veh-12_02139_02676.db",
+    "data/cache/test/2021.06.28.13.53.26_veh-26_00277_00481.db",
+    "data/cache/test/2021.06.28.13.53.26_veh-26_00707_03205.db",
+    "data/cache/test/2021.06.28.13.59.32_veh-38_00015_00936.db",
+    "data/cache/test/2021.06.28.13.59.32_veh-38_01933_03338.db",
+    "data/cache/test/2021.06.28.14.51.28_veh-26_00135_02642.db",
+    "data/cache/test/2021.06.28.14.51.28_veh-26_02653_05399.db",
+    "data/cache/test/2021.06.28.14.55.14_veh-12_00384_00671.db",
+    "data/cache/test/2021.06.28.14.55.14_veh-12_01602_04021.db",
+    "data/cache/test/2021.06.28.14.55.14_veh-12_04032_04916.db",
+    "data/cache/test/2021.06.28.15.02.02_veh-38_01222_01779.db",
+    "data/cache/test/2021.06.28.15.02.02_veh-38_01966_02377.db",
+    "data/cache/test/2021.06.28.15.02.02_veh-38_02398_02848.db",
+    "data/cache/test/2021.06.28.15.02.02_veh-38_02869_03012.db",
+    "data/cache/test/2021.06.28.15.07.02_veh-35_00260_05954.db",
+    "data/cache/test/2021.06.28.15.10.57_veh-16_01001_02195.db",
+    "data/cache/test/2021.06.28.15.10.57_veh-16_02686_03731.db",
+    "data/cache/test/2021.06.28.15.10.57_veh-16_03742_04746.db",
+    "data/cache/test/2021.06.28.15.10.57_veh-16_04903_06361.db",
+    "data/cache/test/2021.06.28.15.59.39_veh-47_00016_01074.db",
+    "data/cache/test/2021.06.28.15.59.39_veh-47_01085_01534.db",
+    "data/cache/test/2021.06.28.15.59.39_veh-47_01555_03368.db",
+    "data/cache/test/2021.06.28.15.59.39_veh-47_03379_04184.db",
+    "data/cache/test/2021.06.28.15.59.39_veh-47_04537_05600.db",
+    "data/cache/test/2021.06.28.16.29.11_veh-38_00750_01393.db",
+    "data/cache/test/2021.06.28.16.29.11_veh-38_01894_02598.db",
+    "data/cache/test/2021.06.28.16.29.11_veh-38_03006_03242.db",
+    "data/cache/test/2021.06.28.16.29.11_veh-38_03263_03766.db",
+    "data/cache/test/2021.06.28.16.29.11_veh-38_04607_06901.db",
+    "data/cache/test/2021.06.28.16.29.11_veh-38_06912_07220.db",
+    "data/cache/test/2021.06.28.16.35.45_veh-12_00029_00514.db",
+    "data/cache/test/2021.06.28.16.35.45_veh-12_00525_02226.db",
+    "data/cache/test/2021.06.28.16.35.45_veh-12_02247_03143.db",
+    "data/cache/test/2021.06.28.16.35.45_veh-12_04331_04784.db",
+    "data/cache/test/2021.06.28.16.57.59_veh-26_00016_00484.db",
+    "data/cache/test/2021.06.28.16.57.59_veh-26_01702_02475.db",
+    "data/cache/test/2021.06.28.16.57.59_veh-26_02496_04017.db",
+    "data/cache/test/2021.06.28.16.57.59_veh-26_04038_04724.db",
+    "data/cache/test/2021.06.28.16.57.59_veh-26_04745_06261.db",
+    "data/cache/test/2021.06.28.17.13.34_veh-16_00015_01780.db",
+    "data/cache/test/2021.06.28.17.13.34_veh-16_01791_04035.db",
+    "data/cache/test/2021.06.28.17.13.34_veh-16_04046_04493.db",
+    "data/cache/test/2021.06.28.17.13.34_veh-16_04504_06163.db",
+    "data/cache/test/2021.06.28.17.56.29_veh-47_00016_01367.db",
+    "data/cache/test/2021.06.28.17.56.29_veh-47_01378_02853.db",
+    "data/cache/test/2021.06.28.17.56.29_veh-47_03034_04012.db",
+    "data/cache/test/2021.06.28.17.56.29_veh-47_04034_05100.db",
+    "data/cache/test/2021.06.28.18.03.27_veh-14_01603_02530.db",
+    "data/cache/test/2021.06.28.18.03.27_veh-14_03140_03856.db",
+    "data/cache/test/2021.06.28.18.30.41_veh-12_00572_01613.db",
+    "data/cache/test/2021.06.28.18.30.41_veh-12_01624_02831.db",
+    "data/cache/test/2021.06.28.18.30.41_veh-12_02870_04378.db",
+    "data/cache/test/2021.06.28.18.30.41_veh-12_04521_05146.db",
+    "data/cache/test/2021.06.28.18.44.16_veh-35_00682_02674.db",
+    "data/cache/test/2021.06.28.18.44.16_veh-35_02695_04087.db",
+    "data/cache/test/2021.06.28.18.44.16_veh-35_04358_04600.db",
+    "data/cache/test/2021.06.28.20.24.43_veh-38_01668_02298.db",
+    "data/cache/test/2021.06.28.20.24.43_veh-38_03385_04952.db",
+    "data/cache/test/2021.06.28.20.24.43_veh-38_04976_05979.db",
+    "data/cache/test/2021.06.28.21.16.05_veh-14_00016_00935.db",
+    "data/cache/test/2021.06.28.21.16.05_veh-14_01338_02740.db",
+    "data/cache/test/2021.06.28.21.23.50_veh-47_00334_01865.db",
+    "data/cache/test/2021.06.28.21.23.50_veh-47_01886_04690.db",
+    "data/cache/test/2021.06.28.21.23.50_veh-47_04712_05316.db",
+    "data/cache/test/2021.06.28.21.29.28_veh-16_00034_00843.db",
+    "data/cache/test/2021.06.28.21.29.28_veh-16_00854_01891.db",
+    "data/cache/test/2021.06.28.21.29.28_veh-16_01912_03183.db",
+    "data/cache/test/2021.06.28.21.29.39_veh-12_00811_01199.db",
+    "data/cache/test/2021.06.28.21.29.39_veh-12_01856_02160.db",
+    "data/cache/test/2021.06.28.21.29.39_veh-12_02171_02725.db",
+    "data/cache/test/2021.06.28.21.47.53_veh-35_00972_02652.db",
+    "data/cache/test/2021.06.28.21.47.53_veh-35_02673_03342.db",
+    "data/cache/test/2021.06.28.22.48.36_veh-14_00005_00762.db",
+    "data/cache/test/2021.06.28.22.48.36_veh-14_01175_02603.db",
+    "data/cache/test/2021.06.28.22.48.36_veh-14_02625_03479.db",
+    "data/cache/test/2021.06.28.23.51.43_veh-14_00169_01681.db",
+    "data/cache/test/2021.06.28.23.51.43_veh-14_01692_02372.db",
+    "data/cache/test/2021.08.16.17.03.12_veh-08_00172_00582.db",
+    "data/cache/test/2021.08.16.17.03.12_veh-08_00641_01035.db",
+    "data/cache/test/2021.08.30.11.18.32_veh-40_00019_00275.db",
+    "data/cache/test/2021.08.30.13.45.25_veh-40_01116_01336.db",
+    "data/cache/test/2021.08.30.16.16.44_veh-40_00256_00716.db",
+    "data/cache/test/2021.08.30.16.16.44_veh-40_00779_01088.db",
+    "data/cache/test/2021.08.30.16.16.44_veh-40_01099_01351.db",
+    "data/cache/test/2021.08.30.17.34.35_veh-40_01546_01786.db",
+    "data/cache/test/2021.08.30.18.49.17_veh-40_00699_01061.db",
+    "data/cache/test/2021.09.09.14.18.22_veh-48_00322_00895.db",
+    "data/cache/test/2021.09.09.14.44.40_veh-40_01595_01714.db",
+    "data/cache/test/2021.09.09.17.18.51_veh-48_00889_01147.db",
+    "data/cache/test/2021.09.09.17.18.51_veh-48_01248_01450.db",
+    "data/cache/test/2021.09.09.17.18.51_veh-48_02055_02269.db",
+    "data/cache/test/2021.09.09.19.49.25_veh-39_00453_00713.db",
+    "data/cache/test/2021.09.16.13.05.51_veh-42_00428_00700.db",
+    "data/cache/test/2021.09.16.13.05.51_veh-42_01597_01965.db",
+    "data/cache/test/2021.09.16.13.05.51_veh-42_02215_02389.db",
+    "data/cache/test/2021.09.16.14.39.34_veh-42_00297_00935.db",
+    "data/cache/test/2021.09.16.14.39.34_veh-42_01111_01448.db",
+    "data/cache/test/2021.09.16.15.00.21_veh-45_00359_00751.db",
+    "data/cache/test/2021.09.16.15.00.21_veh-45_00806_01354.db",
+    "data/cache/test/2021.09.16.15.00.21_veh-45_01380_01959.db",
+    "data/cache/test/2021.09.16.15.12.03_veh-42_00275_00620.db",
+    "data/cache/test/2021.09.16.15.12.03_veh-42_01037_01434.db",
+    "data/cache/test/2021.09.16.15.47.30_veh-45_00370_00612.db",
+    "data/cache/test/2021.09.16.16.20.27_veh-08_00119_00399.db",
+    "data/cache/test/2021.09.16.16.20.27_veh-08_00526_00962.db",
+    "data/cache/test/2021.09.16.16.20.27_veh-08_01562_02066.db",
+    "data/cache/test/2021.09.16.17.40.09_veh-45_02539_02745.db",
+    "data/cache/test/2021.09.16.17.40.35_veh-08_00032_01780.db",
+    "data/cache/test/2021.09.16.17.40.35_veh-08_02269_02956.db",
+    "data/cache/test/2021.09.16.18.31.12_veh-45_00938_01128.db",
+    "data/cache/test/2021.09.16.18.31.12_veh-45_01952_02416.db",
+    "data/cache/test/2021.09.16.18.31.12_veh-45_02447_02656.db",
+    "data/cache/test/2021.09.16.18.41.38_veh-08_00016_00493.db",
+    "data/cache/test/2021.09.16.18.41.38_veh-08_00515_01113.db",
+    "data/cache/test/2021.09.16.18.41.38_veh-08_01472_01832.db",
+    "data/cache/test/2021.09.16.18.41.38_veh-08_02231_02678.db",
+    "data/cache/test/2021.09.16.19.27.01_veh-45_01749_03230.db",
+    "data/cache/test/2021.09.16.19.47.47_veh-08_01278_01633.db",
+    "data/cache/test/2021.09.16.19.47.47_veh-08_02366_03150.db",
+    "data/cache/test/2021.09.16.19.49.00_veh-42_00990_01609.db",
+    "data/cache/test/2021.09.16.20.23.58_veh-45_00054_00389.db",
+    "data/cache/test/2021.09.16.20.23.58_veh-45_00508_00757.db",
+    "data/cache/test/2021.09.16.20.23.58_veh-45_01161_01367.db",
+    "data/cache/test/2021.09.16.20.30.08_veh-42_00658_00910.db",
+    "data/cache/test/2021.09.16.20.30.08_veh-42_00995_01436.db",
+    "data/cache/test/2021.09.16.20.30.08_veh-42_01747_02010.db",
+    "data/cache/test/2021.09.16.20.43.47_veh-08_00783_01358.db",
+    "data/cache/test/2021.09.16.21.13.20_veh-45_00680_01017.db",
+    "data/cache/test/2021.09.22.01.45.32_veh-53_00298_00432.db",
+    "data/cache/test/2021.09.22.02.20.43_veh-53_00915_01150.db",
+    "data/cache/test/2021.09.22.02.55.42_veh-53_01340_01564.db",
+    "data/cache/test/2021.09.22.03.46.15_veh-51_00553_00813.db",
+    "data/cache/test/2021.09.22.03.46.15_veh-51_01522_02013.db",
+    "data/cache/test/2021.09.22.05.32.47_veh-49_00822_01257.db",
+    "data/cache/test/2021.09.22.06.07.17_veh-49_00166_00716.db",
+    "data/cache/test/2021.09.22.06.36.13_veh-53_01137_01583.db",
+    "data/cache/test/2021.09.22.07.43.38_veh-49_01489_01803.db",
+    "data/cache/test/2021.09.22.07.49.35_veh-53_00016_00431.db",
+    "data/cache/test/2021.09.22.07.49.35_veh-53_00846_01126.db",
+    "data/cache/test/2021.09.22.08.18.52_veh-49_00482_00882.db",
+    "data/cache/test/2021.09.29.14.44.26_veh-28_00528_00992.db",
+    "data/cache/test/2021.09.29.18.19.40_veh-28_01268_01685.db",
+    "data/cache/test/2021.09.29.19.02.14_veh-28_00540_00917.db",
+    "data/cache/test/2021.09.29.19.02.14_veh-28_03198_03360.db",
+    "data/cache/test/2021.10.06.02.32.50_veh-53_01292_01787.db",
+    "data/cache/test/2021.10.06.03.07.17_veh-53_00121_00293.db",
+    "data/cache/test/2021.10.06.03.07.17_veh-53_00703_00974.db",
+    "data/cache/test/2021.10.06.03.07.17_veh-53_01278_02139.db",
+    "data/cache/test/2021.10.06.04.07.24_veh-49_00776_01719.db",
+    "data/cache/test/2021.10.06.04.07.24_veh-49_01831_02115.db",
+    "data/cache/test/2021.10.06.06.13.06_veh-51_00927_01219.db",
+    "data/cache/test/2021.10.06.07.15.13_veh-49_00400_00884.db",
+    "data/cache/test/2021.10.06.07.54.27_veh-49_00391_00875.db",
+    "data/cache/test/2021.10.06.08.13.16_veh-51_00692_01123.db",
+    "data/cache/test/2021.10.06.08.34.20_veh-53_00259_00711.db"
+  ],
+  "required_compressed_bytes": 44724020224,
+  "required_uncompressed_bytes": 76013195264
+}

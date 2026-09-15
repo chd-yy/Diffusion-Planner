@@ -1,0 +1,10 @@
+{
+    "checkpoint_path": "/home/yanjun/NewDisk/Diffusion-Planner/checkpoints/model.pth",
+    "source_state": "ema_state_dict",
+    "loaded_tensor_count": 151,
+    "loaded_parameter_count": 1799040,
+    "target_encoder_tensor_count": 151,
+    "missing_keys": [],
+    "shape_mismatches": [],
+    "decoder_tensor_count_loaded": 0
+}

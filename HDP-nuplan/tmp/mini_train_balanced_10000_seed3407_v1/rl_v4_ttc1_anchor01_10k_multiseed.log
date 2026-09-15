@@ -1,0 +1,10 @@
+[2026-08-22 11:34:27 CST] Starting 10k RL v3 multi-seed experiment: seeds=42 2026
+[2026-08-22 11:34:27 CST] Seed 42: training and gate20 started
+gate20 passed: no hard safety regressions; focus_ttc=1.0; score_delta=-0.000300748
+[2026-08-22 11:56:55 CST] Seed 42: gate20 passed; continuing gate39
+[2026-08-22 12:22:40 CST] Seed 42: fixed59 evaluation completed
+[2026-08-22 12:22:40 CST] Seed 2026: training and gate20 started
+gate20 passed: no hard safety regressions; focus_ttc=1.0; score_delta=+0.000652690
+[2026-08-22 12:44:41 CST] Seed 2026: gate20 passed; continuing gate39
+[2026-08-22 13:10:31 CST] Seed 2026: fixed59 evaluation completed
+[2026-08-22 13:10:31 CST] 10k RL v3 multi-seed experiment finished
