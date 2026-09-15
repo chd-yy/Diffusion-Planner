@@ -813,13 +813,12 @@ RL Epoch2 在 Test14-random 为正、Test14-hard 为负，说明更积极的路�
 | B Epoch10 形成过程 | `HDP-nuplan/doc_hdp_nuplan/HDP_B_Epoch10训练过程详解.md` |
 | RL Epoch2 形成过程 | `HDP-nuplan/doc_hdp_nuplan/HDP_RL_Epoch2训练过程详解.md` |
 | 监督训练与 RL 总操作历史 | `HDP-nuplan/doc_hdp_nuplan/正式监督训练NPZ合并操作日志.md` |
-| 论文方案与早期诊断 | `HDP-nuplan/doc_hdp_nuplan/HDP_RL_论文方案迁移操作日志.md` |
+| 论文方案与早期诊断结论 | 已合并在本文第 13～21 节；原始长日志可从 Git 历史查看 |
 | 原始 DP 公平对照 | `HDP-nuplan/doc_hdp_nuplan/原始DiffusionPlanner同数据公平对照操作日志.md` |
 | Test14 数据与正式评测 | `HDP-nuplan/doc_hdp_nuplan/Test14完整评测数据准备与三模型对比操作日志.md` |
 | 三模型参数、YAML 与 hash | `HDP-nuplan/doc_hdp_nuplan/Test14三模型参数与配置完整清单.md` |
 | TTC 退化案例 | `HDP-nuplan/doc_hdp_nuplan/RL_TTC退化场景分析_3713735b94cf5a7b.md` |
-| reference-relative 多轮实验 | `HDP-nuplan/doc_hdp_nuplan/RL_reference_relative_multi_round_operation_log.md` |
-| v7/v8 更新目标实验 | `HDP-nuplan/doc_hdp_nuplan/RL_v7_score_proxy_reference_operation_log.md`、`RL_v8_proxy_v3_positive_advantage_operation_log.md` |
+| 后续替代路线的拒绝依据 | 已合并在本文第 23～27 节；reference-relative、v7/v8 原始长日志可从 Git 历史查看 |
 
 ## 34. 最终总结
 

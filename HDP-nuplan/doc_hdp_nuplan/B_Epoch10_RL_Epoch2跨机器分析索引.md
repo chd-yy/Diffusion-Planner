@@ -4,6 +4,8 @@
 
 本索引用于在另一台电脑 clone/pull 仓库后，直接复盘 B Epoch10、RL Epoch2 的训练配置、数据范围和闭环评测结果。
 
+2026-09-15 已精简 `doc_hdp_nuplan`：删除 NAVSIM、100k、reference-relative、v6～v8 和早期失败门禁等替代实验文档，只保留与 B Epoch10、RL Epoch2 的形成、实现、评测和公平对照直接相关的材料。被删除文档仍可从本次精简提交之前的 Git 历史中查看。
+
 ## 首先阅读
 
 1. `HDP_B_Epoch10训练过程详解.md`：B Epoch10 的权重继承、训练阶段和实际学习率；

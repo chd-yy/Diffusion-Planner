@@ -4357,6 +4357,6 @@ HDP-nuplan/tmp/mini_train_balanced_10000_seed3407_v1/rl_safety_progress_filtered
 
 通过原 `test14-random` 汇总中的场景 token 与现有临时文件名比对，确定缺失场景数为 `34`。新建 `HDP-nuplan/hdp_nuplan/config/scenario_filter/test14-random-v6-missing34.yaml`，仅包含这 34 个 token；原有 152 个结果保留不动。
 
-恢复脚本为 `HDP-nuplan/scripts/resume_v6_test14_random_missing34.sh`。它使用原实验 UID、原输出目录、同一个 v6 checkpoint 和 NuPlan 配置串行补跑缺失场景，随后检查临时文件总数必须为 `186`，再聚合全部 186 个场景的指标。最终结果写入 `b10_vs_rl_v6_test14_random.json`。恢复过程的详细说明另见 `HDP-nuplan/doc_hdp_nuplan/test14_random_v6评测恢复说明.md`。
+恢复脚本为 `HDP-nuplan/scripts/resume_v6_test14_random_missing34.sh`。它使用原实验 UID、原输出目录、同一个 v6 checkpoint 和 NuPlan 配置串行补跑缺失场景，随后检查临时文件总数必须为 `186`，再聚合全部 186 个场景的指标。最终结果写入 `b10_vs_rl_v6_test14_random.json`。独立的 v6 恢复说明已在主线文档精简时删除；本段保留必要结论，完整原文仍可从 Git 历史查看。
 
 恢复任务已于 `2026-08-24 23:43:42 CST` 启动。NuPlan 已确认本次只构建 `34 scenarios`，截至 `23:45` 已完成第 `1/34` 个补跑场景，metric 临时文件总数为 `153`（原有 152 个 + 新增 1 个）。
