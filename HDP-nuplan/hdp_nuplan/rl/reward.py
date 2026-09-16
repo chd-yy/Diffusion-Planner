@@ -114,6 +114,9 @@ class NuPlanRewardConfig:
     # 自车和缺失尺寸目标的几何回退值，单位为米。
     ego_width: float = 2.0
     ego_length: float = 4.8
+    # Historical rewards treated trajectory XY as the box center. NuPlan ego
+    # trajectories are rear-axle poses; repaired runs supply Pacifica geometry.
+    ego_rear_axle_to_center: float = 0.0
     default_agent_width: float = 2.0
     default_agent_length: float = 4.8
 
@@ -634,6 +637,9 @@ class NuPlanTensorRewardScorer:
         fallback[..., 0] = 1
         return torch.where(norm > 1e-6, direction / norm.clamp_min(1e-6), fallback)
 
+    def _ego_box_center(self, rear_axle_xy, direction):
+        return rear_axle_xy + self.config.ego_rear_axle_to_center * self._normalize_direction(direction)
+
     def _rectangle_signed_separation(
         self,
         ego_xy: torch.Tensor,
@@ -657,7 +663,8 @@ class NuPlanTensorRewardScorer:
             [-object_forward[..., 1], object_forward[..., 0]], dim=-1
         )
 
-        delta = object_xy[:, None] - ego_xy[:, :, None]
+        ego_center = self._ego_box_center(ego_xy, ego_direction)
+        delta = object_xy[:, None] - ego_center[:, :, None]
         object_half_width = object_width[:, None, :, None] * 0.5
         object_half_length = object_length[:, None, :, None] * 0.5
         ego_half_width = self.config.ego_width * 0.5
@@ -1238,7 +1245,8 @@ class NuPlanTensorRewardScorer:
         ego_forward = self._normalize_direction(trajectories[..., :horizon, 2:4])
         ego_lateral = torch.stack([-ego_forward[..., 1], ego_forward[..., 0]], dim=-1)
         neighbor_xy = neighbors_future[..., :horizon, :2]
-        delta = neighbor_xy[:, None] - ego_xy[:, :, None]
+        ego_center = self._ego_box_center(ego_xy, trajectories[..., :horizon, 2:4])
+        delta = neighbor_xy[:, None] - ego_center[:, :, None]
         longitudinal = torch.sum(delta * ego_forward[:, :, None], dim=-1)
         lateral = torch.sum(delta * ego_lateral[:, :, None], dim=-1)
 
@@ -1378,7 +1386,7 @@ class NuPlanTensorRewardScorer:
             (batch_size, group_size), dtype=torch.bool, device=trajectories.device
         )
         min_clearance = trajectories.new_full((batch_size, group_size), float("inf"))
-        candidate_points = trajectories[..., :2]
+        candidate_points = self._ego_box_center(trajectories[..., :2], trajectories[..., 2:4])
         ego_forward = self._normalize_direction(trajectories[..., 2:4])
         ego_lateral = torch.stack([-ego_forward[..., 1], ego_forward[..., 0]], dim=-1)
         half_length = float(self.config.ego_length) * 0.5
@@ -1477,6 +1485,14 @@ class NuPlanTensorRewardScorer:
         cfg = self.config
         batch_size, group_size, horizon, _ = trajectories.shape
         ego_velocity, ego_speed, _ = self._ego_motion(trajectories, ego_current_state)
+        # Collision closing velocity is measured at the box center, including
+        # the rotation-induced motion of its rear-axle offset during turns.
+        direction = self._normalize_direction(trajectories[..., 2:4])
+        initial_direction = torch.zeros_like(direction[..., :1, :])
+        initial_direction[..., 0] = 1.0
+        center_velocity = ego_velocity + cfg.ego_rear_axle_to_center * torch.diff(
+            torch.cat([initial_direction, direction], dim=-2), dim=-2
+        ) / cfg.dt
         geometry = self._neighbor_geometry(
             trajectories, neighbors_future, neighbor_mask, neighbor_agents_past
         )
@@ -1490,10 +1506,11 @@ class NuPlanTensorRewardScorer:
             thw_reward = trajectories.new_ones(batch_size, group_size)
             safety_reward = trajectories.new_ones(batch_size, group_size)
         else:
-            ego_velocity_dynamic = ego_velocity[..., :dynamic_horizon, :][:, :, None]
+            ego_velocity_dynamic = center_velocity[..., :dynamic_horizon, :][:, :, None]
             delta = (
                 neighbors_future[:, None, :, :dynamic_horizon, :2]
-                - trajectories[:, :, None, :dynamic_horizon, :2]
+                - self._ego_box_center(trajectories[..., :dynamic_horizon, :2],
+                                       trajectories[..., :dynamic_horizon, 2:4])[:, :, None]
             )
             line_of_sight = self._normalize_direction(delta)
             relative_velocity = geometry["neighbor_velocity"] - ego_velocity_dynamic

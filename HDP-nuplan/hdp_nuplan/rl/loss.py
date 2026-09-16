@@ -302,6 +302,8 @@ def group_advantage_weights(
     # 或 reward scorer 的数据结构不符合预期。
     if rewards.ndim != 2:
         raise ValueError("rewards must have shape [B, G]")
+    if not torch.isfinite(rewards).all():
+        raise ValueError("rewards must be finite")
     if reference_rewards is not None:
         if reference_rewards.ndim == 1:
             reference_rewards = reference_rewards[:, None]
@@ -310,6 +312,8 @@ def group_advantage_weights(
         reference_rewards = reference_rewards.to(
             device=rewards.device, dtype=rewards.dtype
         )
+        if not torch.isfinite(reference_rewards).all():
+            raise ValueError("reference_rewards must be finite")
     if min_reward_std < 0:
         raise ValueError("min_reward_std must be non-negative")
     if weighting_mode not in {
@@ -622,6 +626,8 @@ def reward_weighted_diffusion_loss(
         rewards: [B, G] 的绝对场景奖励。
         reference_rewards: 可选的 [B] 或 [B, 1] 冻结参考策略 reward。
     """
+    if candidate_mask is not None and center_reward_weights:
+        raise ValueError("Candidate-filtered loss requires nonnegative regression weights; disable centering")
 
     # 从轨迹张量读取四个维度：
     #
@@ -1507,6 +1513,7 @@ def reward_weighted_diffusion_loss(
         # 内部均值为 1、低方差组为 0，所以该值近似等于 active_group_fraction。
         "weight_mean": weights.mean(),
         "regression_weight_mean": regression_weights.mean(),
+        "has_regression_targets": (regression_weights != 0).any().to(rewards.dtype),
 
         # v2 稳定性门控：监控有多少场景具有足够大的组内 reward 差异。
         "reward_std_mean": reward_std.mean(),

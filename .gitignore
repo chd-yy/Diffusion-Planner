@@ -10,3 +10,6 @@ image*
 exp/
 cache/
 checkpoints/
+
+# Generated paper build products.
+/paper/build/

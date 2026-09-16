@@ -471,6 +471,10 @@ def get_args():
         default=False,
         type=boolean,
     )
+    parser.add_argument(
+        "--rl_filter_collision_candidates", default=False, type=boolean,
+        help="exclude proxy collision candidates independently of risk shaping",
+    )
 
     # 【NuPlan 进度保护门】只让相对专家路线进度达到阈值的候选进入
     # rollout 自蒸馏；与 safety mask 取交集，避免模型学习“安全但不前进”的轨迹。
@@ -594,6 +598,8 @@ def get_args():
 
     # reward v2 的 OBB 几何安全余量，单位为米；0 表示仅惩罚包围盒重叠。
     parser.add_argument("--reward_collision_distance", default=0.5, type=float)
+    parser.add_argument("--reward_use_nuplan_vehicle_geometry", default=False, type=boolean,
+                        help="use Pacifica size and rear-axle-to-center offset in reward geometry")
 
     # 【论文 HDP-RL / Table 6】multi-reward 的三个固定权重。
     parser.add_argument("--reward_risk_weight", default=1.0, type=float)
@@ -678,6 +684,8 @@ def get_args():
 
     # 解析命令行参数。
     args = parser.parse_args()
+    from hdp_nuplan.rl.safety_update import validate_safety_update
+    validate_safety_update(args)
 
     # 组内相对优势至少需要两个候选样本才能定义。
     #
@@ -986,8 +994,15 @@ def model_training(args):
     replay_buffer = NuPlanReplayBuffer(max_size=args.rl_buffer_size)
 
     # 创建轨迹奖励计算器。
+    vehicle_geometry = {}
+    if args.reward_use_nuplan_vehicle_geometry:
+        from nuplan.common.actor_state.vehicle_parameters import get_pacifica_parameters
+        vehicle = get_pacifica_parameters()
+        vehicle_geometry = dict(ego_width=vehicle.width, ego_length=vehicle.length,
+                                ego_rear_axle_to_center=vehicle.rear_axle_to_center)
     reward_scorer = NuPlanTensorRewardScorer(
         NuPlanRewardConfig(
+            **vehicle_geometry,
             # 沿路线向前行驶的奖励权重。
             progress_weight=args.reward_progress_weight,
 
@@ -1203,7 +1218,8 @@ def model_training(args):
             #
             # rollout epoch 不进行模型参数更新，
             # 因此也不推进学习率调度器。
-            scheduler.step()
+            if metrics["update_steps"] > 0:
+                scheduler.step()
 
             # 标记当前阶段名称。
             phase = "update"

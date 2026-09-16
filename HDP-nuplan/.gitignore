@@ -11,3 +11,8 @@ cache/
 checkpoints/
 ckpt/
 training_log/
+
+# Local training/evaluation artifacts (checkpoints, metrics, logs, caches).
+# A small set of historical evidence files under tmp/ is already tracked;
+# Git continues tracking those files while ignoring new runtime outputs.
+/tmp/

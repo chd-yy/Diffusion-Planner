@@ -16,8 +16,7 @@ class NuPlanReplayItem:
     # 冻结参考策略（通常为 B Epoch10）在同一场景上的 reward，保存为标量。
     # None 用于兼容旧 replay 条目；旧条目仍退化为组内 mean baseline。
     reference_reward: Optional[torch.Tensor] = None
-    # 候选是否通过 rollout 阶段的安全门。None 表示旧格式条目，读取时按全 True
-    # 兼容；新保守更新会把未通过门的候选从 rollout 回归目标中完全排除。
+    # None 仅兼容未开启过滤的历史实验；开启过滤后必须存在显式 bool mask。
     candidate_mask: Optional[torch.Tensor] = None  # [G] bool，保存在 CPU
 
 
@@ -39,15 +38,21 @@ class NuPlanReplayBuffer:
             raise ValueError("trajectories must have shape [G, T, D]")
         if rewards.ndim != 1 or rewards.shape[0] != trajectories.shape[0]:
             raise ValueError("rewards must have shape [G] and match trajectories")
+        if not torch.isfinite(trajectories).all() or not torch.isfinite(rewards).all():
+            raise ValueError("Replay trajectories and rewards must be finite")
         if candidate_mask is not None:
             if candidate_mask.ndim != 1 or candidate_mask.shape != rewards.shape:
                 raise ValueError(
                     "candidate_mask must have shape [G] and match rewards"
                 )
-            candidate_mask = candidate_mask.detach().to(dtype=torch.bool).cpu()
+            if candidate_mask.dtype != torch.bool:
+                raise ValueError("candidate_mask must be boolean, not an implicit numeric qualification")
+            candidate_mask = candidate_mask.detach().cpu()
         if reference_reward is not None:
             if reference_reward.numel() != 1:
                 raise ValueError("reference_reward must be a scalar tensor")
+            if not torch.isfinite(reference_reward).all():
+                raise ValueError("reference_reward must be finite")
             reference_reward = reference_reward.detach().reshape(()).cpu()
         self._items.append(
             NuPlanReplayItem(

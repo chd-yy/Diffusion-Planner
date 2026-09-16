@@ -16,21 +16,6 @@ import numpy as np
 # PyTorch 核心库，用于张量运算、自动求导和模型训练。
 import torch
 
-# clip_grad_norm_ 用于执行梯度范数裁剪。
-#
-# 假设所有可训练参数的梯度整体范数为：
-#
-# ||g||_2
-#
-# 当：
-#
-# ||g||_2 > max_norm
-#
-# 时，会按照比例缩放所有梯度，使缩放后的整体范数不超过 max_norm。
-#
-# 其主要作用是抑制奖励加权产生的异常大梯度，提高训练稳定性。
-from torch.nn.utils import clip_grad_norm_
-
 # default_collate 是 PyTorch DataLoader 默认使用的 batch 拼接函数。
 #
 # 它可以把多个单场景样本：
@@ -66,6 +51,9 @@ from tqdm import tqdm
 # 由 hdp_nuplan.rl.loss 中的实现决定。
 from hdp_nuplan.rl.loss import reward_weighted_diffusion_loss
 from hdp_nuplan.rl.trajectory_augmentation import augment_trajectory_batch
+from hdp_nuplan.rl.safety_update import (
+    apply_update, build_candidate_mask, candidate_filter_enabled, validate_safety_update,
+)
 from hdp_nuplan.loss import diffusion_loss_func
 
 # 项目封装的分布式训练工具。
@@ -550,18 +538,7 @@ def rollout_epoch(
         # 把候选级安全资格和轨迹、奖励一起存入 Replay Buffer。旧实现只保存
         # 门控后的标量 reward，更新阶段无法区分“安全候选”和“被硬门降分的
         # 不安全候选”，因而 centered 权重仍可能对不安全候选产生负回归梯度。
-        safety_candidate_masks = details["safety_gate_eligible"].to(torch.bool)
-        candidate_masks = safety_candidate_masks
-        if getattr(args, "rl_filter_progress_guard_candidates", False):
-            # progress_guard_reward 是候选相对专家路线进度的 [0, 1] 质量分。
-            # 这里取 safety mask 与 progress mask 的交集，避免把“没有碰撞但
-            # 明显停滞/落后”的候选作为 rollout 目标。整组无候选时，update
-            # 阶段会跳过该组 rollout loss，但仍保留 expert anchor。
-            progress_guard_reward = details["progress_guard_reward"]
-            progress_candidate_masks = progress_guard_reward >= float(
-                getattr(args, "rl_min_progress_guard_reward", 0.9)
-            )
-            candidate_masks = safety_candidate_masks & progress_candidate_masks
+        candidate_masks = build_candidate_mask(details, args)
         for (
             scene_name,
             scene_trajectories,
@@ -658,7 +635,16 @@ def rollout_epoch(
 
 # 根据 Replay Buffer 中保存的场景名称，
 # 重新从 Dataset 加载完整场景数据并组织训练 batch。
-def _load_replay_batch(dataset, replay_items):
+def _load_replay_batch(dataset, replay_items, require_candidate_mask=False,
+                       require_reference_reward=False):
+    # An absent qualification is unknown, not safe. Reject before loading NPZ.
+    for item in replay_items:
+        if require_candidate_mask and item.candidate_mask is None:
+            raise ValueError(f"Missing candidate_mask for filtered replay scene {item.scene_name}")
+        if require_reference_reward and (
+            item.reference_reward is None or not torch.isfinite(item.reference_reward).all()
+        ):
+            raise ValueError(f"Missing or non-finite reference_reward for scene {item.scene_name}")
     # 遍历本次从 Replay Buffer 中抽出的所有条目。
     #
     # 每个 item 至少包含：
@@ -754,6 +740,8 @@ def update_epoch(
     # 3. 组内相对优劣信息。
     if len(replay_buffer) == 0:
         raise RuntimeError("Replay Buffer 为空，请先执行 rollout epoch")
+    validate_safety_update(args)
+    filter_candidates = candidate_filter_enabled(args)
 
     # Reward-weighted regression 的 target 来自 eval 模式旧策略。如果 update
     # 再启用 Dropout/DropPath，自蒸馏会混入与 reward 无关的随机删层梯度并造成
@@ -816,6 +804,8 @@ def update_epoch(
         ) = _load_replay_batch(
             dataset,
             replay_items,
+            require_candidate_mask=filter_candidates,
+            require_reference_reward=getattr(args, "rl_relative_to_reference", False),
         )
 
         # 把重新加载的场景 batch 转换为模型输入。
@@ -850,7 +840,7 @@ def update_epoch(
         candidate_masks = candidate_masks.to(device)
         rollout_candidate_mask = (
             candidate_masks
-            if args.rl_filter_safety_eligible_candidates
+            if filter_candidates
             else None
         )
 
@@ -1025,24 +1015,7 @@ def update_epoch(
         # PyTorch 会计算所有 requires_grad=True 参数的梯度：
         #
         # d total_loss / d theta
-        total_loss.backward()
-
-        # 对所有可训练参数执行全局梯度范数裁剪。
-        #
-        # 冻结参数 requires_grad=False，
-        # 不会被加入梯度裁剪参数列表。
-        clip_grad_norm_(
-            [parameter for parameter in model.parameters() if parameter.requires_grad],
-
-            # 最大允许梯度范数。
-            args.rl_grad_clip,
-        )
-
-        # 根据裁剪后的梯度更新模型参数。
-        optimizer.step()
-
-        # 使用更新后的当前模型参数更新 EMA 模型。
-        ema.update(model)
+        did_update = apply_update(total_loss, model, optimizer, ema, args, metrics)
 
         # 将 reward_weighted_diffusion_loss 返回的指标
         # 从 Tensor 转换为普通 Python float。
@@ -1060,6 +1033,7 @@ def update_epoch(
         # 当前 update 阶段不会修改 Replay Buffer，
         # 因此该值通常在整个 epoch 中保持不变。
         record["buffer_size"] = len(replay_buffer)
+        record["optimizer_step_applied"] = int(did_update)
 
         # 保存当前迭代指标。
         records.append(record)
@@ -1075,5 +1049,7 @@ def update_epoch(
 
     # 对一个 update epoch 内所有训练迭代的指标求平均并返回。
     summary = _mean_metrics(records)
-    summary["update_steps"] = len(records)
+    summary["sampled_batches"] = len(records)
+    summary["update_steps"] = sum(row["optimizer_step_applied"] for row in records)
+    summary["skipped_update_steps"] = len(records) - summary["update_steps"]
     return summary
