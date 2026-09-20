@@ -234,3 +234,27 @@ def test_audit_splits_detects_log_and_scenario_leakage(tmp_path):
     assert result["status"] == "failed"
     assert result["overlapping_log_count"] == 1
     assert result["overlapping_npz_count"] == 1
+    assert result["overlapping_token_count"] == 1
+
+
+def test_audit_splits_detects_same_token_with_different_map_prefixes(tmp_path):
+    train_manifest = tmp_path / "train_manifest.json"
+    val_manifest = tmp_path / "val_manifest.json"
+    train_report = tmp_path / "train_report.json"
+    val_report = tmp_path / "val_report.json"
+    train_manifest.write_text(
+        json.dumps(["train/cache/us-ma-boston_token123.npz"]), encoding="utf-8"
+    )
+    val_manifest.write_text(
+        json.dumps(["val/cache/sg-one-north_token123.npz"]), encoding="utf-8"
+    )
+    train_report.write_text(json.dumps({"log_names": ["train-log"]}), encoding="utf-8")
+    val_report.write_text(json.dumps({"log_names": ["val-log"]}), encoding="utf-8")
+
+    result = audit_splits(train_manifest, train_report, val_manifest, val_report)
+
+    assert result["status"] == "failed"
+    assert result["overlapping_log_count"] == 0
+    assert result["overlapping_npz_count"] == 0
+    assert result["overlapping_token_count"] == 1
+    assert result["overlapping_tokens"] == ["token123"]

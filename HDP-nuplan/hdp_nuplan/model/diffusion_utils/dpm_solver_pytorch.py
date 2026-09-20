@@ -1179,7 +1179,7 @@ class DPM_Solver:
                 step = 0
                 t = timesteps[step]
                 t_prev_list = [t]
-                model_prev_list = [self.model_fn(x, t)]
+                model_prev_list = [self.model_fn(x, t)] # 不会修改 x 本身。
                 if self.correcting_xt_fn is not None:
                     x = self.correcting_xt_fn(x, t, step)
                 if return_intermediate:

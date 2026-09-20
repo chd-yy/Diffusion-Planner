@@ -1,9 +1,12 @@
+import pytest
 import torch
 from torch import nn
 
 from hdp_nuplan.utils.train_utils import (
     load_encoder_warm_start,
+    model_initialization_fingerprints,
     set_encoder_trainable,
+    state_dict_fingerprint,
 )
 
 
@@ -54,3 +57,30 @@ def test_encoder_can_be_frozen_and_unfrozen():
 
     set_encoder_trainable(model, True)
     assert all(parameter.requires_grad for parameter in model.encoder.parameters())
+
+
+def test_state_dict_fingerprint_is_stable_and_partitioned():
+    torch.manual_seed(7)
+    first = TinyPlanner()
+    torch.manual_seed(7)
+    second = TinyPlanner()
+
+    first_report = model_initialization_fingerprints(first)
+    second_report = model_initialization_fingerprints(second)
+
+    assert first_report == second_report
+    assert first_report["model"]["tensor_count"] == 4
+    assert first_report["encoder"]["tensor_count"] == 2
+    assert first_report["decoder"]["tensor_count"] == 2
+
+    with torch.no_grad():
+        second.decoder.bias.add_(1.0)
+    changed_report = model_initialization_fingerprints(second)
+    assert changed_report["encoder"] == first_report["encoder"]
+    assert changed_report["decoder"]["sha256"] != first_report["decoder"]["sha256"]
+    assert changed_report["model"]["sha256"] != first_report["model"]["sha256"]
+
+
+def test_state_dict_fingerprint_rejects_non_tensor_values():
+    with pytest.raises(TypeError, match="is not a tensor"):
+        state_dict_fingerprint({"encoder.invalid": "not-a-tensor"})

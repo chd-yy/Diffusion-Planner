@@ -5,6 +5,59 @@ from mmengine import fileio
 import io
 import os
 import json
+import hashlib
+
+
+def state_dict_fingerprint(state_dict, prefix=None):
+    """Return a deterministic SHA256 fingerprint for selected model tensors.
+
+    The fingerprint includes tensor names, dtypes, shapes and raw values.  It
+    is intended for experiment identity checks, not as a checkpoint format.
+    """
+
+    selected = [
+        (key, value)
+        for key, value in state_dict.items()
+        if prefix is None or key.startswith(prefix)
+    ]
+    digest = hashlib.sha256()
+    parameter_count = 0
+    for key, value in sorted(selected):
+        if not torch.is_tensor(value):
+            raise TypeError(f"state_dict value for {key!r} is not a tensor")
+        tensor = value.detach().cpu().contiguous()
+        metadata = json.dumps(
+            {
+                "key": key,
+                "dtype": str(tensor.dtype),
+                "shape": list(tensor.shape),
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+        digest.update(len(metadata).to_bytes(8, "little"))
+        digest.update(metadata)
+        raw = tensor.reshape(-1).view(torch.uint8).numpy().tobytes()
+        digest.update(len(raw).to_bytes(8, "little"))
+        digest.update(raw)
+        parameter_count += tensor.numel()
+    return {
+        "sha256": digest.hexdigest(),
+        "tensor_count": len(selected),
+        "parameter_count": int(parameter_count),
+        "prefix": prefix,
+    }
+
+
+def model_initialization_fingerprints(model):
+    """Fingerprint the full model and its encoder/decoder partitions."""
+
+    state_dict = model.state_dict()
+    return {
+        "model": state_dict_fingerprint(state_dict),
+        "encoder": state_dict_fingerprint(state_dict, prefix="encoder."),
+        "decoder": state_dict_fingerprint(state_dict, prefix="decoder."),
+    }
 
 
 def load_encoder_warm_start(model, checkpoint_path):
@@ -187,4 +240,3 @@ def resume_model(path: str, model, optimizer, scheduler, ema, device):
         print('no ema shadow found')
 
     return model, optimizer, scheduler, init_epoch, wandb_id, ema
-

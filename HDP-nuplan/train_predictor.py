@@ -24,6 +24,7 @@ from hdp_nuplan.model.hyper_diffusion_planner import Hyper_Diffusion_Planner
 # hdp_nuplan 命名空间；另外新增只迁移兼容 encoder 的 warm-start 和冻结/解冻工具。
 from hdp_nuplan.utils.train_utils import (
     load_encoder_warm_start,
+    model_initialization_fingerprints,
     resume_model,
     save_model,
     set_encoder_trainable,
@@ -323,6 +324,7 @@ def model_training(args):
     # 当前入口实例化 Hyper_Diffusion_Planner，并在请求时只加载兼容 encoder，输出加载报告。
     # set up model
     diffusion_planner = Hyper_Diffusion_Planner(args)
+    warm_start_report = None
     # encoder-only warm-start 只在用户显式提供源 checkpoint 时执行。
     if args.encoder_pretrained_model_path is not None:
         warm_start_report = load_encoder_warm_start(
@@ -345,6 +347,27 @@ def model_training(args):
                 f"parameters={warm_start_report['loaded_parameter_count']}, "
                 f"decoder_loaded={warm_start_report['decoder_tensor_count_loaded']}"
             )
+    # 在迁移 Encoder、但尚未开始训练之前记录完整初始化指纹。公平消融的两个新运行
+    # 必须具有相同的 model/encoder/decoder SHA256，才能排除随机初始化差异。
+    if global_rank == 0:
+        initialization_report = {
+            "stage": "after_encoder_warm_start_before_training",
+            "seed": args.seed,
+            "encoder_pretrained_model_path": args.encoder_pretrained_model_path,
+            "warm_start_report": warm_start_report,
+            "fingerprints": model_initialization_fingerprints(diffusion_planner),
+        }
+        from mmengine.fileio import dump
+        dump(
+            initialization_report,
+            os.path.join(save_path, 'initialization_report.json'),
+            file_format='json',
+            indent=4,
+        )
+        print(
+            'Initialization fingerprint: '
+            f"model={initialization_report['fingerprints']['model']['sha256']}"
+        )
     # CUDA 模式按本地 rank 选择 GPU；CPU 模式使用 args.device。
     diffusion_planner = diffusion_planner.to(rank if args.device == 'cuda' else args.device)
 
@@ -406,6 +429,7 @@ def model_training(args):
 
     # DistributedSampler 的 epoch 不在 checkpoint 中；恢复时显式对齐到下一训练 epoch，
     # 避免每次重启都从 sampler epoch 0 的相同 shuffle 顺序重新开始。
+    # 使恢复后的样本打乱序号与即将训练的 epoch 对齐
     train_sampler.set_epoch(init_epoch)
 
     # logger
