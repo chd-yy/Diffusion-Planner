@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/chapter3_hybrid_ablation_v1/C0/training_log/chapter3-C0-hybrid0/2026-09-17-22:47:24/model_epoch_10_trainloss_0.0031.pth",
+  "sha256": "afb07593c2c989372ad5d11e39b13b532f65a457121b302f11c4b00e5c02aeb0",
+  "epoch": 10,
+  "train_loss": 0.0031174239702522755,
+  "model_tensor_count": 260,
+  "ema_tensor_count": 260,
+  "historical_b10": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_full_306801_seed3407_v1/experiment_b_constant5e5_from_epoch4/model_epoch_10_trainloss_0.0091.pth",
+  "historical_b10_sha256": "22ec0cf6be7cc89a3cf8414cddd0c7446ce2737ddc4e44b23e50dbeeeb0b29ce",
+  "audited_at": "2026-09-18T06:46:52.840062+08:00"
+}

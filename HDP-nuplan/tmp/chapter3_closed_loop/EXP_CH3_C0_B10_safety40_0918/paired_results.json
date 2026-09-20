@@ -1,0 +1,837 @@
+{
+  "created_at": "2026-09-18T10:39:15.414318+08:00",
+  "scenario_count": 40,
+  "log_count": 8,
+  "baseline": "B10",
+  "candidate": "C0",
+  "delta_definition": "C0 minus B10",
+  "comparison_C0_minus_B10": {
+    "scenario_count": 40,
+    "log_count": 8,
+    "metrics": {
+      "score": {
+        "baseline_mean": 0.8963308802499238,
+        "candidate_mean": 0.8847123630997114,
+        "mean_delta": -0.011618517150212334,
+        "median_delta": 0.0,
+        "wins": 14,
+        "losses": 6,
+        "ties": 20,
+        "log_cluster_percentile_interval_95": [
+          -0.04239392629569416,
+          0.003998182541786723
+        ]
+      },
+      "no_ego_at_fault_collisions": {
+        "baseline_mean": 0.9375,
+        "candidate_mean": 0.925,
+        "mean_delta": -0.0125,
+        "median_delta": 0.0,
+        "wins": 1,
+        "losses": 1,
+        "ties": 38,
+        "log_cluster_percentile_interval_95": [
+          -0.039473684210526314,
+          0.0
+        ]
+      },
+      "drivable_area_compliance": {
+        "baseline_mean": 0.975,
+        "candidate_mean": 0.975,
+        "mean_delta": 0.0,
+        "median_delta": 0.0,
+        "wins": 0,
+        "losses": 0,
+        "ties": 40,
+        "log_cluster_percentile_interval_95": [
+          0.0,
+          0.0
+        ]
+      },
+      "ego_is_making_progress": {
+        "baseline_mean": 1.0,
+        "candidate_mean": 1.0,
+        "mean_delta": 0.0,
+        "median_delta": 0.0,
+        "wins": 0,
+        "losses": 0,
+        "ties": 40,
+        "log_cluster_percentile_interval_95": [
+          0.0,
+          0.0
+        ]
+      },
+      "driving_direction_compliance": {
+        "baseline_mean": 1.0,
+        "candidate_mean": 1.0,
+        "mean_delta": 0.0,
+        "median_delta": 0.0,
+        "wins": 0,
+        "losses": 0,
+        "ties": 40,
+        "log_cluster_percentile_interval_95": [
+          0.0,
+          0.0
+        ]
+      },
+      "ego_progress_along_expert_route": {
+        "baseline_mean": 0.9515990246023701,
+        "candidate_mean": 0.9566479980689259,
+        "mean_delta": 0.005048973466555762,
+        "median_delta": 0.0,
+        "wins": 14,
+        "losses": 7,
+        "ties": 19,
+        "log_cluster_percentile_interval_95": [
+          -0.005135912386163282,
+          0.01220606184035126
+        ]
+      },
+      "time_to_collision_within_bound": {
+        "baseline_mean": 0.9,
+        "candidate_mean": 0.925,
+        "mean_delta": 0.025,
+        "median_delta": 0.0,
+        "wins": 1,
+        "losses": 0,
+        "ties": 39,
+        "log_cluster_percentile_interval_95": [
+          0.0,
+          0.07894736842105263
+        ]
+      },
+      "speed_limit_compliance": {
+        "baseline_mean": 0.9955086725507052,
+        "candidate_mean": 0.9936820389551195,
+        "mean_delta": -0.0018266335955855223,
+        "median_delta": 0.0,
+        "wins": 0,
+        "losses": 2,
+        "ties": 38,
+        "log_cluster_percentile_interval_95": [
+          -0.005479900786756567,
+          0.0
+        ]
+      },
+      "ego_is_comfortable": {
+        "baseline_mean": 0.95,
+        "candidate_mean": 0.975,
+        "mean_delta": 0.025,
+        "median_delta": 0.0,
+        "wins": 1,
+        "losses": 0,
+        "ties": 39,
+        "log_cluster_percentile_interval_95": [
+          0.0,
+          0.07894736842105263
+        ]
+      }
+    },
+    "category_results": {
+      "following_lane_with_slow_lead": {
+        "count": 2,
+        "mean_deltas": {
+          "score": 0.0016294978602025,
+          "no_ego_at_fault_collisions": 0.0,
+          "drivable_area_compliance": 0.0,
+          "ego_is_making_progress": 0.0,
+          "driving_direction_compliance": 0.0,
+          "ego_progress_along_expert_route": 0.005214393152648045,
+          "time_to_collision_within_bound": 0.0,
+          "speed_limit_compliance": 0.0,
+          "ego_is_comfortable": 0.0
+        }
+      },
+      "following_lane_without_lead": {
+        "count": 1,
+        "mean_deltas": {
+          "score": 0.0,
+          "no_ego_at_fault_collisions": 0.0,
+          "drivable_area_compliance": 0.0,
+          "ego_is_making_progress": 0.0,
+          "driving_direction_compliance": 0.0,
+          "ego_progress_along_expert_route": 1.1102230246251565e-16,
+          "time_to_collision_within_bound": 0.0,
+          "speed_limit_compliance": 0.0,
+          "ego_is_comfortable": 0.0
+        }
+      },
+      "high_lateral_acceleration": {
+        "count": 3,
+        "mean_deltas": {
+          "score": 0.0010961379047231823,
+          "no_ego_at_fault_collisions": 0.0,
+          "drivable_area_compliance": 0.0,
+          "ego_is_making_progress": 0.0,
+          "driving_direction_compliance": 0.0,
+          "ego_progress_along_expert_route": 0.003507641295114198,
+          "time_to_collision_within_bound": 0.0,
+          "speed_limit_compliance": 0.0,
+          "ego_is_comfortable": 0.0
+        }
+      },
+      "high_magnitude_speed": {
+        "count": 1,
+        "mean_deltas": {
+          "score": 0.0,
+          "no_ego_at_fault_collisions": 0.0,
+          "drivable_area_compliance": 0.0,
+          "ego_is_making_progress": 0.0,
+          "driving_direction_compliance": 0.0,
+          "ego_progress_along_expert_route": 0.0,
+          "time_to_collision_within_bound": 0.0,
+          "speed_limit_compliance": 0.0,
+          "ego_is_comfortable": 0.0
+        }
+      },
+      "medium_magnitude_speed": {
+        "count": 1,
+        "mean_deltas": {
+          "score": 0.0,
+          "no_ego_at_fault_collisions": 0.5,
+          "drivable_area_compliance": 0.0,
+          "ego_is_making_progress": 0.0,
+          "driving_direction_compliance": 0.0,
+          "ego_progress_along_expert_route": -0.11954839090566916,
+          "time_to_collision_within_bound": 1.0,
+          "speed_limit_compliance": 0.0,
+          "ego_is_comfortable": 0.0
+        }
+      },
+      "near_construction_zone_sign": {
+        "count": 1,
+        "mean_deltas": {
+          "score": 0.0,
+          "no_ego_at_fault_collisions": 0.0,
+          "drivable_area_compliance": 0.0,
+          "ego_is_making_progress": 0.0,
+          "driving_direction_compliance": 0.0,
+          "ego_progress_along_expert_route": 0.0,
+          "time_to_collision_within_bound": 0.0,
+          "speed_limit_compliance": 0.0,
+          "ego_is_comfortable": 0.0
+        }
+      },
+      "near_high_speed_vehicle": {
+        "count": 2,
+        "mean_deltas": {
+          "score": 0.0,
+          "no_ego_at_fault_collisions": 0.0,
+          "drivable_area_compliance": 0.0,
+          "ego_is_making_progress": 0.0,
+          "driving_direction_compliance": 0.0,
+          "ego_progress_along_expert_route": 0.0,
+          "time_to_collision_within_bound": 0.0,
+          "speed_limit_compliance": 0.0,
+          "ego_is_comfortable": 0.0
+        }
+      },
+      "near_long_vehicle": {
+        "count": 3,
+        "mean_deltas": {
+          "score": 0.002238561471404813,
+          "no_ego_at_fault_collisions": 0.0,
+          "drivable_area_compliance": 0.0,
+          "ego_is_making_progress": 0.0,
+          "driving_direction_compliance": 0.0,
+          "ego_progress_along_expert_route": 0.007163396708495344,
+          "time_to_collision_within_bound": 0.0,
+          "speed_limit_compliance": 0.0,
+          "ego_is_comfortable": 0.0
+        }
+      },
+      "near_pedestrian_on_crosswalk": {
+        "count": 3,
+        "mean_deltas": {
+          "score": 0.0020421600231058656,
+          "no_ego_at_fault_collisions": 0.0,
+          "drivable_area_compliance": 0.0,
+          "ego_is_making_progress": 0.0,
+          "driving_direction_compliance": 0.0,
+          "ego_progress_along_expert_route": 0.006534912073938748,
+          "time_to_collision_within_bound": 0.0,
+          "speed_limit_compliance": 0.0,
+          "ego_is_comfortable": 0.0
+        }
+      },
+      "on_intersection": {
+        "count": 1,
+        "mean_deltas": {
+          "score": 0.0,
+          "no_ego_at_fault_collisions": 0.0,
+          "drivable_area_compliance": 0.0,
+          "ego_is_making_progress": 0.0,
+          "driving_direction_compliance": 0.0,
+          "ego_progress_along_expert_route": 0.0,
+          "time_to_collision_within_bound": 0.0,
+          "speed_limit_compliance": 0.0,
+          "ego_is_comfortable": 0.0
+        }
+      },
+      "on_stopline_crosswalk": {
+        "count": 1,
+        "mean_deltas": {
+          "score": 0.008649811736491708,
+          "no_ego_at_fault_collisions": 0.0,
+          "drivable_area_compliance": 0.0,
+          "ego_is_making_progress": 0.0,
+          "driving_direction_compliance": 0.0,
+          "ego_progress_along_expert_route": 0.02767939755677351,
+          "time_to_collision_within_bound": 0.0,
+          "speed_limit_compliance": 0.0,
+          "ego_is_comfortable": 0.0
+        }
+      },
+      "on_traffic_light_intersection": {
+        "count": 1,
+        "mean_deltas": {
+          "score": 0.0,
+          "no_ego_at_fault_collisions": 0.0,
+          "drivable_area_compliance": 0.0,
+          "ego_is_making_progress": 0.0,
+          "driving_direction_compliance": 0.0,
+          "ego_progress_along_expert_route": 0.0,
+          "time_to_collision_within_bound": 0.0,
+          "speed_limit_compliance": 0.0,
+          "ego_is_comfortable": 0.0
+        }
+      },
+      "stationary": {
+        "count": 1,
+        "mean_deltas": {
+          "score": 0.0,
+          "no_ego_at_fault_collisions": 0.0,
+          "drivable_area_compliance": 0.0,
+          "ego_is_making_progress": 0.0,
+          "driving_direction_compliance": 0.0,
+          "ego_progress_along_expert_route": 0.0,
+          "time_to_collision_within_bound": 0.0,
+          "speed_limit_compliance": 0.0,
+          "ego_is_comfortable": 0.0
+        }
+      },
+      "stationary_in_traffic": {
+        "count": 1,
+        "mean_deltas": {
+          "score": 0.0,
+          "no_ego_at_fault_collisions": 0.0,
+          "drivable_area_compliance": 0.0,
+          "ego_is_making_progress": 0.0,
+          "driving_direction_compliance": 0.0,
+          "ego_progress_along_expert_route": 0.0,
+          "time_to_collision_within_bound": 0.0,
+          "speed_limit_compliance": 0.0,
+          "ego_is_comfortable": 0.0
+        }
+      },
+      "stopping_at_stop_sign_without_lead": {
+        "count": 1,
+        "mean_deltas": {
+          "score": 0.03532015053307924,
+          "no_ego_at_fault_collisions": 0.0,
+          "drivable_area_compliance": 0.0,
+          "ego_is_making_progress": 0.0,
+          "driving_direction_compliance": 0.0,
+          "ego_progress_along_expert_route": 0.11302448170585389,
+          "time_to_collision_within_bound": 0.0,
+          "speed_limit_compliance": 0.0,
+          "ego_is_comfortable": 0.0
+        }
+      },
+      "stopping_with_lead": {
+        "count": 1,
+        "mean_deltas": {
+          "score": 0.0,
+          "no_ego_at_fault_collisions": 0.0,
+          "drivable_area_compliance": 0.0,
+          "ego_is_making_progress": 0.0,
+          "driving_direction_compliance": 0.0,
+          "ego_progress_along_expert_route": 0.0,
+          "time_to_collision_within_bound": 0.0,
+          "speed_limit_compliance": 0.0,
+          "ego_is_comfortable": 0.0
+        }
+      },
+      "traversing_intersection": {
+        "count": 6,
+        "mean_deltas": {
+          "score": 0.0008030599449460422,
+          "no_ego_at_fault_collisions": 0.0,
+          "drivable_area_compliance": 0.0,
+          "ego_is_making_progress": 0.0,
+          "driving_direction_compliance": 0.0,
+          "ego_progress_along_expert_route": -0.0031642252896865917,
+          "time_to_collision_within_bound": 0.0,
+          "speed_limit_compliance": 0.0,
+          "ego_is_comfortable": 0.0
+        }
+      },
+      "traversing_pickup_dropoff": {
+        "count": 1,
+        "mean_deltas": {
+          "score": 0.0,
+          "no_ego_at_fault_collisions": 0.0,
+          "drivable_area_compliance": 0.0,
+          "ego_is_making_progress": 0.0,
+          "driving_direction_compliance": 0.0,
+          "ego_progress_along_expert_route": 0.0,
+          "time_to_collision_within_bound": 0.0,
+          "speed_limit_compliance": -0.01921330947821842,
+          "ego_is_comfortable": 0.0
+        }
+      },
+      "traversing_traffic_light_intersection": {
+        "count": 9,
+        "mean_deltas": {
+          "score": -0.05921317576287191,
+          "no_ego_at_fault_collisions": -0.1111111111111111,
+          "drivable_area_compliance": 0.0,
+          "ego_is_making_progress": 0.0,
+          "driving_direction_compliance": 0.0,
+          "ego_progress_along_expert_route": 0.01530468505616119,
+          "time_to_collision_within_bound": 0.0,
+          "speed_limit_compliance": -0.005983559371689163,
+          "ego_is_comfortable": 0.1111111111111111
+        }
+      }
+    },
+    "new_metric_regressions": {
+      "no_ego_at_fault_collisions": [
+        {
+          "log_name": "2021.06.08.14.35.24_veh-26_02555_03004",
+          "token": "eb1efeeaad7c54fb",
+          "baseline": 1.0,
+          "candidate": 0.0
+        }
+      ],
+      "drivable_area_compliance": [],
+      "time_to_collision_within_bound": [],
+      "ego_is_comfortable": []
+    },
+    "top4_share_of_total_score_decrease": 0.9983861310883588,
+    "largest_score_decreases": [
+      {
+        "log_name": "2021.06.08.14.35.24_veh-26_02555_03004",
+        "token": "eb1efeeaad7c54fb",
+        "delta": -0.5625
+      },
+      {
+        "log_name": "2021.10.05.07.10.04_veh-52_01442_01802",
+        "token": "b60bda0bedee5fc0",
+        "delta": -0.012836596454170124
+      },
+      {
+        "log_name": "2021.06.07.12.54.00_veh-35_01843_02314",
+        "token": "d47ba9006f185159",
+        "delta": -0.00868831642486434
+      },
+      {
+        "log_name": "2021.07.24.20.37.45_veh-17_00015_00375",
+        "token": "d3f21c2df4375a87",
+        "delta": -0.0009641399909229298
+      },
+      {
+        "log_name": "2021.07.24.23.50.16_veh-17_01696_02071",
+        "token": "bc70712ca75e59f8",
+        "delta": -0.0007943311380584905
+      },
+      {
+        "log_name": "2021.06.08.16.31.33_veh-38_01589_02072",
+        "token": "09e61bfe76b25bbe",
+        "delta": -0.00015129061757235274
+      }
+    ]
+  },
+  "group_results": {
+    "intersection": {
+      "count": 12,
+      "metrics": {
+        "score": {
+          "baseline_mean": 0.9074726507714884,
+          "candidate_mean": 0.9103710025014059,
+          "mean_delta": 0.002898351729917712,
+          "wins": 4,
+          "losses": 2,
+          "ties": 6
+        },
+        "no_ego_at_fault_collisions": {
+          "baseline_mean": 0.9166666666666666,
+          "candidate_mean": 0.9166666666666666,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 12
+        },
+        "drivable_area_compliance": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 12
+        },
+        "ego_is_making_progress": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 12
+        },
+        "driving_direction_compliance": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 12
+        },
+        "ego_progress_along_expert_route": {
+          "baseline_mean": 0.9571174160673382,
+          "candidate_mean": 0.9635251330463181,
+          "mean_delta": 0.006407716978979701,
+          "wins": 4,
+          "losses": 3,
+          "ties": 5
+        },
+        "time_to_collision_within_bound": {
+          "baseline_mean": 0.9166666666666666,
+          "candidate_mean": 0.9166666666666666,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 12
+        },
+        "speed_limit_compliance": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 12
+        },
+        "ego_is_comfortable": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 12
+        }
+      }
+    },
+    "vehicle_interaction": {
+      "count": 10,
+      "metrics": {
+        "score": {
+          "baseline_mean": 0.8493147353405108,
+          "candidate_mean": 0.7939827702401668,
+          "mean_delta": -0.055331965100343904,
+          "wins": 3,
+          "losses": 3,
+          "ties": 4
+        },
+        "no_ego_at_fault_collisions": {
+          "baseline_mean": 0.9,
+          "candidate_mean": 0.8,
+          "mean_delta": -0.1,
+          "wins": 0,
+          "losses": 1,
+          "ties": 9
+        },
+        "drivable_area_compliance": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 10
+        },
+        "ego_is_making_progress": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 10
+        },
+        "driving_direction_compliance": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 10
+        },
+        "ego_progress_along_expert_route": {
+          "baseline_mean": 0.9778071530896348,
+          "candidate_mean": 0.9807448647685343,
+          "mean_delta": 0.0029377116788994904,
+          "wins": 3,
+          "losses": 2,
+          "ties": 5
+        },
+        "time_to_collision_within_bound": {
+          "baseline_mean": 0.8,
+          "candidate_mean": 0.8,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 10
+        },
+        "speed_limit_compliance": {
+          "baseline_mean": 0.9980045291681285,
+          "candidate_mean": 0.9960831982203067,
+          "mean_delta": -0.001921330947821842,
+          "wins": 0,
+          "losses": 1,
+          "ties": 9
+        },
+        "ego_is_comfortable": {
+          "baseline_mean": 0.9,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.1,
+          "wins": 1,
+          "losses": 0,
+          "ties": 9
+        }
+      }
+    },
+    "vru_rules": {
+      "count": 8,
+      "metrics": {
+        "score": {
+          "baseline_mean": 0.9661970696628923,
+          "candidate_mean": 0.9725108609781127,
+          "mean_delta": 0.006313791315220446,
+          "wins": 5,
+          "losses": 0,
+          "ties": 3
+        },
+        "no_ego_at_fault_collisions": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 8
+        },
+        "drivable_area_compliance": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 8
+        },
+        "ego_is_making_progress": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 8
+        },
+        "driving_direction_compliance": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 8
+        },
+        "ego_progress_along_expert_route": {
+          "baseline_mean": 0.9077947542863429,
+          "candidate_mean": 0.9333840899295686,
+          "mean_delta": 0.0255893356432257,
+          "wins": 5,
+          "losses": 0,
+          "ties": 3
+        },
+        "time_to_collision_within_bound": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 8
+        },
+        "speed_limit_compliance": {
+          "baseline_mean": 0.9800448357936403,
+          "candidate_mean": 0.97331333150049,
+          "mean_delta": -0.006731504293150309,
+          "wins": 0,
+          "losses": 1,
+          "ties": 7
+        },
+        "ego_is_comfortable": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 8
+        }
+      }
+    },
+    "dynamics_environment": {
+      "count": 6,
+      "metrics": {
+        "score": {
+          "baseline_mean": 0.9584317925367799,
+          "candidate_mean": 0.9589798614891415,
+          "mean_delta": 0.0005480689523615911,
+          "wins": 2,
+          "losses": 1,
+          "ties": 3
+        },
+        "no_ego_at_fault_collisions": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 6
+        },
+        "drivable_area_compliance": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 6
+        },
+        "ego_is_making_progress": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 6
+        },
+        "driving_direction_compliance": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 6
+        },
+        "ego_progress_along_expert_route": {
+          "baseline_mean": 0.9336560129179894,
+          "candidate_mean": 0.9354098335655466,
+          "mean_delta": 0.001753820647557099,
+          "wins": 2,
+          "losses": 1,
+          "ties": 3
+        },
+        "time_to_collision_within_bound": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 6
+        },
+        "speed_limit_compliance": {
+          "baseline_mean": 0.999990487332966,
+          "candidate_mean": 0.999990487332966,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 6
+        },
+        "ego_is_comfortable": {
+          "baseline_mean": 0.8333333333333334,
+          "candidate_mean": 0.8333333333333334,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 6
+        }
+      }
+    },
+    "basic_preservation": {
+      "count": 4,
+      "metrics": {
+        "score": {
+          "baseline_mean": 0.7475621837025415,
+          "candidate_mean": 0.7475621837025415,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 4
+        },
+        "no_ego_at_fault_collisions": {
+          "baseline_mean": 0.875,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.125,
+          "wins": 1,
+          "losses": 0,
+          "ties": 3
+        },
+        "drivable_area_compliance": {
+          "baseline_mean": 0.75,
+          "candidate_mean": 0.75,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 4
+        },
+        "ego_is_making_progress": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 4
+        },
+        "driving_direction_compliance": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 4
+        },
+        "ego_progress_along_expert_route": {
+          "baseline_mean": 0.9840465871479296,
+          "candidate_mean": 0.9541594894215123,
+          "mean_delta": -0.02988709772641726,
+          "wins": 0,
+          "losses": 1,
+          "ties": 3
+        },
+        "time_to_collision_within_bound": {
+          "baseline_mean": 0.75,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.25,
+          "wins": 1,
+          "losses": 0,
+          "ties": 3
+        },
+        "speed_limit_compliance": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 4
+        },
+        "ego_is_comfortable": {
+          "baseline_mean": 1.0,
+          "candidate_mean": 1.0,
+          "mean_delta": 0.0,
+          "wins": 0,
+          "losses": 0,
+          "ties": 4
+        }
+      }
+    }
+  },
+  "inputs": {
+    "protocol": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/chapter3_closed_loop/EXP_CH3_C0_B10_safety40_0918/protocol.json",
+    "benchmark": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/benchmarks/midterm_safety40_v1/manifest.json"
+  },
+  "promotion_authorized": false
+}

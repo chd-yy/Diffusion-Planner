@@ -1,0 +1,270 @@
+{
+  "version": "posttraining-safety40-v1",
+  "created_at": "2026-09-18T12:46:13.322714+08:00",
+  "models": {
+    "M0": {
+      "variant": "B10_frozen",
+      "args": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_full_306801_seed3407_v1/experiment_b_constant5e5_from_epoch4/args.json",
+      "args_sha256": "ba6848d19bf5ea486fcc9ff31299cadccd8778c927fdf7e961e65381b2caa39f",
+      "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_full_306801_seed3407_v1/experiment_b_constant5e5_from_epoch4/model_epoch_10_trainloss_0.0091.pth",
+      "checkpoint_sha256": "22ec0cf6be7cc89a3cf8414cddd0c7446ce2737ddc4e44b23e50dbeeeb0b29ce",
+      "training_seed": null
+    },
+    "M1": {
+      "variant": "expert_only",
+      "args": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/midterm_posttraining/EXP002_expert_only_seed2026_0917/training_log/midterm-expert_only-seed2026/2026-09-17-01:21:20/args.json",
+      "args_sha256": "26b976bbc5119c3b714c9063ecd5298883c826acb058cbc58d4e79b472db9d9b",
+      "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/midterm_posttraining/EXP002_expert_only_seed2026_0917/training_log/midterm-expert_only-seed2026/2026-09-17-01:21:20/model_epoch_2_trainloss_0.0003.pth",
+      "checkpoint_sha256": "12e78a35b2823c99a2459c6ced1e161e040412d5ec06e1d875d6140ecacdeceb",
+      "training_seed": 2026
+    },
+    "M2": {
+      "variant": "unfiltered",
+      "args": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/midterm_posttraining/EXP004_unfiltered_seed2026_0917/training_log/midterm-unfiltered-seed2026/2026-09-17-09:08:18/args.json",
+      "args_sha256": "b245f686db415f2478a6155d1b6efded71a4574dd84fa6b3447adb3e99265d15",
+      "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/midterm_posttraining/EXP004_unfiltered_seed2026_0917/training_log/midterm-unfiltered-seed2026/2026-09-17-09:08:18/model_epoch_2_trainloss_0.0018.pth",
+      "checkpoint_sha256": "c46516e4efcc49f7bfd592262d3422089749a8e43838ad8f608f076b11ec91a5",
+      "training_seed": 2026
+    },
+    "M3": {
+      "variant": "safety",
+      "args": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/midterm_posttraining/EXP005_fixed200_train2026_0917_safety_seed2026/training_log/midterm-safety-seed2026/2026-09-17-09:21:10/args.json",
+      "args_sha256": "86b50e5a6d1d3d258331d9d084e52da8c9f5f287c107ef62931bd26168199628",
+      "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/midterm_posttraining/EXP005_fixed200_train2026_0917_safety_seed2026/training_log/midterm-safety-seed2026/2026-09-17-09:21:10/model_epoch_2_trainloss_0.0009.pth",
+      "checkpoint_sha256": "3a2348a12eb88f32018921514ffd4bce46720392370af9928aa0392ac4e56948",
+      "training_seed": 2026
+    },
+    "M4": {
+      "variant": "safety_reference",
+      "args": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/midterm_posttraining/EXP005_fixed200_train2026_0917_safety_reference_seed2026/training_log/midterm-safety_reference-seed2026/2026-09-17-09:30:54/args.json",
+      "args_sha256": "35892c1d3e81d2a9a137ced35e95cddb526082015edfbc0e4683982eed222131",
+      "checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/midterm_posttraining/EXP005_fixed200_train2026_0917_safety_reference_seed2026/training_log/midterm-safety_reference-seed2026/2026-09-17-09:30:54/model_epoch_2_trainloss_0.0009.pth",
+      "checkpoint_sha256": "230f0f22493894b735c19118b9d4dfc666336885a7c9ad9b3a54e9c813dfa2d0",
+      "training_seed": 2026
+    }
+  },
+  "model_identity_audit": {
+    "source_checkpoint_sha256": "22ec0cf6be7cc89a3cf8414cddd0c7446ce2737ddc4e44b23e50dbeeeb0b29ce",
+    "training_manifest_sha256": "1597c2f63bbcba7bdc7ed7e5e357cac059e283c84aab6f418ff153c182bdc514",
+    "controlled_effective_argument_differences": {
+      "M1_to_M2": {
+        "rl_filter_collision_candidates": [
+          true,
+          false
+        ],
+        "rl_filter_safety_eligible_candidates": [
+          true,
+          false
+        ],
+        "rl_rollout_loss_weight": [
+          0.0,
+          1.0
+        ]
+      },
+      "M2_to_M3": {
+        "rl_filter_collision_candidates": [
+          false,
+          true
+        ],
+        "rl_filter_safety_eligible_candidates": [
+          false,
+          true
+        ]
+      },
+      "M3_to_M4": {
+        "rl_reference_anchor_weight": [
+          0.0,
+          0.1
+        ]
+      }
+    },
+    "common_training_source_file_count": 46
+  },
+  "M0_reuse": {
+    "source": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/chapter3_closed_loop/EXP_CH3_C0_B10_safety40_0918/B10.summary.json",
+    "source_sha256": "68c860462d0a8329eec6afdda1b3897284ebb05f5e5ecaf3d95fd7e6a5858501",
+    "reason": "same checkpoint, args, benchmark, simulation mode, inference seed, and complete 40/40 coverage"
+  },
+  "benchmark": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/benchmarks/midterm_safety40_v1/manifest.json",
+  "benchmark_sha256": {
+    "candidate_pool.json": "6f6cff12b41b353b0810f7786471743e431b6190a9a05941b96af4603467149c",
+    "manifest.json": "a92539a43c4df934fae9659e810527424eec2c4e45cffc68eed3c02e67d4743a",
+    "midterm-safety40-v1.yaml": "3f38f95ce828bf6161570421e839c4f51f67cbdf80dd0495209731a573d96a47"
+  },
+  "scenario_count": 40,
+  "inference_seed": 0,
+  "simulation": "closed_loop_nonreactive_agents",
+  "worker": "single_machine_thread_pool/max_workers=1/use_process_pool=false",
+  "run_order": [
+    "M1",
+    "M2",
+    "M3",
+    "M4"
+  ],
+  "comparison_order": [
+    [
+      "M0",
+      "M1"
+    ],
+    [
+      "M0",
+      "M2"
+    ],
+    [
+      "M0",
+      "M3"
+    ],
+    [
+      "M0",
+      "M4"
+    ],
+    [
+      "M1",
+      "M2"
+    ],
+    [
+      "M2",
+      "M3"
+    ],
+    [
+      "M3",
+      "M4"
+    ]
+  ],
+  "source_identity": {
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/benchmarks/midterm_safety40_v1/SHA256.json": "a1914b6a9a28a5133ab8a0f4e46528d0f327d39653a35f5b1b447dfa7f705693",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/benchmarks/midterm_safety40_v1/manifest.json": "a92539a43c4df934fae9659e810527424eec2c4e45cffc68eed3c02e67d4743a",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/benchmarks/midterm_safety40_v1/midterm-safety40-v1.yaml": "3f38f95ce828bf6161570421e839c4f51f67cbdf80dd0495209731a573d96a47",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/config/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/config/planner/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/config/planner/hyper_diffusion_planner.yaml": "6517e15cf1bd76d336fe455fec0ccbe387d73052a142b14e192a2c48c22151f6",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/config/scenario_filter/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/config/scenario_filter/mini-val-closed-loop-100.yaml": "6cb1838ea1a5b9836c3f25ed78e562fcc2246806f8dd54c2fc79077b7543d9f7",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/config/scenario_filter/mini-val-closed-loop-20.yaml": "7b2b8cb28c07881d3099eba22eed84473717cf808e3faf19b6db38047407e8c0",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/config/scenario_filter/mini-val-closed-loop-3.yaml": "0f2a977c32411a0f1b43690a8fedb4fbbfefe9de967154a3ccf0d9338a6575af",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/config/scenario_filter/mini-val-fixed-200-original-diffusion-missing.yaml": "cb8749958fa04697b6e1503e775b77fa1bfdb9cfbca3c551c037de05a6b03af3",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/config/scenario_filter/mini-val-fixed-200-reference-relative-epoch2-missing.yaml": "599cb3c0978dc2a66d253afa6e5d13270f6e0be164d906178aac03e717725939",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/config/scenario_filter/mini-val-fixed-200-reference-relative-epoch4-missing.yaml": "599cb3c0978dc2a66d253afa6e5d13270f6e0be164d906178aac03e717725939",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/config/scenario_filter/mini-val-fixed-200-rl-v4.yaml": "1147612d2173bb803890600e7ea356f02bbabcbd98d895a479cac41f3d8c2651",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/config/scenario_filter/mini-val-fixed-200-rl-v8-missing-26.yaml": "ff7257b2c3f3de4b081dc74ae8fe0e867f7eccb4f63d6403f7bac90c81fb080b",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/config/scenario_filter/test14-hard.yaml": "091c68fc52b6ac148f27d6c1fb5b19cfcc3529214111fbcc4ddd0b204457b5c5",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/config/scenario_filter/test14-random-v6-missing34.yaml": "35c9777b6fc8282466d38ba098b843343bebe0e0c850430c4d94b4cfd31faca2",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/config/scenario_filter/test14-random.yaml": "a0c48d6b66ee3460317c881411fd445b544306583a1a93ab855bcde0fdf77b9c",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/config/scenario_filter/test_one_scenatio.yaml": "a562f6644fcb975fefc9946e7c760034b2b349e0a2b28e2968f5bbb6c346384b",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/config/scenario_filter/val14-collision.yaml": "e0f4ad6d265b413b182b5029f72f7e9b118d02abbe20e530c031505c6d528338",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/config/scenario_filter/val14.yaml": "1a3d3ce13a3f52b2079115057bb5932146ba130a20bdc56a8415b8c97fd4e7d8",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/data_process/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/data_process/agent_process.py": "cdbfda10e405a763a2e1717e7710c47b1038186bf73c4dfc78dcbc9540964af5",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/data_process/data_processor.py": "6be87c2609a6094ae11ac47b94865c2669fc8bff88d6bc43db2057e6fa694cca",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/data_process/ego_process.py": "7f8193e816560796e5093e3f17e0e6a18dca8ced963f5bf5932a28e30df117a9",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/data_process/map_process.py": "da5c54ab1f66f0b4c16bcd3cb18bfb63f23a8ab16046d6844a766a13961870cd",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/data_process/roadblock_utils.py": "2d964caa78f723292be54c857d13da16603f07e4e28eea683ec3c73c5771a5d6",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/data_process/run_utils.py": "d46d6bfc4f09faf397bc50d027bf1cb91d638878abd7a46c0dca8c329d1b10d6",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/data_process/sampling.py": "57b6ffb011e3156c1e1a7ae58fc6b99ef12cc77c8f93e4a2107dbde377bd3bed",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/data_process/utils.py": "4071c8ecdf548d7885da4aa03db3091ce53bcf96c40f2a454a1c4343f48b6f97",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/loss.py": "3280cf779aece5d0dc8f3ae64824d7da4444f8649e6588d01500b256632eb5e3",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/model/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/model/diffusion_utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/model/diffusion_utils/dpm_solver_pytorch.py": "7ce65571c396c425d0a6479cef46b7ab36784a9e2cb20cd118215a9025957d84",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/model/diffusion_utils/sampling.py": "79d00b4822292d15b92c15e6ec180eab19eb6c2abcd34df800019f78fcd0e3a3",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/model/diffusion_utils/sde.py": "b60842f2b6069808c19690a80c169e7d73c0428f42b7e607d75d8a2c2d25bc07",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/model/hyper_diffusion_planner.py": "08c85b5447785ed1bab34f41d01bd0b169df7497acb843511ff1e1c1bdcabe89",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/model/module/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/model/module/decoder.py": "506b4cc7c3820f2e207754f7e4c8ea23b248bb39f394a0856f1e8c291cd7f43f",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/model/module/dit.py": "a3b7b7457369721f9aa23acb0c65733c52f918e89a1a8c2254dad98045e57e15",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/model/module/encoder.py": "e4d596b1b846540bceb1ef8d1b93235ad18fc9f3df992ef7c198201e9f3895d2",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/model/module/mixer.py": "84b4eb2b6e354cfb0d71b9bff3828446d00da0ead4d395e501d4dfcc299f48ad",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/planner/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/planner/planner.py": "023a64392b403f4ceed3146dabf69c7a1e9abd36ddd9d0ef0b9f9f6132d72060",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/rl/__init__.py": "8544217cc15bcd7aa39b33b4c8999f39f4a7f06f8b62882a01342253045c55c2",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/rl/loss.py": "c177e61b60e003e638733d6f70bb738ec3190169cc555f492a53c7355bc36f89",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/rl/replay_buffer.py": "d2e140c864baf88544978fe2b1e5f3249f01279ab297b7cddefe16873c0c1c38",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/rl/reward.py": "5c231310a72792a17f9a87e24f9327e7fabb695bf49ce25ea54dc70929821e9f",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/rl/safety_update.py": "83916e4dd1aa2f100da5a63f284d5eb041962a9a3c7133085cc6fb1ea03a96d8",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/rl/train_epoch_rl.py": "33a6f49073220f1ab206cd95df9dc6b2f66c8ced1022eec0e744f5f5e592900d",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/rl/trajectory_augmentation.py": "34d9192aad33929f669ec699a4af0fce3e21279c33d19a269c94444f0f2f5837",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/train_epoch.py": "7e3320d14fb43f778b7a0c8953496047077e2e99202acf89e5322df7bee57d76",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/utils/config.py": "a726492b71ea0ff9fc998767d7782543e1e7465954e9742b93550de9f8887148",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/utils/data_augmentation.py": "06b4da0b9d0718b8a743bfd2f35e62b4e58b611206fc0408a154e0b693890689",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/utils/dataset.py": "dccde828875007b167228712feee6831e4e8dc70d3ceaa610a36464eb16f2dfb",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/utils/ddp.py": "5be441a3e926982b7e3ced720eac05c0d3e03065b371a8e418837531206abfe5",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/utils/lr_schedule.py": "f4fd0eebfe4204edfd3c2aba5422c9d858ccf1825b11ccef2edd11149b2fdb04",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/utils/normalizer.py": "b2ed202749a918d8d1d423d8e372713943f874c193d7ee1fb4e25ca74504c584",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/utils/open_loop_metrics.py": "472f22bd0e89b0eaf7e96275bceae31bb45da8c26ec15abe8e864b5928e384e4",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/utils/tb_log.py": "b504124bcf7d47b9c321d05ea235377c3004d3daf71bba6f6b479b330c5bd2d5",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/utils/train_utils.py": "3c79cfce95fd902e5ca28f54bc5ddfa6e4809fe4e04bba450bc81649495b978d",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/hdp_nuplan/utils/traj_kinematics.py": "cf993ea4b623e8d160b32a0cefeb10a2c5ea83304250bbdad1f782eba23334d4",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/scripts/analyze_midterm_paired.py": "a1ec5ac61871a988bfdf0e9b89d05226211bda718065d5d9bdbb4195da3070fd",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/scripts/analyze_paired_closed_loop.py": "236eb7e81c1d85956e6ab3d34a13c4a24f4e74b134e5f7e4cecf56d3c3673dcd",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/scripts/run_chapter3_safety40_closed_loop.py": "1056bf829bb3f7bce891ef9dddf3b3e0774af3fb4c62b6be8def8e8abfcdccbb",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/scripts/run_midterm_safety40_posttraining.py": "c583de68b2b92aca7035d92a482a863e3f85183206d02f883866745a77326de1",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/scripts/summarize_closed_loop_metrics.py": "ada17a8b08f4beb2261ddf2ca87435c6a10bcd18c4a93ed2bf9453de2eb5fb80",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/chapter3_closed_loop/EXP_CH3_C0_B10_safety40_0918/B10.summary.json": "68c860462d0a8329eec6afdda1b3897284ebb05f5e5ecaf3d95fd7e6a5858501",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/chapter3_closed_loop/EXP_CH3_C0_B10_safety40_0918/protocol.json": "3675f04b92b46c918722561db1d1cd753923856fff7a254e6306c9db1b9a0c4c",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/chapter3_closed_loop/EXP_CH3_C0_B10_safety40_0918/state.json": "860c958c51c84fad24411a68233d4aa232ec3eb392116361bf7d3d31ff94c050",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/midterm_closed_loop/EXP006_safety40_train2026_0918_v2/config/scenario_filter/midterm-safety40-v1.yaml": "3f38f95ce828bf6161570421e839c4f51f67cbdf80dd0495209731a573d96a47",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/midterm_posttraining/EXP002_expert_only_seed2026_0917/run.json": "06b1e1cef2c4030e95d032ae52b7b4026775ae8fddf1153f70ebc7bc18810644",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/midterm_posttraining/EXP002_expert_only_seed2026_0917/training_log/midterm-expert_only-seed2026/2026-09-17-01:21:20/args.json": "26b976bbc5119c3b714c9063ecd5298883c826acb058cbc58d4e79b472db9d9b",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/midterm_posttraining/EXP002_expert_only_seed2026_0917/training_log/midterm-expert_only-seed2026/2026-09-17-01:21:20/model_epoch_2_trainloss_0.0003.pth": "12e78a35b2823c99a2459c6ced1e161e040412d5ec06e1d875d6140ecacdeceb",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/midterm_posttraining/EXP004_unfiltered_seed2026_0917/run.json": "caced78f984b75e2482be47f5af52e97c90692052ee362242432fa182d5f2cec",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/midterm_posttraining/EXP004_unfiltered_seed2026_0917/training_log/midterm-unfiltered-seed2026/2026-09-17-09:08:18/args.json": "b245f686db415f2478a6155d1b6efded71a4574dd84fa6b3447adb3e99265d15",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/midterm_posttraining/EXP004_unfiltered_seed2026_0917/training_log/midterm-unfiltered-seed2026/2026-09-17-09:08:18/model_epoch_2_trainloss_0.0018.pth": "c46516e4efcc49f7bfd592262d3422089749a8e43838ad8f608f076b11ec91a5",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/midterm_posttraining/EXP005_fixed200_train2026_0917_safety_reference_seed2026/run.json": "e6faa27213415b8bb038a5532b0061cb58f7b754338e0abffc290a2cdc2b72e9",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/midterm_posttraining/EXP005_fixed200_train2026_0917_safety_reference_seed2026/training_log/midterm-safety_reference-seed2026/2026-09-17-09:30:54/args.json": "35892c1d3e81d2a9a137ced35e95cddb526082015edfbc0e4683982eed222131",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/midterm_posttraining/EXP005_fixed200_train2026_0917_safety_reference_seed2026/training_log/midterm-safety_reference-seed2026/2026-09-17-09:30:54/model_epoch_2_trainloss_0.0009.pth": "230f0f22493894b735c19118b9d4dfc666336885a7c9ad9b3a54e9c813dfa2d0",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/midterm_posttraining/EXP005_fixed200_train2026_0917_safety_seed2026/run.json": "b69930a8cff8f62fa57ee43a0901d04b40c414e3cada50ace4140703dfae0263",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/midterm_posttraining/EXP005_fixed200_train2026_0917_safety_seed2026/training_log/midterm-safety-seed2026/2026-09-17-09:21:10/args.json": "86b50e5a6d1d3d258331d9d084e52da8c9f5f287c107ef62931bd26168199628",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/midterm_posttraining/EXP005_fixed200_train2026_0917_safety_seed2026/training_log/midterm-safety-seed2026/2026-09-17-09:21:10/model_epoch_2_trainloss_0.0009.pth": "3a2348a12eb88f32018921514ffd4bce46720392370af9928aa0392ac4e56948",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_full_306801_seed3407_v1/experiment_b_constant5e5_from_epoch4/args.json": "ba6848d19bf5ea486fcc9ff31299cadccd8778c927fdf7e961e65381b2caa39f",
+    "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_full_306801_seed3407_v1/experiment_b_constant5e5_from_epoch4/model_epoch_10_trainloss_0.0091.pth": "22ec0cf6be7cc89a3cf8414cddd0c7446ce2737ddc4e44b23e50dbeeeb0b29ce",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/config/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/config/planner/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/config/planner/diffusion_planner.yaml": "8f01d3c51adaa00e9d43fa8731e781a4f797700b908768179188ea9d6b4e3cba",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/config/planner/diffusion_planner_guidance.yaml": "f6dbbe3c68fba492f740633760f6ec58fe21f4fbbc221d2804678560299c113e",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/config/scenario_filter/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/config/scenario_filter/test14-hard.yaml": "091c68fc52b6ac148f27d6c1fb5b19cfcc3529214111fbcc4ddd0b204457b5c5",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/config/scenario_filter/test14-random.yaml": "a0c48d6b66ee3460317c881411fd445b544306583a1a93ab855bcde0fdf77b9c",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/config/scenario_filter/test_one_scenatio.yaml": "a562f6644fcb975fefc9946e7c760034b2b349e0a2b28e2968f5bbb6c346384b",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/config/scenario_filter/val14-collision.yaml": "e0f4ad6d265b413b182b5029f72f7e9b118d02abbe20e530c031505c6d528338",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/config/scenario_filter/val14.yaml": "1a3d3ce13a3f52b2079115057bb5932146ba130a20bdc56a8415b8c97fd4e7d8",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/data_process/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/data_process/agent_process.py": "cc07f8e3cda43238b6fdbe56359e76515319bd9512a06e1ad851d90854aae0b1",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/data_process/data_processor.py": "ae51190bad54649bbdc89c37b878b67ef5d8ecb21fd5ee38b2aebcbd12606a2b",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/data_process/ego_process.py": "f52583dc4661b131fa02bbdbeac8e1b65311fdfbb1add6e2f25ae4917418694d",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/data_process/map_process.py": "da40874c13e6484c71e5f971e2356b2b7f1b0037e1dc054b454ff180829b7f23",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/data_process/roadblock_utils.py": "aab6393a710868790e884accf14cff74c3db322b72e819969fbdce1879fd99f5",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/data_process/utils.py": "5cf836b4d4de859be12455c7c4a3b4120d8116cac3f813194839b91065f99f08",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/loss.py": "5c14d15dd149604773a384cb8f73f246a1aab85912af8a08354f64f73ea6df79",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/model/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/model/diffusion_planner.py": "b14937043aaaa418aea62dc3a70a67016c8ecd990b554e00edbf3186274bf4b2",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/model/diffusion_utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/model/diffusion_utils/dpm_solver_pytorch.py": "1942924f1e60a766964d516a165d9d7c9d3e84b9d0c7f9d37b528b1a0de239a9",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/model/diffusion_utils/sampling.py": "ee64fdb6f6286d0c55b910186fd9108f19d393d64dbe45ff66a28d0412df4967",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/model/diffusion_utils/sde.py": "cd355c80c33b8bb389a76d1eec0da151a1bb89021531f70ae8f8c5757d15a2ff",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/model/guidance/collision.py": "9e5e5966b35690ef857e8ad8636b245512acd8e342d9d1d9c8226db280827f0d",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/model/guidance/guidance_wrapper.py": "b193a1ceb0b7b14800e3c333e676c3f1f906f57700bdb801d27f994ddffa00dc",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/model/module/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/model/module/decoder.py": "ab43721d1fcc4180458d8e18a41403773108b4b5c97b57d2ae5f21ab6815d372",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/model/module/dit.py": "c3acc5e47ec1359f6dd12ef21645854c42eb2c22f616b1f8d400a4dc51756b30",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/model/module/encoder.py": "55e8d5a2f51255820abb15e2b78ca2043575afbbf1d65ed51832f01d682fdef6",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/model/module/mixer.py": "5742d0e12c807e96e8e2f1db5edb302d45d36ca826b3a13aef9f5ec35f5dc93a",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/planner/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/planner/planner.py": "47a30fbcadcb2f23638a3265934c1833e3ed387bc4c1d5e9b61c5077be9426b6",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/train_epoch.py": "7eeb0408409c2782d6b56b88c417afd8cae6929931045bb22abedd2211e55df1",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/utils/config.py": "7cbe4af0c33f2ab54468219fb3e3e032cbaec7943f55077a88d8cded12150530",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/utils/data_augmentation.py": "bc61ce088a1d50adf67ae819e50b718f7ff2fe89fc04a0663fd23ee4277c9419",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/utils/dataset.py": "2ae2025a90f4faf3b374bd9fb9fb777541971ececda1f233b9924e8b1c6907d7",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/utils/ddp.py": "3fc21e551eee60d35b1978d9c24ff35eb9ad4026d92c4834a58338b271358a2a",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/utils/lr_schedule.py": "c370277df020fe30c18c0a7493fe5541cc9aa8f767bcf3f19aba328b7502b4f1",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/utils/normalizer.py": "b07a13043c78f1596435fbe2b2dcc55d54fa83bf4bfbc669024ff4fed423ef75",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/utils/tb_log.py": "238d89b893fb40282161a25c524f4647e3a5cfca57399c1c610bd7f8e2a6719e",
+    "/home/yanjun/NewDisk/Diffusion-Planner/diffusion_planner/utils/train_utils.py": "07ba0d3c4269002b66ec0c6efe96bfec902b7018fb9cbf0c7b8ac3c23cc3e1b9"
+  },
+  "git_head": "d52d49c8470715beb55fb53b741eeb05207f5c4f",
+  "evaluation_role": "challenge-stratified development set; not blind testing",
+  "promotion_authorized": false
+}
