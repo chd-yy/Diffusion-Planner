@@ -1,0 +1,104 @@
+{
+  "experiment_id": "EXP_CH3_C0_B10_safety40_0918",
+  "completed_at": "2026-09-18T10:39:15+08:00",
+  "question": "Does C0's lower long-horizon open-loop mean error translate into better closed-loop planning than historical B10?",
+  "comparison_type": "historical-control quasi-ablation",
+  "delta_definition": "C0 minus B10",
+  "evaluation": {
+    "simulation": "closed_loop_nonreactive_agents",
+    "inference_seed": 0,
+    "scenario_count": 40,
+    "log_count": 8,
+    "benchmark_id": "midterm_safety40_v1",
+    "benchmark_manifest_sha256": "a92539a43c4df934fae9659e810527424eec2c4e45cffc68eed3c02e67d4743a",
+    "scenario_filter_sha256": "3f38f95ce828bf6161570421e839c4f51f67cbdf80dd0495209731a573d96a47",
+    "protocol_sha256": "3675f04b92b46c918722561db1d1cd753923856fff7a254e6306c9db1b9a0c4c",
+    "full_paired_result_sha256": "9d964e47b314d7bea264d9c33cd9339f9f03fd6c04ac87a2244d04d437401f71",
+    "bootstrap": {
+      "unit": "log cluster",
+      "replicates": 10000,
+      "seed": 3407
+    }
+  },
+  "models": {
+    "B10": {
+      "checkpoint_sha256": "22ec0cf6be7cc89a3cf8414cddd0c7446ce2737ddc4e44b23e50dbeeeb0b29ce",
+      "successful_simulations": 40,
+      "failed_simulations": 0
+    },
+    "C0": {
+      "checkpoint_sha256": "afb07593c2c989372ad5d11e39b13b532f65a457121b302f11c4b00e5c02aeb0",
+      "successful_simulations": 40,
+      "failed_simulations": 0
+    }
+  },
+  "overall": {
+    "score": {
+      "B10": 0.8963308802499238,
+      "C0": 0.8847123630997114,
+      "delta": -0.011618517150212334,
+      "log_cluster_interval_95": [-0.04239392629569416, 0.003998182541786723],
+      "wins_losses_ties": [14, 6, 20]
+    },
+    "ego_progress_along_expert_route": {
+      "B10": 0.9515990246023701,
+      "C0": 0.9566479980689259,
+      "delta": 0.005048973466555762,
+      "log_cluster_interval_95": [-0.005135912386163282, 0.01220606184035126]
+    },
+    "no_ego_at_fault_collisions": {
+      "B10": 0.9375,
+      "C0": 0.925,
+      "delta": -0.0125,
+      "log_cluster_interval_95": [-0.039473684210526314, 0.0]
+    },
+    "drivable_area_compliance": {
+      "B10": 0.975,
+      "C0": 0.975,
+      "delta": 0.0
+    },
+    "time_to_collision_within_bound": {
+      "B10": 0.9,
+      "C0": 0.925,
+      "delta": 0.025
+    },
+    "ego_is_comfortable": {
+      "B10": 0.95,
+      "C0": 0.975,
+      "delta": 0.025
+    }
+  },
+  "pre_registered_group_score_deltas": {
+    "intersection": 0.002898,
+    "vehicle_interaction": -0.055332,
+    "vru_rules": 0.006314,
+    "dynamics_environment": 0.000548,
+    "basic_preservation": 0.0
+  },
+  "dominant_regression": {
+    "scenario": "eb1efeeaad7c54fb",
+    "log_name": "2021.06.08.14.35.24_veh-26_02555_03004",
+    "scenario_type": "traversing_traffic_light_intersection",
+    "selection_tag": "near_multiple_vehicles",
+    "group": "vehicle_interaction",
+    "B10_score": 0.5625,
+    "C0_score": 0.0,
+    "score_delta": -0.5625,
+    "B10_no_ego_at_fault_collisions": 1.0,
+    "C0_no_ego_at_fault_collisions": 0.0,
+    "top4_share_of_all_negative_score_delta": 0.9983861310883588
+  },
+  "supported_conclusion": "Lower long-horizon open-loop mean error did not guarantee improved closed-loop score or collision safety on this fixed development benchmark; one new collision dominated the mean score regression.",
+  "limitations": [
+    "Historical B10 does not share a fully traceable initialization and training random stream with C0.",
+    "The benchmark is a stratified development set rather than a natural-distribution or blind safety test.",
+    "Only one training realization and one inference seed were evaluated.",
+    "The score confidence interval includes zero and does not establish a population-level ordering."
+  ],
+  "full_artifacts": {
+    "protocol": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/chapter3_closed_loop/EXP_CH3_C0_B10_safety40_0918/protocol.json",
+    "paired_results": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/chapter3_closed_loop/EXP_CH3_C0_B10_safety40_0918/paired_results.json",
+    "B10_summary": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/chapter3_closed_loop/EXP_CH3_C0_B10_safety40_0918/B10.summary.json",
+    "C0_summary": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/chapter3_closed_loop/EXP_CH3_C0_B10_safety40_0918/C0.summary.json"
+  }
+}
