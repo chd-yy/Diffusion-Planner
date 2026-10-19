@@ -1,0 +1,201 @@
+<mxfile host="app.diagrams.net" modified="2026-10-07T19:40:00.000Z" agent="Codex" version="24.7.17" type="device">
+  <diagram id="guided-safe-set-88-32" name="多扩散候选采样流程">
+    <mxGraphModel dx="1800" dy="1500" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1900" pageHeight="1600" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Phase backgrounds -->
+        <mxCell id="phase0" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#CBD5E1;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="30" width="1700" height="190" as="geometry"/>
+        </mxCell>
+        <mxCell id="phase1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#CBD5E1;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="250" width="1700" height="340" as="geometry"/>
+        </mxCell>
+        <mxCell id="phase2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#CBD5E1;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="620" width="1700" height="230" as="geometry"/>
+        </mxCell>
+        <mxCell id="phase3" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#CBD5E1;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="880" width="1700" height="260" as="geometry"/>
+        </mxCell>
+        <mxCell id="phase4" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#CBD5E1;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="1170" width="1700" height="250" as="geometry"/>
+        </mxCell>
+
+        <!-- Phase labels -->
+        <mxCell id="phase0label" value="&lt;b&gt;输入与策略&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rotation=-90;fontFamily=SimSun;fontSize=17;fontColor=#334155;" vertex="1" parent="1">
+          <mxGeometry x="20" y="85" width="50" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="phase1label" value="&lt;b&gt;候选生成&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rotation=-90;fontFamily=SimSun;fontSize=17;fontColor=#334155;" vertex="1" parent="1">
+          <mxGeometry x="20" y="370" width="50" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="phase2label" value="&lt;b&gt;评价与资格&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rotation=-90;fontFamily=SimSun;fontSize=17;fontColor=#334155;" vertex="1" parent="1">
+          <mxGeometry x="20" y="685" width="50" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="phase3label" value="&lt;b&gt;安全集压缩&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rotation=-90;fontFamily=SimSun;fontSize=17;fontColor=#334155;" vertex="1" parent="1">
+          <mxGeometry x="20" y="960" width="50" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="phase4label" value="&lt;b&gt;目标构造&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rotation=-90;fontFamily=SimSun;fontSize=17;fontColor=#334155;" vertex="1" parent="1">
+          <mxGeometry x="20" y="1240" width="50" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- Inputs -->
+        <mxCell id="scene" value="&lt;b&gt;nuPlan 训练场景&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;自车/邻车历史、地图与路线&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#E8F1FA;strokeColor=#376996;strokeWidth=1.5;fontFamily=SimSun;fontSize=16;fontColor=#18324A;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="150" y="80" width="270" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="b10" value="&lt;b&gt;监督预训练策略 B10&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;统一初始化参考策略与当前策略&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#E8F1FA;strokeColor=#376996;strokeWidth=1.5;fontFamily=SimSun;fontSize=16;fontColor=#18324A;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="570" y="80" width="300" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="future" value="&lt;b&gt;训练期未来信息&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;专家轨迹与邻车未来轨迹&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#FFF5E6;strokeColor=#B7791F;strokeWidth=1.5;fontFamily=SimSun;fontSize=16;fontColor=#5F3B08;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="1280" y="80" width="300" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="encoder" value="共享场景编码" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#DCEAF7;strokeColor=#376996;strokeWidth=1.5;fontFamily=SimSun;fontSize=15;fontColor=#18324A;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="190" y="185" width="190" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="refpolicy" value="冻结参考策略 π&lt;sub&gt;ref&lt;/sub&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#DCEAF7;strokeColor=#376996;strokeWidth=1.5;fontFamily=SimSun;fontSize=15;fontColor=#18324A;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="500" y="185" width="220" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="emapolicy" value="当前 EMA 策略 π&lt;sub&gt;k&lt;/sub&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#DCEAF7;strokeColor=#376996;strokeWidth=1.5;fontFamily=SimSun;fontSize=15;fontColor=#18324A;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="750" y="185" width="220" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="privnote" value="&lt;font style=&quot;font-size:12px&quot;&gt;仅用于训练期 proposal guidance；部署推理不使用未来真值&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=SimSun;fontSize=12;fontColor=#7C4A03;" vertex="1" parent="1">
+          <mxGeometry x="1230" y="180" width="400" height="45" as="geometry"/>
+        </mxCell>
+
+        <!-- Candidate branches -->
+        <mxCell id="branchRef" value="&lt;b&gt;参考自然分支&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;π&lt;sub&gt;ref&lt;/sub&gt;；16 条&lt;br&gt;noise scale = 0.1&lt;br&gt;无 guidance&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#E8F1FA;strokeColor=#376996;strokeWidth=1.5;fontFamily=SimSun;fontSize=16;fontColor=#18324A;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="140" y="305" width="280" height="125" as="geometry"/>
+        </mxCell>
+        <mxCell id="branchNatural" value="&lt;b&gt;当前策略自然分支&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;π&lt;sub&gt;k&lt;/sub&gt;；16 条&lt;br&gt;noise scale = 0.1&lt;br&gt;无 guidance&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#E8F1FA;strokeColor=#376996;strokeWidth=1.5;fontFamily=SimSun;fontSize=16;fontColor=#18324A;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="470" y="305" width="280" height="125" as="geometry"/>
+        </mxCell>
+        <mxCell id="branchMedium" value="&lt;b&gt;中等噪声探索分支&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;π&lt;sub&gt;k&lt;/sub&gt;；24 条&lt;br&gt;noise scale = 0.5&lt;br&gt;扩大几何支持范围&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#EAF6EE;strokeColor=#3A7D55;strokeWidth=1.5;fontFamily=SimSun;fontSize=16;fontColor=#1F4B32;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="800" y="305" width="280" height="125" as="geometry"/>
+        </mxCell>
+        <mxCell id="branchGuided" value="&lt;b&gt;纵向引导分支&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;π&lt;sub&gt;k&lt;/sub&gt;；32 条&lt;br&gt;noise scale = 0.1&lt;br&gt;guidance scale = 0.01&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#FFF5E6;strokeColor=#B7791F;strokeWidth=1.5;fontFamily=SimSun;fontSize=16;fontColor=#5F3B08;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="1130" y="305" width="280" height="125" as="geometry"/>
+        </mxCell>
+        <mxCell id="guidanceRules" value="&lt;b&gt;场景自适应 guidance&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;低运动：关闭引导&lt;br&gt;前向冲突：仅减速/保持&lt;br&gt;无冲突：对称加速/减速&lt;br&gt;δ∈{−0.5,−0.25,−0.125,0,0.125,0.25,0.5}&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#FFF9EF;strokeColor=#B7791F;strokeWidth=1.2;dashed=1;fontFamily=SimSun;fontSize=14;fontColor=#5F3B08;align=left;spacingLeft=12;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="1450" y="285" width="280" height="165" as="geometry"/>
+        </mxCell>
+        <mxCell id="dpm" value="&lt;b&gt;统一扩散采样器&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;独立高斯噪声 · DPM-Solver++ · 6步去噪&lt;br&gt;增量轨迹反归一化并累积为绝对轨迹&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#EDF2F7;strokeColor=#64748B;strokeWidth=1.5;fontFamily=SimSun;fontSize=15;fontColor=#27364A;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="470" y="480" width="610" height="75" as="geometry"/>
+        </mxCell>
+        <mxCell id="pool88" value="&lt;b&gt;88 条原始候选池 P&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;16 reference natural + 16 policy natural + 24 medium + 32 guided&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#E6EEF8;strokeColor=#244E78;strokeWidth=2;fontFamily=SimSun;fontSize=17;fontColor=#18324A;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="620" y="570" width="650" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- Evaluation and qualification -->
+        <mxCell id="reward" value="&lt;b&gt;NuPlan 对齐代理奖励 R&lt;sub&gt;i&lt;/sub&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;五维加权几何平均&lt;br&gt;安全 · 进度 · 路线 · 舒适 · 跟车&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#E8F1FA;strokeColor=#376996;strokeWidth=1.5;fontFamily=SimSun;fontSize=16;fontColor=#18324A;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="190" y="680" width="360" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="hardGate" value="&lt;b&gt;硬安全资格 H&lt;sub&gt;i&lt;/sub&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;数值有限 ∧ 无碰撞&lt;br&gt;∧（DA未激活 ∨ DA合规）&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#FDECEC;strokeColor=#A94442;strokeWidth=1.5;fontFamily=SimSun;fontSize=16;fontColor=#6B2321;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="610" y="680" width="360" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="quality" value="&lt;b&gt;五维质量向量 q&lt;sub&gt;i&lt;/sub&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;[q&lt;sub&gt;safe&lt;/sub&gt;, q&lt;sub&gt;progress&lt;/sub&gt;, q&lt;sub&gt;route&lt;/sub&gt;, q&lt;sub&gt;comfort&lt;/sub&gt;, q&lt;sub&gt;follow&lt;/sub&gt;]&lt;br&gt;用于质量空间多样性度量&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#EAF6EE;strokeColor=#3A7D55;strokeWidth=1.5;fontFamily=SimSun;fontSize=16;fontColor=#1F4B32;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="1030" y="680" width="410" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="qualified" value="&lt;b&gt;带来源标签的安全候选及其 (R&lt;sub&gt;i&lt;/sub&gt;, q&lt;sub&gt;i&lt;/sub&gt;)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;hard-safe 始终优先；不安全候选只允许作为固定形状存储填充&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#F1F5F9;strokeColor=#64748B;strokeWidth=1.5;fontFamily=SimSun;fontSize=15;fontColor=#27364A;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="540" y="810" width="800" height="65" as="geometry"/>
+        </mxCell>
+
+        <!-- Compression -->
+        <mxCell id="compressTitle" value="&lt;b&gt;Source-aware Safe-Set Compression：88 → 32&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=SimSun;fontSize=18;fontColor=#18324A;" vertex="1" parent="1">
+          <mxGeometry x="550" y="895" width="800" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="slotNatural" value="&lt;b&gt;① 自然支持&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;8 条&lt;br&gt;reference / policy 交替保留&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#E8F1FA;strokeColor=#376996;strokeWidth=1.5;fontFamily=SimSun;fontSize=15;fontColor=#18324A;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="140" y="950" width="330" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="slotElite" value="&lt;b&gt;② 中噪声高分&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;8 条&lt;br&gt;noise=0.5，按 reward 降序&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#EAF6EE;strokeColor=#3A7D55;strokeWidth=1.5;fontFamily=SimSun;fontSize=15;fontColor=#1F4B32;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="540" y="950" width="330" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="slotDiverse" value="&lt;b&gt;③ 中噪声质量多样&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;8 条&lt;br&gt;五维质量空间最远点采样&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#EAF6EE;strokeColor=#3A7D55;strokeWidth=1.5;fontFamily=SimSun;fontSize=15;fontColor=#1F4B32;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="940" y="950" width="330" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="slotGlobal" value="&lt;b&gt;④ 全局安全高分&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;8 条&lt;br&gt;全部来源中的 reward elites&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#FFF5E6;strokeColor=#B7791F;strokeWidth=1.5;fontFamily=SimSun;fontSize=15;fontColor=#5F3B08;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="1340" y="950" width="330" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="replay32" value="&lt;b&gt;固定 32 条 Replay Group&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;轨迹 + reward + candidate mask + source id&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#E6EEF8;strokeColor=#244E78;strokeWidth=2;fontFamily=SimSun;fontSize=17;fontColor=#18324A;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="610" y="1080" width="680" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- Target construction -->
+        <mxCell id="refBest" value="&lt;b&gt;场景级参考基线&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;16条参考候选中选择&lt;br&gt;hard-safe 且 reward 最高者&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#E8F1FA;strokeColor=#376996;strokeWidth=1.5;fontFamily=SimSun;fontSize=15;fontColor=#18324A;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="130" y="1210" width="320" height="105" as="geometry"/>
+        </mxCell>
+        <mxCell id="taskMask" value="&lt;b&gt;任务保持约束&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;H&lt;sub&gt;i&lt;/sub&gt;=1&lt;br&gt;route cost ≤ ref + 10&lt;sup&gt;−4&lt;/sup&gt;&lt;br&gt;progress ≥ ref − 0.005&lt;br&gt;R&lt;sub&gt;i&lt;/sub&gt; ≥ R&lt;sub&gt;ref&lt;/sub&gt;&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#FDECEC;strokeColor=#A94442;strokeWidth=1.5;fontFamily=SimSun;fontSize=15;fontColor=#6B2321;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="500" y="1200" width="350" height="125" as="geometry"/>
+        </mxCell>
+        <mxCell id="dispersion" value="&lt;b&gt;组级信息门&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;安全候选数 ≥ 2&lt;br&gt;五维质量离散度 ≥ 0.01&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#EAF6EE;strokeColor=#3A7D55;strokeWidth=1.5;fontFamily=SimSun;fontSize=15;fontColor=#1F4B32;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="900" y="1210" width="320" height="105" as="geometry"/>
+        </mxCell>
+        <mxCell id="advantage" value="&lt;b&gt;参考相对优势门&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;A&lt;sub&gt;i&lt;/sub&gt;=(R&lt;sub&gt;i&lt;/sub&gt;−R&lt;sub&gt;ref&lt;/sub&gt;)/(σ&lt;sub&gt;safe&lt;/sub&gt;+10&lt;sup&gt;−6&lt;/sup&gt;)&lt;br&gt;A&lt;sub&gt;i&lt;/sub&gt; ≥ 0.1&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#FFF5E6;strokeColor=#B7791F;strokeWidth=1.5;fontFamily=SimSun;fontSize=15;fontColor=#5F3B08;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="1270" y="1210" width="390" height="105" as="geometry"/>
+        </mxCell>
+        <mxCell id="targets" value="&lt;b&gt;有效扩散回归目标集合 T&lt;sub&gt;s&lt;/sub&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;约束通过的正优势候选；每场景数量可变&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#E6EEF8;strokeColor=#244E78;strokeWidth=2;fontFamily=SimSun;fontSize=17;fontColor=#18324A;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="610" y="1360" width="680" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- Final objective and caption -->
+        <mxCell id="objective" value="&lt;b&gt;安全约束后训练目标&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;L = L&lt;sub&gt;rollout&lt;/sub&gt; + 0.1 L&lt;sub&gt;expert-anchor&lt;/sub&gt; + 0.1 L&lt;sub&gt;reference-anchor&lt;/sub&gt;&lt;br&gt;constraint-uniform-positive weighting&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#DCEAF7;strokeColor=#244E78;strokeWidth=2;fontFamily=SimSun;fontSize=17;fontColor=#18324A;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="540" y="1470" width="820" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="caption" value="图：多源引导安全集的扩散候选生成、压缩与后训练目标构造流程" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=SimSun;fontSize=17;fontColor=#1E293B;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="420" y="1570" width="1060" height="35" as="geometry"/>
+        </mxCell>
+
+        <!-- Edges: inputs -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="scene" target="encoder"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="b10" target="refpolicy"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="b10" target="emapolicy"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#376996;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="refpolicy" target="branchRef"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#376996;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="emapolicy" target="branchNatural"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3A7D55;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="emapolicy" target="branchMedium"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#B7791F;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="emapolicy" target="branchGuided"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#B7791F;strokeWidth=1.3;dashed=1;endArrow=block;endFill=1;" edge="1" parent="1" source="future" target="guidanceRules"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#B7791F;strokeWidth=1.3;dashed=1;endArrow=block;endFill=1;" edge="1" parent="1" source="guidanceRules" target="branchGuided"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#94A3B8;strokeWidth=1.2;dashed=1;endArrow=none;" edge="1" parent="1" source="encoder" target="dpm"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="branchRef" target="dpm"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="branchNatural" target="dpm"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="branchMedium" target="dpm"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="branchGuided" target="dpm"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#244E78;strokeWidth=2;endArrow=block;endFill=1;" edge="1" parent="1" source="dpm" target="pool88"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Edges: evaluation -->
+        <mxCell id="e16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#376996;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="pool88" target="reward"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#A94442;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="pool88" target="hardGate"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3A7D55;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="pool88" target="quality"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="reward" target="qualified"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="hardGate" target="qualified"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="quality" target="qualified"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Edges: compression -->
+        <mxCell id="e22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="qualified" target="slotNatural"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="qualified" target="slotElite"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="qualified" target="slotDiverse"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="qualified" target="slotGlobal"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#376996;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="slotNatural" target="replay32"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3A7D55;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="slotElite" target="replay32"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3A7D55;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="slotDiverse" target="replay32"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#B7791F;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="slotGlobal" target="replay32"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Edges: target construction -->
+        <mxCell id="e30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#376996;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="replay32" target="refBest"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e31" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#A94442;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="replay32" target="taskMask"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e32" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3A7D55;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="replay32" target="dispersion"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e33" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#B7791F;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="replay32" target="advantage"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e34" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="refBest" target="taskMask"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1" source="refBest" target="advantage"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e36" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#244E78;strokeWidth=2;endArrow=block;endFill=1;" edge="1" parent="1" source="taskMask" target="targets"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e37" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#244E78;strokeWidth=2;endArrow=block;endFill=1;" edge="1" parent="1" source="dispersion" target="targets"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#244E78;strokeWidth=2;endArrow=block;endFill=1;" edge="1" parent="1" source="advantage" target="targets"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e39" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#244E78;strokeWidth=2;endArrow=block;endFill=1;" edge="1" parent="1" source="targets" target="objective"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Legend -->
+        <mxCell id="legend" value="&lt;font style=&quot;font-size:12px&quot;&gt;&lt;b&gt;颜色语义：&lt;/b&gt; 蓝色—基础策略/自然支持；绿色—多样性探索；橙色—训练期引导；红色—硬约束；虚线—辅助信息或 privileged information&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontFamily=SimSun;fontSize=12;fontColor=#475569;" vertex="1" parent="1">
+          <mxGeometry x="110" y="1615" width="1660" height="35" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

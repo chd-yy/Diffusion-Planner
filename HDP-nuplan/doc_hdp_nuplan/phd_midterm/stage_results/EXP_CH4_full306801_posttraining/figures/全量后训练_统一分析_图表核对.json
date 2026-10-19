@@ -1,0 +1,24 @@
+{
+  "hard_full": {
+    "scenes": 272,
+    "wins": 115,
+    "losses": 56,
+    "ties": 101,
+    "new_collision_events": 6
+  },
+  "random_trimmed": {
+    "scenes": 259,
+    "wins": 95,
+    "losses": 52,
+    "ties": 112,
+    "new_collision_events": 3
+  },
+  "excluded_random_tokens": [
+    "7f50df6eea5c54e9",
+    "2e56997063c057a0"
+  ],
+  "figure_data_sources": [
+    "全量后训练_图表数据.json",
+    "../Test14_random剔除最差两场敏感性.json"
+  ]
+}

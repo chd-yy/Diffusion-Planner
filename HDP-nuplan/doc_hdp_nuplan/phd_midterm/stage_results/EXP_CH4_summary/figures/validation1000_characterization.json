@@ -1,0 +1,266 @@
+{
+  "dataset": "mini_val_balanced_1000_seed3407_v1",
+  "manifest": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_val_balanced_1000_seed3407_v1/diffusion_planner_validation.json",
+  "manifest_sha256": "bf025308d6b2da624836033773f06a95c43930fe247d2a5729571fa0707f61ab",
+  "selection": {
+    "source_expanded_anchor_samples": 62818,
+    "strategy": "balanced_logs",
+    "seed": 3407,
+    "selected_anchor_samples": 1000,
+    "logs": 10,
+    "per_log": [
+      100
+    ]
+  },
+  "official_scene_hierarchy": {
+    "downloaded_official_scenes": 197,
+    "sdk_valid_official_scenes": 157,
+    "all_lidar_pc_rows": 75258,
+    "expanded_anchor_samples": 62818,
+    "selected_anchor_samples": 1000,
+    "represented_official_scenes": 156,
+    "anchors_per_represented_scene": {
+      "min": 1,
+      "p10": 3.0,
+      "p50": 6.0,
+      "p90": 9.0,
+      "max": 100,
+      "mean": 6.410256410256411
+    },
+    "per_log": [
+      {
+        "log_name": "2021.06.07.12.54.00_veh-35_01843_02314",
+        "official_scene_count": 24,
+        "sdk_valid_scene_count": 20,
+        "all_lidar_pc_count": 9420,
+        "expanded_anchor_sample_count": 8000,
+        "selected_anchor_sample_count": 100,
+        "represented_official_scene_count": 19
+      },
+      {
+        "log_name": "2021.06.07.18.53.26_veh-26_00005_00427",
+        "official_scene_count": 22,
+        "sdk_valid_scene_count": 18,
+        "all_lidar_pc_count": 8440,
+        "expanded_anchor_sample_count": 7200,
+        "selected_anchor_sample_count": 100,
+        "represented_official_scene_count": 18
+      },
+      {
+        "log_name": "2021.06.08.12.54.54_veh-26_04262_04732",
+        "official_scene_count": 24,
+        "sdk_valid_scene_count": 20,
+        "all_lidar_pc_count": 9408,
+        "expanded_anchor_sample_count": 8006,
+        "selected_anchor_sample_count": 100,
+        "represented_official_scene_count": 20
+      },
+      {
+        "log_name": "2021.06.08.14.35.24_veh-26_02555_03004",
+        "official_scene_count": 24,
+        "sdk_valid_scene_count": 20,
+        "all_lidar_pc_count": 8990,
+        "expanded_anchor_sample_count": 8009,
+        "selected_anchor_sample_count": 100,
+        "represented_official_scene_count": 20
+      },
+      {
+        "log_name": "2021.06.08.16.31.33_veh-38_01589_02072",
+        "official_scene_count": 25,
+        "sdk_valid_scene_count": 21,
+        "all_lidar_pc_count": 9660,
+        "expanded_anchor_sample_count": 8401,
+        "selected_anchor_sample_count": 100,
+        "represented_official_scene_count": 21
+      },
+      {
+        "log_name": "2021.07.24.20.37.45_veh-17_00015_00375",
+        "official_scene_count": 19,
+        "sdk_valid_scene_count": 15,
+        "all_lidar_pc_count": 7200,
+        "expanded_anchor_sample_count": 6000,
+        "selected_anchor_sample_count": 100,
+        "represented_official_scene_count": 15
+      },
+      {
+        "log_name": "2021.07.24.23.50.16_veh-17_01696_02071",
+        "official_scene_count": 20,
+        "sdk_valid_scene_count": 16,
+        "all_lidar_pc_count": 7500,
+        "expanded_anchor_sample_count": 6400,
+        "selected_anchor_sample_count": 100,
+        "represented_official_scene_count": 16
+      },
+      {
+        "log_name": "2021.08.09.17.55.59_veh-28_00021_00307",
+        "official_scene_count": 15,
+        "sdk_valid_scene_count": 11,
+        "all_lidar_pc_count": 5720,
+        "expanded_anchor_sample_count": 4400,
+        "selected_anchor_sample_count": 100,
+        "represented_official_scene_count": 11
+      },
+      {
+        "log_name": "2021.08.24.13.12.55_veh-45_00386_00472",
+        "official_scene_count": 5,
+        "sdk_valid_scene_count": 1,
+        "all_lidar_pc_count": 1720,
+        "expanded_anchor_sample_count": 401,
+        "selected_anchor_sample_count": 100,
+        "represented_official_scene_count": 1
+      },
+      {
+        "log_name": "2021.10.05.07.10.04_veh-52_01442_01802",
+        "official_scene_count": 19,
+        "sdk_valid_scene_count": 15,
+        "all_lidar_pc_count": 7200,
+        "expanded_anchor_sample_count": 6001,
+        "selected_anchor_sample_count": 100,
+        "represented_official_scene_count": 15
+      }
+    ]
+  },
+  "split_audit": {
+    "status": "passed",
+    "train_log_count": 44,
+    "val_log_count": 10,
+    "train_manifest_count": 306801,
+    "val_manifest_count": 1000,
+    "overlapping_log_count": 0,
+    "overlapping_logs": [],
+    "overlapping_npz_count": 0,
+    "overlapping_npz": [],
+    "train_unique_token_count": 306801,
+    "val_unique_token_count": 1000,
+    "overlapping_token_count": 0,
+    "overlapping_tokens": []
+  },
+  "map_counts": {
+    "sg-one-north": 100,
+    "us-ma-boston": 100,
+    "us-nv-las-vegas-strip": 700,
+    "us-pa-pittsburgh-hazelwood": 100
+  },
+  "log_rows": [
+    {
+      "id": "L1",
+      "log_name": "2021.06.07.12.54.00_veh-35_01843_02314",
+      "map": "us-nv-las-vegas-strip",
+      "count": 100
+    },
+    {
+      "id": "L2",
+      "log_name": "2021.06.07.18.53.26_veh-26_00005_00427",
+      "map": "us-nv-las-vegas-strip",
+      "count": 100
+    },
+    {
+      "id": "L3",
+      "log_name": "2021.06.08.12.54.54_veh-26_04262_04732",
+      "map": "us-nv-las-vegas-strip",
+      "count": 100
+    },
+    {
+      "id": "L4",
+      "log_name": "2021.06.08.14.35.24_veh-26_02555_03004",
+      "map": "us-nv-las-vegas-strip",
+      "count": 100
+    },
+    {
+      "id": "L5",
+      "log_name": "2021.06.08.16.31.33_veh-38_01589_02072",
+      "map": "us-nv-las-vegas-strip",
+      "count": 100
+    },
+    {
+      "id": "L6",
+      "log_name": "2021.07.24.20.37.45_veh-17_00015_00375",
+      "map": "us-nv-las-vegas-strip",
+      "count": 100
+    },
+    {
+      "id": "L7",
+      "log_name": "2021.07.24.23.50.16_veh-17_01696_02071",
+      "map": "us-nv-las-vegas-strip",
+      "count": 100
+    },
+    {
+      "id": "L8",
+      "log_name": "2021.08.09.17.55.59_veh-28_00021_00307",
+      "map": "us-ma-boston",
+      "count": 100
+    },
+    {
+      "id": "L9",
+      "log_name": "2021.08.24.13.12.55_veh-45_00386_00472",
+      "map": "us-pa-pittsburgh-hazelwood",
+      "count": 100
+    },
+    {
+      "id": "L10",
+      "log_name": "2021.10.05.07.10.04_veh-52_01442_01802",
+      "map": "sg-one-north",
+      "count": 100
+    }
+  ],
+  "scenario_type_counts": {
+    "unknown": 222,
+    "stationary": 212,
+    "stationary_in_traffic": 136,
+    "stationary_at_traffic_light_without_lead": 123,
+    "traversing_traffic_light_intersection": 72,
+    "medium_magnitude_speed": 71,
+    "traversing_pickup_dropoff": 49,
+    "traversing_intersection": 25,
+    "high_magnitude_speed": 25,
+    "low_magnitude_speed": 10,
+    "near_long_vehicle": 8,
+    "on_stopline_stop_sign": 6,
+    "near_high_speed_vehicle": 6,
+    "on_pickup_dropoff": 6,
+    "traversing_crosswalk": 5,
+    "near_multiple_vehicles": 4,
+    "following_lane_with_slow_lead": 4,
+    "on_stopline_traffic_light": 4,
+    "following_lane_without_lead": 3,
+    "on_intersection": 3,
+    "near_pedestrian_on_crosswalk": 2,
+    "stopping_with_lead": 1,
+    "near_construction_zone_sign": 1,
+    "stopping_at_traffic_light_without_lead": 1,
+    "stopping_at_crosswalk": 1
+  },
+  "scenario_group_counts": {
+    "Stationary / queued": 471,
+    "Traversal": 151,
+    "Speed magnitude": 106,
+    "Following / proximity": 28,
+    "Control / stopping": 22,
+    "Unknown": 222
+  },
+  "expert_path_length_m": {
+    "p10": 0.0017777944449335337,
+    "p50": 12.59292984008789,
+    "p90": 77.03438262939454,
+    "bins": {
+      "<=2": 449,
+      "2-10": 39,
+      "10-20": 51,
+      "20-40": 97,
+      ">40": 364
+    }
+  },
+  "current_tracked_neighbors": {
+    "p10": 11.0,
+    "p50": 32.0,
+    "p90": 32.0,
+    "capped_at": 32,
+    "bins": {
+      "0": 27,
+      "1-5": 39,
+      "6-10": 32,
+      "11-20": 143,
+      "21-32": 759
+    }
+  }
+}

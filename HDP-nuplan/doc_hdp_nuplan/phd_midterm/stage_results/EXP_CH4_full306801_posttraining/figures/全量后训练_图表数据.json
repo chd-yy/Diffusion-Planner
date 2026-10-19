@@ -1,0 +1,337 @@
+{
+  "generated_at": "10月08日00时47分",
+  "replay_counts": {
+    "scene_groups": 306801,
+    "stored_candidates": 9817632,
+    "safe_candidates": 9097563,
+    "task_preserving_candidates": 2390231,
+    "active_groups": 37145,
+    "target_groups": 30159,
+    "regression_targets": 167730,
+    "shards": 307,
+    "proposals_by_protocol": 26998488
+  },
+  "validation_protocol": {
+    "common_random_numbers": true,
+    "seed_formula": "seed + repeat * 100000 + batch_index",
+    "dataset_samples": 1000,
+    "generated_trajectories_per_model": 3000,
+    "repeats": 3,
+    "seed": 3407,
+    "num_samples": 1,
+    "diffusion_steps": 6,
+    "sampling_noise_scale": 0.1,
+    "trajectory_augmentation_std_m": 0.0,
+    "low_speed_threshold_mps": 0.5
+  },
+  "validation_key_deltas": {
+    "reward": {
+      "mean": 0.00699111454588035,
+      "std": 0.08302020146161423,
+      "p10": -0.01265621185302734,
+      "p50": 0.00124242769771854,
+      "p90": 0.01991458535194397,
+      "count": 3000,
+      "finite_count": 3000,
+      "nonfinite_count": 0,
+      "paired_finite_count": 3000,
+      "paired_nonfinite_count": 0,
+      "both_positive_infinity_count": 0,
+      "supervised_mean": 0.5381108960885593,
+      "rl_mean": 0.5451020106344396,
+      "relative_change_percent": 1.2991958714639726,
+      "rl_higher_fraction": 0.618,
+      "improved_fraction": 0.618
+    },
+    "progress": {
+      "mean": 0.030484139945194024,
+      "std": 0.05094949346224936,
+      "p10": -0.02002468109130859,
+      "p50": 0.012298314017243683,
+      "p90": 0.10914593338966368,
+      "count": 3000,
+      "finite_count": 3000,
+      "nonfinite_count": 0,
+      "paired_finite_count": 3000,
+      "paired_nonfinite_count": 0,
+      "both_positive_infinity_count": 0,
+      "supervised_mean": 2.8130210614082984,
+      "rl_mean": 2.843505201353492,
+      "relative_change_percent": 1.0836797620680656,
+      "rl_higher_fraction": 0.812,
+      "improved_fraction": 0.812
+    },
+    "no_collision": {
+      "mean": -0.0003333333333333333,
+      "std": 0.048303439031007124,
+      "p10": 0.0,
+      "p50": 0.0,
+      "p90": 0.0,
+      "count": 3000,
+      "finite_count": 3000,
+      "nonfinite_count": 0,
+      "paired_finite_count": 3000,
+      "paired_nonfinite_count": 0,
+      "both_positive_infinity_count": 0,
+      "supervised_mean": 0.925,
+      "rl_mean": 0.9246666666666666,
+      "relative_change_percent": -0.036036036036036036,
+      "rl_higher_fraction": 0.001,
+      "improved_fraction": 0.001
+    },
+    "drivable_area_compliance": {
+      "mean": 0.018666666666666668,
+      "std": 0.20571393298029725,
+      "p10": 0.0,
+      "p50": 0.0,
+      "p90": 0.0,
+      "count": 3000,
+      "finite_count": 3000,
+      "nonfinite_count": 0,
+      "paired_finite_count": 3000,
+      "paired_nonfinite_count": 0,
+      "both_positive_infinity_count": 0,
+      "supervised_mean": 0.874,
+      "rl_mean": 0.8926666666666667,
+      "relative_change_percent": 2.135774218154081,
+      "rl_higher_fraction": 0.030666666666666665
+    },
+    "route_cost": {
+      "mean": -0.0013176971217617392,
+      "std": 0.008269851936614094,
+      "p10": -0.010836562514305115,
+      "p50": -0.00014050304889678955,
+      "p90": 0.0084713414311409,
+      "count": 3000,
+      "finite_count": 3000,
+      "nonfinite_count": 0,
+      "paired_finite_count": 3000,
+      "paired_nonfinite_count": 0,
+      "both_positive_infinity_count": 0,
+      "supervised_mean": 0.22302562865211317,
+      "rl_mean": 0.22170793153035143,
+      "relative_change_percent": -0.590827668427807,
+      "rl_higher_fraction": 0.3883333333333333,
+      "improved_fraction": 0.508
+    },
+    "comfort_cost": {
+      "mean": 0.010753654487410435,
+      "std": 0.09737049589913573,
+      "p10": -0.08521780967712402,
+      "p50": 0.0,
+      "p90": 0.16685616970062242,
+      "count": 3000,
+      "finite_count": 3000,
+      "nonfinite_count": 0,
+      "paired_finite_count": 3000,
+      "paired_nonfinite_count": 0,
+      "both_positive_infinity_count": 0,
+      "supervised_mean": 0.342075809361783,
+      "rl_mean": 0.3528294638491934,
+      "relative_change_percent": 3.1436465815790138,
+      "rl_higher_fraction": 0.33666666666666667,
+      "improved_fraction": 0.4226666666666667
+    },
+    "ade_m": {
+      "mean": 1.529864314943552e-05,
+      "std": 0.25222255918955294,
+      "p10": -0.25237479209899905,
+      "p50": -0.03380765439942479,
+      "p90": 0.37484763860702497,
+      "count": 3000,
+      "finite_count": 3000,
+      "nonfinite_count": 0,
+      "paired_finite_count": 3000,
+      "paired_nonfinite_count": 0,
+      "both_positive_infinity_count": 0,
+      "supervised_mean": 2.2080811224877834,
+      "rl_mean": 2.208096421130933,
+      "relative_change_percent": 0.0006928478756341599,
+      "rl_higher_fraction": 0.4,
+      "improved_fraction": 0.6
+    },
+    "fde_m": {
+      "mean": 0.07134923708431112,
+      "std": 0.6497303416072888,
+      "p10": -0.5589803218841553,
+      "p50": -0.06916448101401329,
+      "p90": 0.8880318641662597,
+      "count": 3000,
+      "finite_count": 3000,
+      "nonfinite_count": 0,
+      "paired_finite_count": 3000,
+      "paired_nonfinite_count": 0,
+      "both_positive_infinity_count": 0,
+      "supervised_mean": 5.7705043657775965,
+      "rl_mean": 5.841853602861908,
+      "relative_change_percent": 1.236447155424629,
+      "rl_higher_fraction": 0.422,
+      "improved_fraction": 0.578
+    }
+  },
+  "closed_loop": {
+    "test14-hard": {
+      "scenario_count": 272,
+      "log_count": 160,
+      "metrics": {
+        "score": {
+          "baseline_mean": 0.7053041244966197,
+          "candidate_mean": 0.7141132330315924,
+          "mean_delta": 0.00880910853497254,
+          "median_delta": 0.0,
+          "wins": 115,
+          "losses": 56,
+          "ties": 101,
+          "log_cluster_percentile_interval_95": [
+            -0.011610367051366024,
+            0.029606327160408792
+          ]
+        },
+        "ego_progress_along_expert_route": {
+          "baseline_mean": 0.8191409878855698,
+          "candidate_mean": 0.8327309960647142,
+          "mean_delta": 0.0135900081791445,
+          "median_delta": 0.0014423637638572018,
+          "wins": 144,
+          "losses": 47,
+          "ties": 81,
+          "log_cluster_percentile_interval_95": [
+            0.010187579305986244,
+            0.01743617743620718
+          ]
+        },
+        "no_ego_at_fault_collisions": {
+          "baseline_mean": 0.8676470588235294,
+          "candidate_mean": 0.8621323529411765,
+          "mean_delta": -0.0055147058823529415,
+          "median_delta": 0.0,
+          "wins": 5,
+          "losses": 6,
+          "ties": 261,
+          "log_cluster_percentile_interval_95": [
+            -0.027491408934707903,
+            0.014652014652014652
+          ]
+        },
+        "speed_limit_compliance": {
+          "baseline_mean": 0.97466999981603,
+          "candidate_mean": 0.9726861906608332,
+          "mean_delta": -0.001983809155196713,
+          "median_delta": 0.0,
+          "wins": 22,
+          "losses": 37,
+          "ties": 213,
+          "log_cluster_percentile_interval_95": [
+            -0.0031685811691322062,
+            -0.0009849390746797773
+          ]
+        },
+        "drivable_area_compliance": {
+          "baseline_mean": 0.9448529411764706,
+          "candidate_mean": 0.9411764705882353,
+          "mean_delta": -0.003676470588235294,
+          "median_delta": 0.0,
+          "wins": 1,
+          "losses": 2,
+          "ties": 269,
+          "log_cluster_percentile_interval_95": [
+            -0.017006802721088437,
+            0.007751937984496124
+          ]
+        }
+      },
+      "score_distribution": {
+        "wins": 115,
+        "losses": 56,
+        "ties": 101,
+        "new_collision_events": 6
+      }
+    },
+    "test14-random": {
+      "scenario_count": 261,
+      "log_count": 148,
+      "metrics": {
+        "score": {
+          "baseline_mean": 0.8242700731993303,
+          "candidate_mean": 0.8432106415622038,
+          "mean_delta": 0.01894056836287356,
+          "median_delta": 0.0,
+          "wins": 95,
+          "losses": 54,
+          "ties": 112,
+          "log_cluster_percentile_interval_95": [
+            -0.005576729658635346,
+            0.04860237012833417
+          ]
+        },
+        "ego_progress_along_expert_route": {
+          "baseline_mean": 0.9102697618215604,
+          "candidate_mean": 0.9186740115540294,
+          "mean_delta": 0.008404249732469074,
+          "median_delta": 0.0,
+          "wins": 97,
+          "losses": 39,
+          "ties": 125,
+          "log_cluster_percentile_interval_95": [
+            0.0050262030881585065,
+            0.012622584378069974
+          ]
+        },
+        "no_ego_at_fault_collisions": {
+          "baseline_mean": 0.9080459770114943,
+          "candidate_mean": 0.8984674329501916,
+          "mean_delta": -0.009578544061302681,
+          "median_delta": 0.0,
+          "wins": 3,
+          "losses": 5,
+          "ties": 253,
+          "log_cluster_percentile_interval_95": [
+            -0.03112033195020747,
+            0.010033612711716391
+          ]
+        },
+        "speed_limit_compliance": {
+          "baseline_mean": 0.9664543403309176,
+          "candidate_mean": 0.9650716112364836,
+          "mean_delta": -0.0013827290944339798,
+          "median_delta": 0.0,
+          "wins": 20,
+          "losses": 40,
+          "ties": 201,
+          "log_cluster_percentile_interval_95": [
+            -0.0023833990405696527,
+            -0.0005178607656869715
+          ]
+        },
+        "drivable_area_compliance": {
+          "baseline_mean": 0.9655172413793104,
+          "candidate_mean": 0.9770114942528736,
+          "mean_delta": 0.011494252873563218,
+          "median_delta": 0.0,
+          "wins": 3,
+          "losses": 0,
+          "ties": 258,
+          "log_cluster_percentile_interval_95": [
+            0.0,
+            0.03103448275862069
+          ]
+        }
+      },
+      "score_distribution": {
+        "wins": 95,
+        "losses": 54,
+        "ties": 112,
+        "new_collision_events": 5
+      }
+    }
+  },
+  "test14_overlap_tokens": 11,
+  "source_sha256": {
+    "replay_index": "2c4af8e2f68f9d0fc3d20e66d01fed92ba1e1e48fa884d59af6b626527400bbc",
+    "run_metadata": "00f31c826f4d83c973e3e1cf5437a0846d888e7c152c8c3500217a40b890e9d3",
+    "validation": "ddd4da60d7a8c171d445caae0590455d2711c914a4466518a8ad2831b7f4061a",
+    "closed_loop_extended": "bc6a75cb5d6e2fc39dd8e968b6950312be23e4ccbbd79ca4370ec79919a6faad",
+    "test14_hard_scenarios": "8208b2b2109b86072a7cbaf28bd0d072e523db1d10fb2a7f928e8974dac584b7",
+    "test14_random_scenarios": "ff1f99f92985849570690a572b35cab0c45f66445d9cbcd612d43a966b7b62af"
+  }
+}

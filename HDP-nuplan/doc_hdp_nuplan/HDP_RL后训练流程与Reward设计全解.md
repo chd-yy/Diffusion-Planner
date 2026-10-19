@@ -6,6 +6,8 @@
 
 评测状态更正：09月16日 12:26（北京时间），见第 11.2 节；奖励与训练配置说明未改变。
 
+Following 适用性解耦修订：09月21日 16:38（北京时间）。后续新训练默认使用 `expert_reference`；09月15日已完成几何修复模型及更早 checkpoint 仍属于历史 `candidate` 定义，不得追溯性写成已使用新方法。修复和 100 场景影子审计见 [RL Following Reward 适用性解耦修复记录](./RL_FollowingReward适用性解耦修复记录.md)。
+
 本文回答：当前 RL 后训练究竟怎样运行，各项奖励为什么设计、怎样计算、哪些真正启用，以及奖励怎样最终变成参数更新。
 
 **范围声明：** 以当前工作区实际执行代码为准，以 **09月15日几何修复版 RL Epoch2** 的落盘 `args.json` 为“当前运行配置”。另外单独区分历史 RL Epoch2、通用训练入口默认值和未启用的实验能力。不能用“代码里存在某个参数”推断“本次训练使用了该项奖励”。下文 motivation 是依据实现解释的工程目的，不代表经过消融实验验证的最优设计，也不宣称已经逐式复现论文。源码中“论文 D.5”等注释不是本文独立核验的论文证据。
@@ -317,7 +319,17 @@ comfort_score = clip01(1-acc_violation)
 per_step_follow = (gap_score+spacing_score+speed_score+comfort_score)/4
 ```
 
-前车速度使用其速度在自车朝向上的投影并截为非负；纵向加速度由自车运动差分并投影得到。只对**有前车的时刻**求平均；整条轨迹没有前车则 follow=1，同时 leader_fraction=0。
+历史 `candidate` 模式中，前车速度使用其速度在自车朝向上的投影并截为非负；纵向加速度由自车运动差分并投影得到。只对**候选自己识别为有前车的时刻**求平均；整条轨迹没有前车则 follow=1，同时 leader_fraction=0。这会产生 objective-avoidance 漏洞：候选横向离开 leader corridor 后可自行删除跟车目标。
+
+09月21日新增 `expert_reference` 模式后，修改为：
+
+1. 由 `ego_future` 统一决定每个时刻是否存在 leader 以及 leader 身份，同场景所有候选共享；
+2. gap、自车速度、leader 速度和纵向加速度统一投影到专家轨迹朝向，候选无法通过转动自身航向改写评价坐标系；
+3. 专家换道或当前 lane corridor 无法覆盖专家时，候选无关地关闭 following；
+4. 无参考 leader 时诊断值 follow 仍记 1，但 `follow_contribution=0`，不再当作加法目标的满分；
+5. 有效 leader 达到 8 帧时获得完整 following 权重，1--7 帧按 `valid_steps/8` 降权，防止单帧 leader 噪声主导整条候选。
+
+新日志额外输出 `candidate_leader_fraction`、`reference_leader_fraction`、`follow_applicable`、`follow_confidence`、`leader_escape_fraction`、`reference_leader_switch_fraction`、`legacy_follow_reward` 和 `reference_follow_reward`。
 
 区别要点：THW 只关注过近，follow 同时惩罚离理想时距/间距过远；follow 是时间平均而非风险最小值。gap 和 spacing 两项相关但不完全相同，后者包含 2 米静止间距。follow 中的舒适性正在生效，但只在有前车时起作用；它不是全场景 jerk comfort，也不是限速合规奖励。
 
