@@ -21,6 +21,7 @@ import yaml
 from analyze_midterm_paired import compare, validate_run
 from analyze_paired_closed_loop import METRICS
 from summarize_closed_loop_metrics import summarize_run
+from storage_paths import require_allowed_output
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -424,10 +425,11 @@ def main() -> None:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--execute", action="store_true")
     args = parser.parse_args()
-    output = args.output.resolve()
-    allowed_root = (HDP / "tmp/chapter3_closed_loop").resolve()
-    if allowed_root not in output.parents:
-        raise ValueError(f"output must be a child of {allowed_root}")
+    output, _ = require_allowed_output(
+        args.output,
+        HDP / "tmp/chapter3_closed_loop",
+        "chapter3_closed_loop",
+    )
     output.mkdir(parents=True, exist_ok=True)
     with (output / ".run.lock").open("a") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)

@@ -31,6 +31,8 @@ def main():
         rl_filter_collision_candidates=True,
         rl_filter_progress_guard_candidates=False,
         reward_safety_gate_require_drivable_area=False,
+        # The completed 09/15 run predates candidate-independent following.
+        reward_follow_assignment_mode="candidate",
         rl_reference_anchor_weight=0.0, reward_objective_mode="legacy",
         reward_use_nuplan_vehicle_geometry=not cli.legacy_geometry,
     )

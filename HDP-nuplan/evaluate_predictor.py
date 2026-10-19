@@ -67,6 +67,11 @@ def evaluate_once(model, data_loader, config, device):
             {},
             config.diffusion_model_type,
             config.diffusion_supervision_type,
+            trajectory_representation=getattr(
+                config,
+                "trajectory_representation",
+                "increment",
+            ),
         )
         loss["loss"] = (
             loss["ego_planning_loss"]

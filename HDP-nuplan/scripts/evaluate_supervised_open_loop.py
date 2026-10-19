@@ -35,6 +35,17 @@ def parse_args() -> argparse.Namespace:
         metavar="NAME=CHECKPOINT",
         help="Repeat for every checkpoint; the first model is the paired reference.",
     )
+    parser.add_argument(
+        "--model-args",
+        action="append",
+        default=[],
+        metavar="NAME=ARGS_FILE",
+        help=(
+            "Optional per-model args.json. Models without an override use "
+            "--args-file. Required when compared models use different trajectory "
+            "representations or target normalizers."
+        ),
+    )
     parser.add_argument("--data-dir", required=True, type=Path)
     parser.add_argument("--data-list", required=True, type=Path)
     parser.add_argument("--batch-size", default=16, type=int)
@@ -81,6 +92,29 @@ def parse_model_specs(specs: Iterable[str]) -> list[tuple[str, Path]]:
             raise FileNotFoundError(path)
         names.add(name)
         parsed.append((name, path))
+    return parsed
+
+
+def parse_model_args_specs(
+    specs: Iterable[str],
+    model_names: set[str],
+) -> dict[str, Path]:
+    parsed = {}
+    for spec in specs:
+        if "=" not in spec:
+            raise ValueError(
+                f"invalid --model-args {spec!r}; expected NAME=ARGS_FILE"
+            )
+        name, path_text = spec.split("=", 1)
+        name = name.strip()
+        path = Path(path_text).expanduser().resolve()
+        if name not in model_names:
+            raise ValueError(f"--model-args names unknown model: {name!r}")
+        if name in parsed:
+            raise ValueError(f"duplicate --model-args entry: {name}")
+        if not path.is_file():
+            raise FileNotFoundError(path)
+        parsed[name] = path
     return parsed
 
 
@@ -216,15 +250,19 @@ def main() -> None:
     args = parse_args()
     validate_args(args)
     model_specs = parse_model_specs(args.model)
-    config = Config(args.args_file)
+    model_args_paths = parse_model_args_specs(
+        args.model_args,
+        {name for name, _ in model_specs},
+    )
+    default_config = Config(args.args_file)
     device = torch.device(args.device)
 
     dataset = DiffusionPlannerData(
         str(args.data_dir),
         str(args.data_list),
-        config.agent_num,
-        config.predicted_neighbor_num,
-        config.future_len,
+        default_config.agent_num,
+        default_config.predicted_neighbor_num,
+        default_config.future_len,
         return_metadata=True,
     )
     data_loader = DataLoader(
@@ -238,8 +276,22 @@ def main() -> None:
 
     arrays_by_model: Dict[str, Dict[str, np.ndarray]] = {}
     metadata_by_model = {}
+    args_metadata_by_model = {}
     reference_observations = None
     for model_name, checkpoint_path in model_specs:
+        model_args_path = model_args_paths.get(model_name, args.args_file).resolve()
+        config = Config(model_args_path)
+        structural_fields = (
+            "agent_num",
+            "predicted_neighbor_num",
+            "future_len",
+        )
+        for field in structural_fields:
+            if getattr(config, field) != getattr(default_config, field):
+                raise ValueError(
+                    f"{model_name} changes dataset structural field {field}: "
+                    f"{getattr(config, field)!r} != {getattr(default_config, field)!r}"
+                )
         print(f"Evaluating {model_name}: {checkpoint_path}")
         model, checkpoint_metadata = load_model(config, checkpoint_path, device)
         arrays, observations = evaluate_model(model, data_loader, config, device, args)
@@ -249,6 +301,16 @@ def main() -> None:
             raise RuntimeError("observation order changed between paired model evaluations")
         arrays_by_model[model_name] = arrays
         metadata_by_model[model_name] = checkpoint_metadata
+        args_metadata_by_model[model_name] = {
+            "path": str(model_args_path),
+            "sha256": sha256(model_args_path),
+            "trajectory_representation": getattr(
+                config,
+                "trajectory_representation",
+                "increment",
+            ),
+            "state_normalizer": config.state_normalizer.to_dict(),
+        }
         del model
         if device.type == "cuda":
             torch.cuda.empty_cache()
@@ -273,7 +335,7 @@ def main() -> None:
         "schema_version": 1,
         "metric_contract": {
             "trajectory_input": "[x,y,cos(yaw),sin(yaw)] in ego-local physical units",
-            "sampler_output_is_already_integrated": True,
+            "sampler_output_is_decoded_to_absolute_waypoints": True,
             "ade": "mean Euclidean xy error through the named horizon",
             "fde": "Euclidean xy error at the named horizon",
             "heading": "wrapped angular error from normalized cos/sin direction",
@@ -296,6 +358,7 @@ def main() -> None:
         "inputs": {
             "args_file": str(args.args_file.resolve()),
             "args_file_sha256": sha256(args.args_file),
+            "per_model_args": args_metadata_by_model,
             "data_dir": str(args.data_dir.resolve()),
             "data_list": str(args.data_list.resolve()),
             "data_list_sha256": sha256(args.data_list),

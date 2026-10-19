@@ -43,6 +43,6 @@ def test_manifest_rejects_all_heldout_overlap_not_only_diagnosis_cases():
 
 def test_command_booleans_and_invalid_arguments():
     command = build_command(dict(rl_center_reward_weights=False, seed=42))
-    assert command[-4:] == ["--rl_center_reward_weights", "false", "--seed", "42"]
+    assert command[-2:] == ["--rl_center_reward_weights=false", "--seed=42"]
     with pytest.raises(ValueError): build_command({"invalid": None})
     with pytest.raises(ValueError): variant_args({}, "not_a_variant", 1, Path("run"))

@@ -9,6 +9,7 @@
 # List：
 # 表示列表类型。
 from typing import Dict, Iterable, List
+from dataclasses import replace
 
 # NumPy 用于计算多个 batch 指标的平均值。
 import numpy as np
@@ -51,8 +52,33 @@ from tqdm import tqdm
 # 由 hdp_nuplan.rl.loss 中的实现决定。
 from hdp_nuplan.rl.loss import reward_weighted_diffusion_loss
 from hdp_nuplan.rl.trajectory_augmentation import augment_trajectory_batch
+from hdp_nuplan.model.diffusion_utils.candidate_noise import (
+    parse_scale_count_profile,
+)
+from hdp_nuplan.rl.candidate_selection import (
+    gather_candidate_details,
+    gather_candidate_tensor,
+    quality_diverse_indices,
+    stratified_safety_diverse_indices,
+    weighted_quality_dispersion,
+)
+from hdp_nuplan.rl.candidate_safe_set import (
+    SOURCE_GUIDED,
+    SOURCE_POLICY_MEDIUM,
+    SOURCE_POLICY_NATURAL,
+    SOURCE_REFERENCE_NATURAL,
+    classify_candidate_eligibility,
+    safe_set_compression_indices,
+)
+from hdp_nuplan.model.guidance.longitudinal import (
+    expert_frenet_targets,
+    make_longitudinal_guidance_energy,
+)
+from hdp_nuplan.rl.reward import NuPlanTensorRewardScorer
+from hdp_nuplan.rl.replay_buffer import ReplayTargetBatchSampler
 from hdp_nuplan.rl.safety_update import (
-    apply_update, build_candidate_mask, candidate_filter_enabled, validate_safety_update,
+    apply_update, build_candidate_mask, candidate_filter_enabled,
+    replay_target_state, validate_replay_target_coverage, validate_safety_update,
 )
 from hdp_nuplan.loss import diffusion_loss_func
 
@@ -63,6 +89,197 @@ from hdp_nuplan.loss import diffusion_loss_func
 # 1. 在普通单卡模式下，直接返回模型本身；
 # 2. 在 DDP 模式下，从 DDP 包装器中取出 model.module。
 from hdp_nuplan.utils import ddp
+
+
+def _temporal_forward_conflict_mask(
+    ego_future,
+    neighbors_future,
+    neighbor_mask,
+    corridor_half_width=3.5,
+    corridor_range=15.0,
+):
+    """Return scenes with a neighbour ahead in the expert-path corridor.
+
+    The A6 prototype inspected only the first future frame.  This version checks
+    the complete overlapping horizon, so a later cut-in cannot silently retain
+    positive acceleration guidance.
+    """
+    if neighbors_future.shape[1] == 0:
+        return torch.zeros(
+            ego_future.shape[0], device=ego_future.device, dtype=torch.bool
+        )
+    horizon = min(ego_future.shape[1], neighbors_future.shape[2])
+    tangent, _ = expert_frenet_targets(ego_future[:, :horizon], dt=0.1)
+    lateral_axis = torch.stack([-tangent[..., 1], tangent[..., 0]], dim=-1)
+    delta = (
+        neighbors_future[:, :, :horizon, :2]
+        - ego_future[:, None, :horizon, :2]
+    )
+    longitudinal = (delta * tangent[:, None]).sum(dim=-1)
+    lateral = (delta * lateral_axis[:, None]).sum(dim=-1)
+    valid = ~neighbor_mask[:, :, :horizon].bool()
+    forward_conflict = (
+        valid
+        & (lateral.abs() < float(corridor_half_width))
+        & (longitudinal >= 0.0)
+        & (longitudinal < float(corridor_range))
+    )
+    return forward_conflict.flatten(1).any(dim=1)
+
+
+def _scene_adaptive_guidance_deviations(
+    deviations,
+    forward_conflict,
+    moving,
+    guided_count,
+    *,
+    device,
+    dtype,
+):
+    """Assign symmetric/free-road or nonpositive/conflict guidance ladders.
+
+    Low-motion scenes receive an all-zero deviation and a disabled gate, so
+    their guided branch is exactly ordinary low-noise sampling.
+    """
+    symmetric = [float(value) for value in deviations]
+    nonpositive = [value for value in symmetric if value <= 0.0]
+    if not (
+        any(value < 0.0 for value in symmetric)
+        and any(value == 0.0 for value in symmetric)
+        and any(value > 0.0 for value in symmetric)
+    ):
+        raise ValueError(
+            "guidance deviation ladder requires negative, zero and positive values"
+        )
+    rows = []
+    for conflict, is_moving in zip(forward_conflict.tolist(), moving.tolist()):
+        if not is_moving:
+            ladder = [0.0]
+        elif conflict:
+            ladder = nonpositive
+        else:
+            ladder = symmetric
+        rows.append(
+            [ladder[index % len(ladder)] for index in range(guided_count)]
+        )
+    deviation = torch.tensor(rows, device=device, dtype=dtype)
+    return deviation, moving.to(device=device, dtype=dtype)
+
+
+def _sample_guided_safe_set_pool(
+    base_model,
+    reference_model,
+    model_inputs,
+    raw_inputs,
+    ego_future,
+    neighbors_future,
+    neighbor_mask,
+    reward_scorer,
+    args,
+):
+    """Build the 88-proposal pool (no high-noise exploration branch)."""
+    if reference_model is None:
+        raise RuntimeError("guided safe-set protocol requires a frozen reference model")
+    counts = {
+        SOURCE_REFERENCE_NATURAL: int(args.rl_guided_reference_count),
+        SOURCE_POLICY_NATURAL: int(args.rl_guided_policy_count),
+        SOURCE_POLICY_MEDIUM: int(args.rl_guided_medium_count),
+        SOURCE_GUIDED: int(args.rl_guided_count),
+    }
+    if any(count < 1 for count in counts.values()):
+        raise ValueError("all guided safe-set proposal branches must be non-empty")
+
+    reference = reference_model.sample(
+        model_inputs,
+        num_samples=counts[SOURCE_REFERENCE_NATURAL],
+        diffusion_steps=args.rl_rollout_steps,
+        noise_scale=args.rl_guided_low_noise_scale,
+    )
+    natural = base_model.sample(
+        model_inputs,
+        num_samples=counts[SOURCE_POLICY_NATURAL],
+        diffusion_steps=args.rl_rollout_steps,
+        noise_scale=args.rl_guided_low_noise_scale,
+    )
+    medium = base_model.sample(
+        model_inputs,
+        num_samples=counts[SOURCE_POLICY_MEDIUM],
+        diffusion_steps=args.rl_rollout_steps,
+        noise_scale=args.rl_guided_medium_noise_scale,
+    )
+
+    with torch.no_grad():
+        _, expert_details = reward_scorer(
+            trajectories=ego_future[:, None],
+            neighbors_future=neighbors_future,
+            neighbor_mask=neighbor_mask,
+            route_lanes=raw_inputs["route_lanes"],
+            static_objects=raw_inputs["static_objects"],
+            ego_future=ego_future,
+            neighbor_agents_past=raw_inputs["neighbor_agents_past"],
+            ego_current_state=raw_inputs["ego_current_state"],
+            lanes=raw_inputs["lanes"],
+        )
+        forward_conflict = _temporal_forward_conflict_mask(
+            ego_future, neighbors_future, neighbor_mask,
+            corridor_half_width=args.rl_guidance_corridor_half_width,
+            corridor_range=args.rl_guidance_corridor_range,
+        )
+        moving = (
+            expert_details["progress"][:, 0]
+            > float(args.rl_guidance_progress_threshold)
+        )
+        tangent, speed = expert_frenet_targets(ego_future, dt=0.1)
+
+    deviations = [
+        float(value.strip())
+        for value in args.rl_guidance_deviations.split(",")
+        if value.strip()
+    ]
+    guided_count = counts[SOURCE_GUIDED]
+    deviation_matrix, gate = _scene_adaptive_guidance_deviations(
+        deviations,
+        forward_conflict,
+        moving,
+        guided_count,
+        device=ego_future.device,
+        dtype=ego_future.dtype,
+    )
+    representation = getattr(args, "trajectory_representation", "increment")
+    guided = base_model.sample(
+        model_inputs,
+        num_samples=guided_count,
+        diffusion_steps=args.rl_rollout_steps,
+        noise_scale=args.rl_guided_low_noise_scale,
+        guidance_fn=make_longitudinal_guidance_energy(
+            dt=0.1, trajectory_representation=representation
+        ),
+        guidance_kwargs={
+            "expert_tangent": tangent.repeat_interleave(guided_count, dim=0),
+            "expert_speed": speed.repeat_interleave(guided_count, dim=0),
+            "deviation": deviation_matrix.reshape(-1),
+            "gate": gate.to(ego_future.dtype).repeat_interleave(guided_count),
+        },
+        guidance_scale=float(args.rl_guidance_scale),
+    )
+    trajectories = torch.cat([reference, natural, medium, guided], dim=1)
+    source_ids = torch.cat([
+        torch.full((count,), source, device=ego_future.device, dtype=torch.long)
+        for source, count in counts.items()
+    ])
+    stats = {
+        "guidance/gate_fraction": float(gate.float().mean()),
+        "guidance/free_symmetric_fraction": float(
+            (moving & ~forward_conflict).float().mean()
+        ),
+        "guidance/conflict_deceleration_fraction": float(
+            (moving & forward_conflict).float().mean()
+        ),
+        "guidance/low_motion_natural_fraction": float((~moving).float().mean()),
+        "guidance/proposal_pool_size": float(trajectories.shape[1]),
+        "guidance/deviation_span": float(deviation_matrix.abs().max()),
+    }
+    return trajectories, source_ids, stats
 
 
 # 把两个训练目标的组合单独封装，便于做“只用 rollout / 只用 expert anchor”控制实验。
@@ -376,6 +593,40 @@ def rollout_epoch(
     # 保存每个 batch 的 rollout 统计指标。
     records = []
 
+    pool_profile = getattr(args, "rl_candidate_pool_profile", "")
+    selection_profile = getattr(args, "rl_candidate_selection_profile", "")
+    pool_scales = (
+        parse_scale_count_profile(pool_profile) if pool_profile else None
+    )
+    selection_scales = (
+        parse_scale_count_profile(selection_profile)
+        if selection_profile
+        else None
+    )
+    reference_selection_profile = getattr(
+        args, "rl_task_reference_selection_profile", ""
+    )
+    reference_selection_scales = (
+        parse_scale_count_profile(reference_selection_profile)
+        if reference_selection_profile
+        else None
+    )
+    task_preserving_update = getattr(
+        args, "rl_task_preserving_update_mask", False
+    )
+    guided_safe_set_protocol = getattr(
+        args, "rl_guided_safe_set_protocol", False
+    )
+    legacy_selection_scorer = None
+    if task_preserving_update:
+        legacy_selection_scorer = NuPlanTensorRewardScorer(
+            replace(
+                reward_scorer.config,
+                objective_mode="legacy",
+                safety_gate_require_drivable_area=False,
+            )
+        )
+
     # 创建带进度条的数据迭代器。
     progress = tqdm(data_loader, desc="NuPlan RL rollout", unit="batch")
 
@@ -416,18 +667,34 @@ def rollout_epoch(
         # [B, K, future_len, trajectory_dim]
         #
         # 具体张量维度由 base_model.sample 的实现决定。
-        trajectories = base_model.sample(
-            model_inputs,
+        source_ids = None
+        guidance_stats = {}
+        if guided_safe_set_protocol:
+            trajectories, source_ids, guidance_stats = _sample_guided_safe_set_pool(
+                base_model,
+                reference_model,
+                model_inputs,
+                raw_inputs,
+                ego_future,
+                neighbors_future,
+                neighbor_mask,
+                reward_scorer,
+                args,
+            )
+        else:
+            trajectories = base_model.sample(
+                model_inputs,
 
-            # 每个场景的候选轨迹数量 K。
-            num_samples=args.rl_group_size,
+                # 每个场景的候选轨迹数量 K。
+                num_samples=(len(pool_scales) if pool_scales else args.rl_group_size),
 
-            # 每条轨迹使用的反向扩散去噪步数。
-            diffusion_steps=args.rl_rollout_steps,
+                # 每条轨迹使用的反向扩散去噪步数。
+                diffusion_steps=args.rl_rollout_steps,
 
-            # 仅控制 RL 候选的初始噪声尺度；普通 planner 推理仍使用 sample() 默认 0.1。
-            noise_scale=args.rl_sampling_noise_scale,
-        )
+                # 仅控制 RL 候选的初始噪声尺度；普通 planner 推理仍使用 sample() 默认 0.1。
+                noise_scale=args.rl_sampling_noise_scale,
+                candidate_noise_scales=pool_scales,
+            )
 
         # 【迁移自 HDP-NAVSIM】前若干个 epoch 在每条候选自身的局部坐标系中，
         # 给整条轨迹加入共享的纵向/横向高斯偏移。它直接扩大候选几何差异，
@@ -469,7 +736,7 @@ def rollout_epoch(
         #     "backward_cost": backward_cost,
         #     "imitation_cost": imitation_cost,
         # }
-        rewards, details = reward_scorer(
+        scorer_kwargs = dict(
             trajectories=trajectories,
             neighbors_future=neighbors_future,
             neighbor_mask=neighbor_mask,
@@ -493,12 +760,185 @@ def rollout_epoch(
             # route_lanes 只继续用于 progress/route 退化诊断。
             lanes=raw_inputs["lanes"],
         )
+        rewards, details = reward_scorer(**scorer_kwargs)
+
+        # Task bounds use the pre-registered B compression as a within-pool
+        # comparator.  Its legacy scalar reward is used only for selecting the
+        # B subset; route/progress bounds are read from the aligned scorer on
+        # the exact same candidate indices.
+        task_route_bound = None
+        task_progress_bound = None
+        reference_selected_indices = None
+        reference_rewards_from_pool = None
+        reference_has_safe = None
+        pool_eligibility = None
+        if guided_safe_set_protocol:
+            pool_eligibility = classify_candidate_eligibility(
+                trajectories, details
+            )
+            reference_count = int(args.rl_guided_reference_count)
+            reference_safe = pool_eligibility.hard_safe[:, :reference_count]
+            reference_values = rewards[:, :reference_count]
+            reference_top = torch.where(
+                reference_safe,
+                reference_values,
+                torch.full_like(reference_values, -torch.inf),
+            ).argmax(dim=1)
+            reference_rows = torch.arange(
+                rewards.shape[0], device=rewards.device
+            )
+            reference_has_safe = reference_safe.any(dim=1)
+            reference_rewards_from_pool = reference_values[
+                reference_rows, reference_top
+            ]
+            task_route_bound = details["route_cost"][:, :reference_count][
+                reference_rows, reference_top
+            ]
+            task_progress_bound = details["progress_guard_reward"][:, :reference_count][
+                reference_rows, reference_top
+            ]
+        elif task_preserving_update:
+            if not pool_scales or reference_selection_scales is None:
+                raise RuntimeError("task-preserving update requires pool/reference profiles")
+            _, legacy_details = legacy_selection_scorer(**scorer_kwargs)
+            pool_masks_for_reference = build_candidate_mask(details, args)
+            reference_selected_indices = stratified_safety_diverse_indices(
+                trajectories,
+                legacy_details["reward"],
+                pool_masks_for_reference,
+                pool_scales,
+                args.rl_group_size,
+                target_noise_scales=reference_selection_scales,
+            )
+            reference_details = gather_candidate_details(
+                details, reference_selected_indices, len(pool_scales)
+            )
+            reference_masks = build_candidate_mask(reference_details, args)
+            reference_reward = reference_details["reward"]
+            reference_top = torch.where(
+                reference_masks,
+                reference_reward,
+                torch.full_like(reference_reward, -torch.inf),
+            ).argmax(dim=1)
+            reference_rows = torch.arange(
+                reference_top.shape[0], device=reference_top.device
+            )
+            task_route_bound = reference_details["route_cost"][
+                reference_rows, reference_top
+            ]
+            task_progress_bound = reference_details["progress_guard_reward"][
+                reference_rows, reference_top
+            ]
+            # No safe reference means the scene cannot define a trustworthy
+            # task-preservation bound and must remain update-inactive.
+            reference_has_safe = reference_masks.any(dim=1)
+
+        # Candidate-generation repair: use a larger multi-temperature search
+        # pool, then retain a fixed safety-diverse group.  This changes only
+        # rollout proposals and does not update model parameters.
+        selected_eligibility = None
+        if guided_safe_set_protocol:
+            quality = torch.stack(
+                [
+                    details["aligned_safety_quality"],
+                    details["aligned_progress_quality"],
+                    details["aligned_route_quality"],
+                    details["aligned_comfort_quality"],
+                    details["aligned_follow_quality"],
+                ],
+                dim=-1,
+            )
+            selected_indices, selected_padding_mask = safe_set_compression_indices(
+                quality,
+                rewards,
+                pool_eligibility,
+                source_ids,
+                target_size=args.rl_group_size,
+                natural_slots=args.rl_safe_set_natural_slots,
+                medium_elite_slots=args.rl_safe_set_medium_elite_slots,
+                medium_diverse_slots=args.rl_safe_set_medium_diverse_slots,
+                global_elite_slots=args.rl_safe_set_global_elite_slots,
+                return_padding_mask=True,
+            )
+            pool_size = trajectories.shape[1]
+            trajectories = gather_candidate_tensor(trajectories, selected_indices)
+            details = gather_candidate_details(details, selected_indices, pool_size)
+            rewards = gather_candidate_tensor(rewards, selected_indices)
+            selected_source_ids = source_ids[None].expand(
+                selected_indices.shape[0], -1
+            ).gather(1, selected_indices)
+            selected_eligibility = type(pool_eligibility)(
+                valid=gather_candidate_tensor(
+                    pool_eligibility.valid, selected_indices
+                ) & ~selected_padding_mask,
+                hard_safe=gather_candidate_tensor(
+                    pool_eligibility.hard_safe, selected_indices
+                ) & ~selected_padding_mask,
+            )
+            invalid_scene = selected_padding_mask.all(dim=1)
+            if invalid_scene.any():
+                # No generated finite proposal exists for this scene.  Retain
+                # it as an explicitly inactive anchor-only group; zero storage
+                # values are never exposed to the RL objective because both
+                # candidate and update masks are false.
+                trajectories[invalid_scene] = 0.0
+                rewards[invalid_scene] = 0.0
+            details["safe_set_padding"] = selected_padding_mask.to(rewards.dtype)
+            details["safe_set_invalid_scene"] = invalid_scene[:, None].expand_as(
+                rewards
+            ).to(rewards.dtype)
+        elif pool_scales and len(pool_scales) > args.rl_group_size:
+            pool_masks = build_candidate_mask(details, args)
+            if getattr(args, "rl_candidate_selection_mode", "geometry") == "quality":
+                quality = torch.stack(
+                    [
+                        details["aligned_safety_quality"],
+                        details["aligned_progress_quality"],
+                        details["aligned_route_quality"],
+                        details["aligned_comfort_quality"],
+                        details["aligned_follow_quality"],
+                    ],
+                    dim=-1,
+                )
+                selected_indices = quality_diverse_indices(
+                    quality,
+                    rewards,
+                    pool_masks,
+                    pool_scales,
+                    selection_scales,
+                )
+                if reference_selected_indices is not None:
+                    no_safe = ~pool_masks.any(dim=1)
+                    selected_indices[no_safe] = reference_selected_indices[no_safe]
+            else:
+                selected_indices = stratified_safety_diverse_indices(
+                    trajectories,
+                    rewards,
+                    pool_masks,
+                    pool_scales,
+                    args.rl_group_size,
+                    target_noise_scales=selection_scales,
+                )
+            pool_size = len(pool_scales)
+            trajectories = gather_candidate_tensor(
+                trajectories,
+                selected_indices,
+            )
+            details = gather_candidate_details(
+                details,
+                selected_indices,
+                pool_size,
+            )
+            rewards = gather_candidate_tensor(rewards, selected_indices)
 
         # 可选的 reference-relative reward：冻结参考策略通常是 B Epoch10。
         # 它只生成每个场景一条确定性候选，不写入 replay；其 reward 作为
         # 当前 G 条候选的 baseline，update 时只学习真正超过参考策略的候选。
-        reference_rewards = None
-        if getattr(args, "rl_relative_to_reference", False):
+        reference_rewards = reference_rewards_from_pool
+        if (
+            getattr(args, "rl_relative_to_reference", False)
+            and reference_rewards is None
+        ):
             if reference_model is None:
                 raise RuntimeError(
                     "rl_relative_to_reference=true requires reference_model"
@@ -538,20 +978,86 @@ def rollout_epoch(
         # 把候选级安全资格和轨迹、奖励一起存入 Replay Buffer。旧实现只保存
         # 门控后的标量 reward，更新阶段无法区分“安全候选”和“被硬门降分的
         # 不安全候选”，因而 centered 权重仍可能对不安全候选产生负回归梯度。
-        candidate_masks = build_candidate_mask(details, args)
+        candidate_masks = (
+            selected_eligibility.hard_safe
+            if selected_eligibility is not None
+            else build_candidate_mask(details, args)
+        )
+        update_masks = candidate_masks.clone()
+        if task_preserving_update or guided_safe_set_protocol:
+            update_masks = (
+                update_masks
+                & reference_has_safe[:, None]
+                & (
+                    details["route_cost"]
+                    <= task_route_bound[:, None]
+                    + args.rl_route_cost_tolerance
+                    + 1e-12
+                )
+                & (
+                    details["progress_guard_reward"]
+                    >= task_progress_bound[:, None]
+                    - args.rl_progress_guard_tolerance
+                    - 1e-12
+                )
+            )
+        if guided_safe_set_protocol:
+            update_masks = update_masks & (
+                rewards
+                >= reference_rewards[:, None]
+                + float(args.rl_reference_reward_margin)
+            )
+
+        active_groups = torch.ones(
+            rewards.shape[0], device=rewards.device, dtype=torch.bool
+        )
+        if getattr(args, "rl_component_dispersion_gate", False):
+            quality = torch.stack(
+                [
+                    details["aligned_safety_quality"],
+                    details["aligned_progress_quality"],
+                    details["aligned_route_quality"],
+                    details["aligned_comfort_quality"],
+                    details["aligned_follow_quality"],
+                ],
+                dim=-1,
+            )
+            config = reward_scorer.config
+            component_weights = (
+                config.aligned_safety_exponent,
+                config.aligned_progress_exponent,
+                config.aligned_route_exponent,
+                config.aligned_comfort_exponent,
+                config.aligned_follow_exponent,
+            )
+            dispersion = weighted_quality_dispersion(
+                quality, candidate_masks, component_weights
+            )
+            active_groups = (
+                (candidate_masks.sum(dim=1) >= 2)
+                & (dispersion >= args.rl_min_component_dispersion)
+            )
         for (
             scene_name,
             scene_trajectories,
             scene_rewards,
             scene_candidate_mask,
+            scene_update_mask,
+            scene_active_group,
             scene_reference_reward,
+            scene_source_ids,
         ) in zip(
             scene_names,
             trajectories,
             rewards,
             candidate_masks,
+            update_masks,
+            active_groups,
             reference_rewards
             if reference_rewards is not None
+            else [None] * len(scene_names),
+            selected_source_ids
+            if guided_safe_set_protocol
             else [None] * len(scene_names),
         ):
             # Replay Buffer 保存：
@@ -565,7 +1071,10 @@ def rollout_epoch(
                 scene_trajectories,
                 scene_rewards,
                 candidate_mask=scene_candidate_mask,
+                update_mask=scene_update_mask,
+                active_group=scene_active_group,
                 reference_reward=scene_reference_reward,
+                source_ids=scene_source_ids,
             )
 
         # 对当前 batch 的每个奖励分项取平均。
@@ -591,6 +1100,13 @@ def rollout_epoch(
             f"reward/{key}": value.mean().item()
             for key, value in details.items()
         }
+        record["reward/update_candidate_fraction"] = update_masks.float().mean().item()
+        record["reward/component_active_group_fraction"] = active_groups.float().mean().item()
+        record.update(guidance_stats)
+        if guided_safe_set_protocol:
+            record["reward/safe_set_fraction"] = candidate_masks.float().mean().item()
+        if getattr(args, "rl_component_dispersion_gate", False):
+            record["reward/component_dispersion_mean"] = dispersion.mean().item()
         if getattr(args, "rl_filter_progress_guard_candidates", False):
             record["reward/progress_guard_eligible"] = (
                 candidate_masks.float().mean().item()
@@ -635,8 +1151,13 @@ def rollout_epoch(
 
 # 根据 Replay Buffer 中保存的场景名称，
 # 重新从 Dataset 加载完整场景数据并组织训练 batch。
-def _load_replay_batch(dataset, replay_items, require_candidate_mask=False,
-                       require_reference_reward=False):
+def _load_replay_batch(
+    dataset,
+    replay_items,
+    require_candidate_mask=False,
+    require_reference_reward=False,
+    require_update_contract=False,
+):
     # An absent qualification is unknown, not safe. Reject before loading NPZ.
     for item in replay_items:
         if require_candidate_mask and item.candidate_mask is None:
@@ -645,6 +1166,12 @@ def _load_replay_batch(dataset, replay_items, require_candidate_mask=False,
             item.reference_reward is None or not torch.isfinite(item.reference_reward).all()
         ):
             raise ValueError(f"Missing or non-finite reference_reward for scene {item.scene_name}")
+        if require_update_contract and (
+            item.update_mask is None or item.active_group is None
+        ):
+            raise ValueError(
+                f"Missing update_mask/active_group for scene {item.scene_name}"
+            )
     # 遍历本次从 Replay Buffer 中抽出的所有条目。
     #
     # 每个 item 至少包含：
@@ -712,9 +1239,39 @@ def _load_replay_batch(dataset, replay_items, require_candidate_mask=False,
         dim=0,
     )
 
+    update_masks = torch.stack(
+        [
+            item.update_mask
+            if item.update_mask is not None
+            else (
+                item.candidate_mask
+                if item.candidate_mask is not None
+                else torch.ones_like(item.rewards, dtype=torch.bool)
+            )
+            for item in replay_items
+        ],
+        dim=0,
+    )
+    active_group_masks = torch.stack(
+        [
+            item.active_group
+            if item.active_group is not None
+            else torch.tensor(True, dtype=torch.bool)
+            for item in replay_items
+        ],
+        dim=0,
+    )
     # 返回参考策略 reward；旧 replay 条目用 NaN 标记，调用方会在显式
     # reference-relative 模式下拒绝混用，避免静默退化为错误 baseline。
-    return batch, trajectories, rewards, candidate_masks, reference_rewards
+    return (
+        batch,
+        trajectories,
+        rewards,
+        candidate_masks,
+        reference_rewards,
+        update_masks,
+        active_group_masks,
+    )
 
 
 # 从 Replay Buffer 中采样数据，
@@ -728,6 +1285,7 @@ def update_epoch(
     args,
     device,
     reference_model=None,
+    update_checkpoint_callback=None,
 ):
     """从 Replay Buffer 采样，执行 reward-weighted diffusion 更新。"""
 
@@ -742,6 +1300,26 @@ def update_epoch(
         raise RuntimeError("Replay Buffer 为空，请先执行 rollout epoch")
     validate_safety_update(args)
     filter_candidates = candidate_filter_enabled(args)
+    target_fraction = float(getattr(args, "rl_update_target_fraction", 0.0))
+    target_flags = None
+    if target_fraction > 0:
+        replay_preflight, target_flags = validate_replay_target_coverage(
+            replay_buffer,
+            args,
+            return_target_flags=True,
+        )
+    else:
+        replay_preflight = validate_replay_target_coverage(replay_buffer, args)
+    if target_fraction > 0:
+        target_count = sum(target_flags)
+        if target_count == 0:
+            raise RuntimeError(
+                "Target-aware update sampling requested but replay has no target-bearing groups"
+            )
+        replay_preflight.update({
+            "replay_target_sampling_fraction": target_fraction,
+            "replay_target_sampling_group_count": float(target_count),
+        })
 
     # Reward-weighted regression 的 target 来自 eval 模式旧策略。如果 update
     # 再启用 Dropout/DropPath，自蒸馏会混入与 reward 无关的随机删层梯度并造成
@@ -754,6 +1332,9 @@ def update_epoch(
 
     # 保存每个 update iteration 的训练指标。
     records = []
+    applied_update_steps = 0
+    sampled_scene_names = set()
+    sampled_target_scene_names = set()
 
     # 获取 DataLoader 对应的 Dataset。
     #
@@ -761,8 +1342,44 @@ def update_epoch(
     # 重新读取 Replay Buffer 条目对应的场景。
     dataset = data_loader.dataset
 
-    # 创建 update 进度条。
-    progress = tqdm(data_loader, desc="NuPlan RL update", unit="batch")
+    cover_all_targets = bool(
+        getattr(args, "rl_update_cover_all_targets", False)
+    )
+    target_sampler = None
+    if cover_all_targets:
+        if target_flags is None:
+            raise ValueError(
+                "rl_update_cover_all_targets requires rl_update_target_fraction > 0"
+            )
+        target_sampler = ReplayTargetBatchSampler(
+            replay_buffer,
+            target_flags,
+            batch_size=int(data_loader.batch_size),
+            target_fraction=target_fraction,
+            seed=int(args.seed),
+        )
+        planned_steps = target_sampler.steps_for_target_coverage
+        max_steps = int(getattr(args, "rl_max_update_steps_per_epoch", 0))
+        if max_steps > 0 and max_steps < planned_steps:
+            raise RuntimeError(
+                "Configured max update steps cannot cover every target group: "
+                f"{max_steps} < {planned_steps}"
+            )
+        if max_steps > 0:
+            planned_steps = min(planned_steps, max_steps)
+        update_iterator = range(planned_steps)
+        progress = tqdm(
+            update_iterator,
+            total=planned_steps,
+            desc="NuPlan RL target-covering update",
+            unit="batch",
+        )
+        replay_preflight.update({
+            "replay_target_coverage_planned_steps": float(planned_steps),
+            "replay_target_slots_per_batch": float(target_sampler.target_slots),
+        })
+    else:
+        progress = tqdm(data_loader, desc="NuPlan RL update", unit="batch")
 
     # 此处遍历 data_loader 的主要作用，是：
     #
@@ -779,7 +1396,11 @@ def update_epoch(
         #
         # 最后一个 batch 可能小于配置的标准 batch size，
         # 因此不能始终直接使用 args.batch_size。
-        batch_size = loader_batch[0].shape[0]
+        batch_size = (
+            int(data_loader.batch_size)
+            if target_sampler is not None
+            else loader_batch[0].shape[0]
+        )
 
         # 从 Replay Buffer 中随机抽取 batch_size 个场景条目。
         #
@@ -791,7 +1412,27 @@ def update_epoch(
         # loader_batch：决定本次更新抽多少个场景
         #                ↓
         # replay_buffer：真正随机提供4个训练场景
-        replay_items = replay_buffer.sample(batch_size)
+        replay_items = (
+            target_sampler.next_batch()
+            if target_sampler is not None
+            else replay_buffer.sample_target_aware(
+                batch_size,
+                target_flags,
+                target_fraction,
+            )
+            if target_flags is not None
+            else replay_buffer.sample(batch_size)
+        )
+        sampled_scene_names.update(item.scene_name for item in replay_items)
+        if target_flags is not None:
+            sampled_batch_targets = replay_target_state(
+                replay_items, args
+            )["target_groups"]
+            sampled_target_scene_names.update(
+                item.scene_name
+                for item, is_target in zip(replay_items, sampled_batch_targets)
+                if bool(is_target)
+            )
 
         # 根据场景名称重新加载场景输入，
         # 并堆叠对应的候选轨迹和奖励。
@@ -801,11 +1442,16 @@ def update_epoch(
             rewards,
             candidate_masks,
             reference_rewards,
+            update_masks,
+            active_group_masks,
         ) = _load_replay_batch(
             dataset,
             replay_items,
             require_candidate_mask=filter_candidates,
             require_reference_reward=getattr(args, "rl_relative_to_reference", False),
+            require_update_contract=(
+                args.rl_weighting_mode == "constraint_uniform_positive"
+            ),
         )
 
         # 把重新加载的场景 batch 转换为模型输入。
@@ -838,6 +1484,8 @@ def update_epoch(
         # 整组无合格候选时，rollout loss 对该场景为 0，后面的专家 anchor
         # 仍正常训练，避免“在一组不安全动作中挑一个相对没那么差的动作”。
         candidate_masks = candidate_masks.to(device)
+        update_masks = update_masks.to(device)
+        active_group_masks = active_group_masks.to(device)
         rollout_candidate_mask = (
             candidate_masks
             if filter_candidates
@@ -952,6 +1600,17 @@ def update_epoch(
 
             # 将候选安全资格传入损失；None 保持旧实验完全兼容。
             candidate_mask=rollout_candidate_mask,
+            update_mask=(
+                update_masks
+                if args.rl_weighting_mode == "constraint_uniform_positive"
+                else None
+            ),
+            active_group_mask=(
+                active_group_masks
+                if getattr(args, "rl_component_dispersion_gate", False)
+                else None
+            ),
+            positive_margin=getattr(args, "rl_positive_advantage_margin", 0.0),
 
             # 可选的 B Epoch 10 reference policy 约束；默认 None 保持旧实验
             # 数值兼容，新 v7 实验通过显式权重开启。
@@ -979,6 +1638,11 @@ def update_epoch(
                 args.diffusion_model_type,
                 args.diffusion_supervision_type,
                 detach_window_size=args.rl_detach_window_size,
+                trajectory_representation=getattr(
+                    args,
+                    "trajectory_representation",
+                    "increment",
+                ),
             )
             expert_anchor_loss = (
                 anchor_loss_dict["ego_planning_loss"]
@@ -1035,6 +1699,14 @@ def update_epoch(
         record["buffer_size"] = len(replay_buffer)
         record["optimizer_step_applied"] = int(did_update)
 
+        if did_update:
+            applied_update_steps += 1
+            if update_checkpoint_callback is not None:
+                update_checkpoint_callback(
+                    applied_update_steps,
+                    record,
+                )
+
         # 保存当前迭代指标。
         records.append(record)
 
@@ -1052,4 +1724,16 @@ def update_epoch(
     summary["sampled_batches"] = len(records)
     summary["update_steps"] = sum(row["optimizer_step_applied"] for row in records)
     summary["skipped_update_steps"] = len(records) - summary["update_steps"]
+    summary["sampled_unique_scene_count"] = len(sampled_scene_names)
+    summary["sampled_unique_scene_fraction"] = (
+        len(sampled_scene_names) / len(replay_buffer)
+    )
+    if target_flags is not None:
+        summary["sampled_unique_target_scene_count"] = len(
+            sampled_target_scene_names
+        )
+        summary["sampled_unique_target_scene_fraction"] = (
+            len(sampled_target_scene_names) / max(sum(target_flags), 1)
+        )
+    summary.update(replay_preflight)
     return summary

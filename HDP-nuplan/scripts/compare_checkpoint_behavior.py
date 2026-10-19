@@ -133,7 +133,18 @@ def load_checkpoint_model(
 
 def reward_config_from_args(config: Config) -> NuPlanRewardConfig:
     """从训练 args.json 恢复 reward 配置，并兼容没有新字段的旧文件。"""
+    vehicle_geometry = {}
+    if getattr(config, "reward_use_nuplan_vehicle_geometry", False):
+        from nuplan.common.actor_state.vehicle_parameters import get_pacifica_parameters
+
+        vehicle = get_pacifica_parameters()
+        vehicle_geometry = dict(
+            ego_width=vehicle.width,
+            ego_length=vehicle.length,
+            ego_rear_axle_to_center=vehicle.rear_axle_to_center,
+        )
     return NuPlanRewardConfig(
+        **vehicle_geometry,
         progress_weight=getattr(config, "reward_progress_weight", 1.0),
         collision_weight=getattr(config, "reward_collision_weight", 10.0),
         route_weight=getattr(config, "reward_route_weight", 1.0),
@@ -144,6 +155,12 @@ def reward_config_from_args(config: Config) -> NuPlanRewardConfig:
         risk_weight=getattr(config, "reward_risk_weight", 1.0),
         follow_weight=getattr(config, "reward_follow_weight", 3.0),
         lane_weight=getattr(config, "reward_lane_weight", 2.5),
+        follow_assignment_mode=getattr(
+            config, "reward_follow_assignment_mode", "candidate"
+        ),
+        follow_reference_full_weight_steps=getattr(
+            config, "reward_follow_reference_full_weight_steps", 8
+        ),
         progress_guard_weight=getattr(
             config, "reward_progress_guard_weight", 0.0
         ),
@@ -156,6 +173,28 @@ def reward_config_from_args(config: Config) -> NuPlanRewardConfig:
         safety_gate_margin=getattr(config, "reward_safety_gate_margin", 1.0),
         safety_gate_min_ttc_seconds=getattr(
             config, "reward_safety_gate_min_ttc_seconds", 0.0
+        ),
+        safety_gate_require_drivable_area=getattr(
+            config, "reward_safety_gate_require_drivable_area", False
+        ),
+        safety_gate_drivable_area_margin=getattr(
+            config, "reward_safety_gate_drivable_area_margin", 0.1
+        ),
+        objective_mode=getattr(config, "reward_objective_mode", "legacy"),
+        aligned_safety_exponent=getattr(
+            config, "reward_aligned_safety_exponent", 0.45
+        ),
+        aligned_progress_exponent=getattr(
+            config, "reward_aligned_progress_exponent", 0.25
+        ),
+        aligned_route_exponent=getattr(
+            config, "reward_aligned_route_exponent", 0.15
+        ),
+        aligned_comfort_exponent=getattr(
+            config, "reward_aligned_comfort_exponent", 0.10
+        ),
+        aligned_follow_exponent=getattr(
+            config, "reward_aligned_follow_exponent", 0.05
         ),
         risk_speed_reference=getattr(config, "reward_risk_speed_reference", 15.0),
         ttc_safe_low_speed=getattr(config, "reward_ttc_safe_low_speed", 2.0),
@@ -319,18 +358,37 @@ def group_diversity_metrics(
 
 def summarize_values(values: Iterable[float]) -> dict:
     array = np.asarray(list(values), dtype=np.float64)
+    finite = array[np.isfinite(array)]
+    if finite.size == 0:
+        return {
+            "mean": None,
+            "std": None,
+            "p10": None,
+            "p50": None,
+            "p90": None,
+            "count": int(array.size),
+            "finite_count": 0,
+            "nonfinite_count": int(array.size),
+        }
     return {
-        "mean": float(array.mean()),
-        "std": float(array.std()),
-        "p10": float(np.percentile(array, 10)),
-        "p50": float(np.percentile(array, 50)),
-        "p90": float(np.percentile(array, 90)),
+        "mean": float(finite.mean()),
+        "std": float(finite.std()),
+        "p10": float(np.percentile(finite, 10)),
+        "p50": float(np.percentile(finite, 50)),
+        "p90": float(np.percentile(finite, 90)),
+        "count": int(array.size),
+        "finite_count": int(finite.size),
+        "nonfinite_count": int(array.size - finite.size),
     }
 
 
 def _correlation(x: Iterable[float], y: Iterable[float]) -> Optional[float]:
     x_array = np.asarray(list(x), dtype=np.float64)
     y_array = np.asarray(list(y), dtype=np.float64)
+    if x_array.size == y_array.size:
+        finite = np.isfinite(x_array) & np.isfinite(y_array)
+        x_array = x_array[finite]
+        y_array = y_array[finite]
     # 候选级指标有 B*G 个值，group 指标只有 B 个值；不同统计层级不能直接相关。
     if (
         x_array.size != y_array.size
@@ -349,19 +407,35 @@ def paired_summary(
     for metric in supervised.keys() & rl.keys():
         supervised_values = np.asarray(supervised[metric], dtype=np.float64)
         rl_values = np.asarray(rl[metric], dtype=np.float64)
-        delta = rl_values - supervised_values
-        baseline_mean = supervised_values.mean()
+        finite_pair = np.isfinite(supervised_values) & np.isfinite(rl_values)
+        supervised_finite = supervised_values[finite_pair]
+        rl_finite = rl_values[finite_pair]
+        delta = rl_finite - supervised_finite
+        baseline_mean = supervised_finite.mean() if supervised_finite.size else None
         record = summarize_values(delta)
-        record["supervised_mean"] = float(baseline_mean)
-        record["rl_mean"] = float(rl_values.mean())
-        record["relative_change_percent"] = float(
-            100.0 * delta.mean() / max(abs(baseline_mean), 1e-12)
+        record["paired_finite_count"] = int(finite_pair.sum())
+        record["paired_nonfinite_count"] = int((~finite_pair).sum())
+        record["both_positive_infinity_count"] = int(
+            (np.isposinf(supervised_values) & np.isposinf(rl_values)).sum()
         )
-        record["rl_higher_fraction"] = float((delta > 0).mean())
+        record["supervised_mean"] = (
+            float(baseline_mean) if baseline_mean is not None else None
+        )
+        record["rl_mean"] = float(rl_finite.mean()) if rl_finite.size else None
+        record["relative_change_percent"] = (
+            float(100.0 * delta.mean() / max(abs(baseline_mean), 1e-12))
+            if delta.size
+            else None
+        )
+        record["rl_higher_fraction"] = (
+            float((delta > 0).mean()) if delta.size else None
+        )
         if metric in HIGHER_IS_BETTER:
             record["improved_fraction"] = record["rl_higher_fraction"]
         elif metric in LOWER_IS_BETTER:
-            record["improved_fraction"] = float((delta < 0).mean())
+            record["improved_fraction"] = (
+                float((delta < 0).mean()) if delta.size else None
+            )
         result[metric] = record
     return result
 

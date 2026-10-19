@@ -287,7 +287,7 @@ class RlComponentTest(unittest.TestCase):
         ego_current_state[0, 4] = 5.0
 
         scorer = NuPlanTensorRewardScorer(NuPlanRewardConfig())
-        follow, leader_fraction = scorer._following_reward(
+        follow, leader_fraction, _ = scorer._following_reward(
             trajectories,
             neighbors,
             neighbor_mask,
@@ -297,6 +297,177 @@ class RlComponentTest(unittest.TestCase):
 
         self.assertGreater(follow[0, 0], follow[0, 1])
         torch.testing.assert_close(leader_fraction, torch.ones_like(leader_fraction))
+
+    def test_reference_following_blocks_lateral_leader_escape(self):
+        horizon = 20
+        time = torch.arange(1, horizon + 1, dtype=torch.float32) * 0.1
+        trajectories = torch.zeros(1, 2, horizon, 4)
+        trajectories[..., 0] = 5.0 * time
+        trajectories[..., 2] = 1.0
+        trajectories[0, 1, :, 1] = 4.0
+        ego_future = trajectories[:, 0].clone()
+
+        neighbors = torch.zeros(1, 1, horizon, 4)
+        neighbors[0, 0, :, 0] = 10.0 + 5.0 * time
+        neighbors[..., 2] = 1.0
+        neighbor_mask = torch.zeros(1, 1, horizon, dtype=torch.bool)
+        neighbor_past = torch.zeros(1, 1, 21, 11)
+        neighbor_past[0, 0, -1, 0] = 10.0
+        neighbor_past[0, 0, -1, 2] = 1.0
+        neighbor_past[0, 0, -1, 6:8] = torch.tensor([2.0, 4.8])
+        neighbor_past[0, 0, -1, 8] = 1.0
+        ego_current_state = torch.zeros(1, 10)
+        ego_current_state[0, 4] = 5.0
+
+        legacy = NuPlanTensorRewardScorer(
+            NuPlanRewardConfig(follow_assignment_mode="candidate")
+        )
+        legacy_follow, _, _ = legacy._following_reward(
+            trajectories,
+            neighbors,
+            neighbor_mask,
+            neighbor_past,
+            ego_current_state,
+        )
+        repaired = NuPlanTensorRewardScorer(
+            NuPlanRewardConfig(follow_assignment_mode="expert_reference")
+        )
+        reference_follow, reference_fraction, details = repaired._following_reward(
+            trajectories,
+            neighbors,
+            neighbor_mask,
+            neighbor_past,
+            ego_current_state,
+            ego_future=ego_future,
+            reference_applicable=torch.ones(1, dtype=torch.bool),
+        )
+
+        self.assertAlmostEqual(legacy_follow[0, 1].item(), 1.0)
+        torch.testing.assert_close(
+            reference_follow[0, 0], reference_follow[0, 1]
+        )
+        torch.testing.assert_close(reference_fraction, torch.ones_like(reference_fraction))
+        torch.testing.assert_close(
+            details["follow_contribution_weight"],
+            torch.ones_like(details["follow_contribution_weight"]),
+        )
+        self.assertAlmostEqual(details["leader_escape_fraction"][0, 1].item(), 1.0)
+
+    def test_reference_following_downweights_short_leader_fragments(self):
+        horizon = 8
+        time = torch.arange(1, horizon + 1, dtype=torch.float32) * 0.1
+        trajectories = torch.zeros(1, 1, horizon, 4)
+        trajectories[..., 0] = 5.0 * time
+        trajectories[..., 2] = 1.0
+        neighbors = torch.zeros(1, 1, horizon, 4)
+        neighbors[..., 0] = 10.0 + 5.0 * time
+        neighbors[..., 2] = 1.0
+        neighbor_mask = torch.zeros(1, 1, horizon, dtype=torch.bool)
+        neighbor_mask[..., 4:] = True
+        scorer = NuPlanTensorRewardScorer(
+            NuPlanRewardConfig(
+                follow_assignment_mode="expert_reference",
+                follow_reference_full_weight_steps=8,
+            )
+        )
+
+        _, reference_fraction, details = scorer._following_reward(
+            trajectories,
+            neighbors,
+            neighbor_mask,
+            None,
+            None,
+            ego_future=trajectories[:, 0],
+            reference_applicable=torch.ones(1, dtype=torch.bool),
+        )
+
+        self.assertAlmostEqual(reference_fraction.item(), 0.5)
+        self.assertAlmostEqual(details["follow_confidence"].item(), 0.5)
+        self.assertAlmostEqual(details["follow_contribution_weight"].item(), 0.5)
+
+    def test_reference_following_is_inactive_without_reference_leader(self):
+        horizon = 8
+        trajectories = torch.zeros(1, 2, horizon, 4)
+        trajectories[..., 0] = torch.arange(1, horizon + 1) * 0.5
+        trajectories[..., 2] = 1.0
+        neighbors = torch.zeros(1, 0, horizon, 4)
+        neighbor_mask = torch.zeros(1, 0, horizon, dtype=torch.bool)
+        lanes = torch.zeros(1, 1, horizon, 12)
+        lanes[..., 0] = torch.arange(1, horizon + 1) * 0.5
+        lanes[..., 2] = 1.0
+        lanes[..., 5] = 1.75
+        lanes[..., 7] = -1.75
+        scorer = NuPlanTensorRewardScorer(
+            NuPlanRewardConfig(follow_assignment_mode="expert_reference")
+        )
+
+        _, details = scorer(
+            trajectories,
+            neighbors,
+            neighbor_mask,
+            lanes,
+            ego_future=trajectories[:, 0],
+            lanes=lanes,
+        )
+
+        torch.testing.assert_close(
+            details["follow_reward"], torch.ones_like(details["follow_reward"])
+        )
+        torch.testing.assert_close(
+            details["follow_contribution"],
+            torch.zeros_like(details["follow_contribution"]),
+        )
+        torch.testing.assert_close(
+            details["reference_leader_fraction"],
+            torch.zeros_like(details["reference_leader_fraction"]),
+        )
+        expected = details["risk_reward"] + 2.5 * details["lane_reward"]
+        torch.testing.assert_close(details["base_reward"], expected)
+
+    def test_reference_following_is_masked_for_expert_lane_change(self):
+        horizon = 8
+        time = torch.arange(1, horizon + 1, dtype=torch.float32) * 0.1
+        trajectories = torch.zeros(1, 2, horizon, 4)
+        trajectories[..., 0] = 5.0 * time
+        trajectories[..., 2] = 1.0
+        ego_future = trajectories[:, 0].clone()
+        ego_future[0, :, 1] = torch.linspace(0.0, 2.0, horizon)
+        neighbors = torch.zeros(1, 1, horizon, 4)
+        neighbors[0, 0, :, 0] = 10.0 + 5.0 * time
+        neighbors[..., 2] = 1.0
+        neighbor_mask = torch.zeros(1, 1, horizon, dtype=torch.bool)
+        neighbor_past = torch.zeros(1, 1, 21, 11)
+        neighbor_past[0, 0, -1, 0] = 10.0
+        neighbor_past[0, 0, -1, 2] = 1.0
+        neighbor_past[0, 0, -1, 6:8] = torch.tensor([2.0, 4.8])
+        neighbor_past[0, 0, -1, 8] = 1.0
+        lanes = torch.zeros(1, 1, horizon, 12)
+        lanes[..., 0] = 5.0 * time
+        lanes[..., 2] = 1.0
+        lanes[..., 5] = 1.75
+        lanes[..., 7] = -1.75
+        scorer = NuPlanTensorRewardScorer(
+            NuPlanRewardConfig(follow_assignment_mode="expert_reference")
+        )
+
+        _, details = scorer(
+            trajectories,
+            neighbors,
+            neighbor_mask,
+            lanes,
+            ego_future=ego_future,
+            neighbor_agents_past=neighbor_past,
+            lanes=lanes,
+        )
+
+        torch.testing.assert_close(
+            details["lane_reward_mask"],
+            torch.zeros_like(details["lane_reward_mask"]),
+        )
+        torch.testing.assert_close(
+            details["follow_contribution"],
+            torch.zeros_like(details["follow_contribution"]),
+        )
 
     def test_paper_lane_reward_prefers_centerline(self):
         horizon = 20
@@ -566,6 +737,40 @@ class RlComponentTest(unittest.TestCase):
         self.assertGreater(weights[0, 2].item(), 0.0)
         self.assertAlmostEqual(weights.mean().item(), 1.0, places=6)
         self.assertLess(advantages[0, 0], 0)
+
+    def test_constraint_uniform_positive_keeps_group_statistics_but_masks_targets(self):
+        rewards = torch.tensor([[0.0, 1.0, 2.0, 3.0]])
+        safety_mask = torch.tensor([[True, True, True, True]])
+        update_mask = torch.tensor([[False, False, True, True]])
+        advantages, weights = group_advantage_weights(
+            rewards,
+            min_reward_std=1e-6,
+            normalize_weights=True,
+            weighting_mode="constraint_uniform_positive",
+            candidate_mask=safety_mask,
+            update_mask=update_mask,
+            active_group_mask=torch.tensor([True]),
+            positive_margin=0.1,
+        )
+
+        # Advantages are standardized over all four safe candidates, not only
+        # the two task-compliant candidates.  Retained targets are exactly 1
+        # and are never amplified back to a group mean of one.
+        self.assertLess(advantages[0, 1], 0)
+        torch.testing.assert_close(weights, torch.tensor([[0., 0., 1., 1.]]))
+        self.assertEqual(weights.max().item(), 1.0)
+
+    def test_constraint_uniform_positive_respects_external_group_gate(self):
+        _, weights = group_advantage_weights(
+            torch.tensor([[0.0, 1.0, 2.0]]),
+            min_reward_std=1e-6,
+            weighting_mode="constraint_uniform_positive",
+            candidate_mask=torch.ones(1, 3, dtype=torch.bool),
+            update_mask=torch.ones(1, 3, dtype=torch.bool),
+            active_group_mask=torch.tensor([False]),
+            positive_margin=0.1,
+        )
+        torch.testing.assert_close(weights, torch.zeros_like(weights))
 
     def test_reference_relative_positive_weights_require_beating_reference(self):
         rewards = torch.tensor([[0.2, 0.5, 0.8, 1.0]])

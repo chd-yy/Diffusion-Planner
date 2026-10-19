@@ -5,10 +5,14 @@ from timm.models.layers import Mlp
 from timm.layers import DropPath
 
 from hdp_nuplan.model.diffusion_utils.sampling import dpm_sampler
+from hdp_nuplan.model.diffusion_utils.candidate_noise import (
+    validate_candidate_noise_scales,
+)
 from hdp_nuplan.model.diffusion_utils.sde import SDE, VPSDE_linear
 from hdp_nuplan.utils.normalizer import ObservationNormalizer, StateNormalizer
 from hdp_nuplan.model.module.mixer import MixerBlock
 from hdp_nuplan.model.module.dit import TimestepEmbedder, DiTBlock, FinalLayer
+from hdp_nuplan.utils.traj_kinematics import decode_trajectory_representation
 
 
 # 扩散解码器：训练时预测给定带噪轨迹的扩散目标；推理/RL rollout 时从噪声采样轨迹。
@@ -31,6 +35,12 @@ class Decoder(nn.Module):
         # 【HDP 与原 Diffusion-Planner 的区别：预测对象】HDP 只预测自车未来轨迹，
         # 因此不再保存原版的 predicted_neighbor_num。
         self._future_len = config.future_len
+        # Old checkpoints/args predate this field and remain increment models.
+        self._trajectory_representation = getattr(
+            config,
+            "trajectory_representation",
+            "increment",
+        )
         # 与原版一致，使用线性 beta 调度的 VP-SDE。
         self._sde = VPSDE_linear()
 
@@ -53,8 +63,8 @@ class Decoder(nn.Module):
         
         self._state_normalizer: StateNormalizer = config.state_normalizer
         self._observation_normalizer: ObservationNormalizer = config.observation_normalizer
-        # 【区别：无 guidance_fn】原版还保存 config.guidance_fn 供 classifier guidance；
-        # HDP 的采样器调用不使用该配置，因此这里没有 self._guidance_fn。
+        # Guidance不作为持久模型配置；只有RL rollout显式传入guidance_fn时启用，
+        # 普通推理和历史实验仍走无引导路径。
         
     @property
     def sde(self):
@@ -69,6 +79,10 @@ class Decoder(nn.Module):
         num_samples=1,
         diffusion_steps=10,
         noise_scale=0.1,
+        candidate_noise_scales=None,
+        guidance_fn=None,
+        guidance_kwargs=None,
+        guidance_scale=0.0,
     ):
         """显式生成多条自车候选轨迹，供普通推理和 NuPlan RL rollout 共用。
 
@@ -82,8 +96,11 @@ class Decoder(nn.Module):
         normalizer.inverse 后仍是逐帧位移，需要通过 cumsum 恢复累计位置。
         """
         # 防止空候选集在 repeat/reshape 时产生难以定位的错误。
-        if num_samples < 1:
-            raise ValueError("num_samples must be at least 1")
+        scales = validate_candidate_noise_scales(
+            num_samples,
+            noise_scale,
+            candidate_noise_scales,
+        )
 
         # encoding: [B,N,D]；route_lanes: [B,P,V,D_route]；ego_v: [B,2]。
         encoding = encoder_outputs["encoding"]
@@ -101,18 +118,41 @@ class Decoder(nn.Module):
         # 【区别：初始噪声】HDP 直接采样 [B*G,T,4] 的纯噪声；普通推理默认缩放为 0.1，
         # RL rollout 可显式传入更大 noise_scale 以提高同场景候选多样性；
         # 原版采样 [B,P,T,4]、缩放为 0.5，并把当前状态拼在第一个时间位置。
-        xT = torch.randn(
-            sample_batch,
+        base_noise = torch.randn(
+            batch_size,
+            num_samples,
             self._future_len,
             4,
             device=encoding.device,
             dtype=encoding.dtype,
-        ) * noise_scale
+        )
+        scale_tensor = torch.as_tensor(
+            scales,
+            device=encoding.device,
+            dtype=encoding.dtype,
+        ).reshape(1, num_samples, 1, 1)
+        xT = (base_noise * scale_tensor).reshape(
+            sample_batch,
+            self._future_len,
+            4,
+        )
 
         # DPM-Solver 从终点噪声 xT 逐步求解到预测的干净轨迹 x0。
-        # 【区别：无 classifier guidance/初态纠正】HDP 不传原版的 guidance_fn，
-        # 也不使用 correcting_xt_fn 把第一个位置反复固定为当前状态。
+        # HDP不使用correcting_xt_fn固定首点；classifier guidance仅在调用方
+        # 显式传入时启用，默认model_wrapper_params仍为空。
         # x0 : [sample_batch, future_len, 4] = [B × G, T, 4]
+        model_wrapper_params = {}
+        if guidance_fn is not None:
+            if guidance_scale <= 0:
+                raise ValueError("guidance_scale must be positive when guidance_fn is set")
+            classifier_kwargs = dict(guidance_kwargs or {})
+            classifier_kwargs.setdefault("state_normalizer", self._state_normalizer)
+            model_wrapper_params = {
+                "classifier_fn": guidance_fn,
+                "classifier_kwargs": classifier_kwargs,
+                "guidance_scale": float(guidance_scale),
+                "guidance_type": "classifier",
+            }
         x0 = dpm_sampler(
             self.dit,
             xT,
@@ -124,14 +164,15 @@ class Decoder(nn.Module):
             },
             diffusion_steps=diffusion_steps,
             dpm_solver_params={},
-            model_wrapper_params={},
+            model_wrapper_params=model_wrapper_params,
         )
         # 将训练使用的标准化轨迹恢复到真实量纲。
         x0 = self._state_normalizer.inverse(x0.reshape(sample_batch, -1, 4))
-        # HDP 预测前两维的逐帧位移，通过积分恢复 NuPlan 自车局部坐标轨迹。
-        x0 = torch.cat(
-            [torch.cumsum(x0[..., :2], dim=-2), x0[..., 2:]],
-            dim=-1,
+        # 将训练表示统一恢复成 NuPlan 所需的 ego-local absolute waypoints。
+        x0 = decode_trajectory_representation(
+            x0,
+            self._trajectory_representation,
+            detach_window_size=0,
         )
         # 恢复被展平的候选维，得到 [B,G,T,4]。
         return x0.reshape(batch_size, num_samples, self._future_len, 4)

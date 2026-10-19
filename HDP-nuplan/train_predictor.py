@@ -187,6 +187,13 @@ def get_args():
     # HDP 还把模型输出类型与监督目标类型分开配置。
     # HDP 允许“模型输出参数化”和“监督目标参数化”分开设置，便于统一训练 noise/v/x_start/score。
     parser.add_argument('--diffusion_supervision_type', type=str, help='type of diffusion model supervision', choices=['v', 'x_start', 'noise', 'score'], default='x_start')
+    parser.add_argument(
+        '--trajectory_representation',
+        type=str,
+        choices=['increment', 'absolute'],
+        default='increment',
+        help='XY trajectory state used by diffusion: frame increments or ego-local absolute waypoints',
+    )
 
     # decoder
     # 【HDP 与原 Diffusion-Planner 的区别：邻车预测】原模型使用 predicted_neighbor_num
@@ -208,6 +215,12 @@ def get_args():
         type=int,
         default=0,
         help='number of initial epochs that keep a warm-started encoder frozen',
+    )
+    parser.add_argument(
+        '--expected_initialization_sha256',
+        type=str,
+        default=None,
+        help='optional full-model initialization fingerprint gate checked before training',
     )
 
     # 是否启用 Weights & Biases；notes 保存实验备注。
@@ -281,14 +294,22 @@ def model_training(args):
             # exist_ok=True 允许目标目录已经存在。
             os.makedirs(save_path, exist_ok=True)
 
-        # Save args
+        # Save args.  A resumed run reuses the original experiment directory;
+        # keep its canonical args.json immutable so downstream audits still see
+        # the configuration that created the run.  Record resume invocations in
+        # a separate timestamped file instead of overwriting that provenance.
         # vars() 把 Namespace 转成普通字典；归一化器需要先转成可 JSON 序列化的字典。
         args_dict = vars(args)
         args_dict = {k: v if not isinstance(v, (StateNormalizer, ObservationNormalizer)) else v.to_dict() for k, v in args_dict.items() }
 
         # 保存完整 args.json，供恢复训练、离线评估和 NuPlan Planner 推理时复用。
         from mmengine.fileio import dump
-        dump(args_dict, os.path.join(save_path, 'args.json'), file_format='json', indent=4)
+        if args.resume_model_path is None:
+            args_filename = 'args.json'
+        else:
+            from datetime import datetime
+            args_filename = f"resume_args_{datetime.now().strftime('%Y-%m-%d-%H:%M:%S')}.json"
+        dump(args_dict, os.path.join(save_path, args_filename), file_format='json', indent=4)
     else:
         # 非主进程不负责文件输出。
         save_path = None
@@ -349,7 +370,7 @@ def model_training(args):
             )
     # 在迁移 Encoder、但尚未开始训练之前记录完整初始化指纹。公平消融的两个新运行
     # 必须具有相同的 model/encoder/decoder SHA256，才能排除随机初始化差异。
-    if global_rank == 0:
+    if global_rank == 0 and args.resume_model_path is None:
         initialization_report = {
             "stage": "after_encoder_warm_start_before_training",
             "seed": args.seed,
@@ -368,6 +389,15 @@ def model_training(args):
             'Initialization fingerprint: '
             f"model={initialization_report['fingerprints']['model']['sha256']}"
         )
+        if args.expected_initialization_sha256 is not None:
+            actual_initialization_sha = initialization_report['fingerprints']['model']['sha256']
+            if actual_initialization_sha != args.expected_initialization_sha256:
+                raise RuntimeError(
+                    'Initialization fingerprint mismatch: '
+                    f'expected={args.expected_initialization_sha256}, '
+                    f'actual={actual_initialization_sha}'
+                )
+            print('Expected initialization fingerprint gate passed')
     # CUDA 模式按本地 rank 选择 GPU；CPU 模式使用 args.device。
     diffusion_planner = diffusion_planner.to(rank if args.device == 'cuda' else args.device)
 

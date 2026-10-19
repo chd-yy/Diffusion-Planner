@@ -17,7 +17,7 @@ import torch.nn as nn
 # 7. 原版 DiT 的 token 轴是“自车/邻车”，使用 2 类 agent embedding；HDP 的 token 轴是
 #    “未来时间位置”，使用 future_len 个位置 embedding，并新增自车 vx/vy 条件投影；
 # 8. 原版模型输出参数化只接受 score/x_start；HDP 还接受 noise/v；
-# 9. 原版保存并使用 guidance_fn；HDP Decoder 不读取该配置，当前采样不走该 guidance 路径；
+# 9. 原版把guidance保存在配置中；HDP仅允许训练rollout显式传入，普通推理默认关闭；
 # 10. 两边虽然都使用 VP-SDE 和 DPM 类采样器，但采样张量形状、条件参数和返回契约不同。
 from hdp_nuplan.model.module.encoder import Encoder
 from hdp_nuplan.model.module.decoder import Decoder
@@ -63,7 +63,17 @@ class Hyper_Diffusion_Planner(nn.Module):
     # HDP 新增不依赖 forward 的多候选采样接口，供普通推理和离线 RL rollout 直接调用。
     # @torch.no_grad() 禁用梯度记录，减少采样阶段显存和计算开销。
     @torch.no_grad()
-    def sample(self, inputs, num_samples=1, diffusion_steps=10, noise_scale=0.1):
+    def sample(
+        self,
+        inputs,
+        num_samples=1,
+        diffusion_steps=10,
+        noise_scale=0.1,
+        candidate_noise_scales=None,
+        guidance_fn=None,
+        guidance_kwargs=None,
+        guidance_scale=0.0,
+    ):
         """不依赖 train/eval 分支的显式采样接口，主要供 RL rollout 使用。"""
         # 返回形状为 [B, num_samples, future_len, 4]。
         # 记录调用前模式，避免采样永久改变外部模型的 train/eval 状态。
@@ -80,6 +90,10 @@ class Hyper_Diffusion_Planner(nn.Module):
                 num_samples=num_samples,
                 diffusion_steps=diffusion_steps,
                 noise_scale=noise_scale,
+                candidate_noise_scales=candidate_noise_scales,
+                guidance_fn=guidance_fn,
+                guidance_kwargs=guidance_kwargs,
+                guidance_scale=guidance_scale,
             )
         finally:
             # train(bool) 会递归恢复整个模型；原来是 eval 时仍恢复为 eval。

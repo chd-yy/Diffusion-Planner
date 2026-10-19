@@ -75,6 +75,9 @@ from timm.utils import ModelEma
 
 # Hyper_Diffusion_Planner 是当前要进行强化学习微调的 HDP 模型。
 from hdp_nuplan.model.hyper_diffusion_planner import Hyper_Diffusion_Planner
+from hdp_nuplan.model.diffusion_utils.candidate_noise import (
+    parse_scale_count_profile,
+)
 
 # NuPlanReplayBuffer：
 # 保存 rollout 阶段生成的候选轨迹、场景信息、奖励和训练所需变量。
@@ -86,6 +89,7 @@ from hdp_nuplan.model.hyper_diffusion_planner import Hyper_Diffusion_Planner
 # 使用 PyTorch 张量批量计算候选轨迹的奖励。
 from hdp_nuplan.rl import (
     NuPlanReplayBuffer,
+    ShardedNuPlanReplayBuffer,
     NuPlanRewardConfig,
     NuPlanTensorRewardScorer,
 )
@@ -119,7 +123,7 @@ from hdp_nuplan.utils.tb_log import TensorBoardLogger as Logger
 # save_model 用于保存模型、优化器、调度器和 EMA 参数。
 #
 # set_seed 用于设置随机种子，尽可能保证实验可复现。
-from hdp_nuplan.utils.train_utils import save_model, set_seed
+from hdp_nuplan.utils.train_utils import save_model, save_update_step_model, set_seed
 
 
 # argparse 默认不能直接可靠地将命令行字符串转换为布尔值。
@@ -386,6 +390,96 @@ def get_args():
 
     # 论文未报告额外放大初始噪声，默认与普通采样保持一致。
     parser.add_argument("--rl_sampling_noise_scale", default=0.1, type=float)
+    parser.add_argument(
+        "--rl_candidate_pool_profile",
+        default="",
+        type=str,
+        help=(
+            "Optional oversampled rollout pool, e.g. "
+            "0.1x40+0.5x64+1.0x32+1.5x32+2.0x32"
+        ),
+    )
+    parser.add_argument(
+        "--rl_candidate_selection_profile",
+        default="",
+        type=str,
+        help=(
+            "Final group quotas for an oversampled pool, e.g. "
+            "0.1x11+0.5x16+1.0x2+1.5x2+2.0x1"
+        ),
+    )
+    parser.add_argument(
+        "--rl_candidate_selection_mode",
+        default="geometry",
+        choices=["geometry", "quality"],
+        help="Candidate-pool compression space; quality is opt-in.",
+    )
+    parser.add_argument(
+        "--rl_task_reference_selection_profile",
+        default="",
+        type=str,
+        help="Legacy B-group quota used only to define route/progress update bounds.",
+    )
+    parser.add_argument(
+        "--rl_component_dispersion_gate", default=False, type=boolean,
+        help="Use aligned objective-space dispersion as an external group gate.",
+    )
+    parser.add_argument(
+        "--rl_min_component_dispersion", default=0.01, type=float,
+    )
+    parser.add_argument(
+        "--rl_task_preserving_update_mask", default=False, type=boolean,
+        help="Mask update targets, without deleting candidates from advantage estimation.",
+    )
+    parser.add_argument("--rl_route_cost_tolerance", default=1e-4, type=float)
+    parser.add_argument("--rl_progress_guard_tolerance", default=0.005, type=float)
+    parser.add_argument("--rl_positive_advantage_margin", default=0.0, type=float)
+    parser.add_argument(
+        "--rl_min_active_group_fraction", default=0.0, type=float,
+        help="Fail before update when replay quality-active coverage is smaller.",
+    )
+    parser.add_argument(
+        "--rl_min_target_group_retention", default=0.0, type=float,
+        help="Minimum fraction of active groups retaining a regression target.",
+    )
+    parser.add_argument(
+        "--rl_min_targets_per_retained_group", default=0.0, type=float,
+    )
+    parser.add_argument(
+        "--rl_min_target_group_count", default=0, type=int,
+        help="Absolute effective-target support required before optimizer updates.",
+    )
+    parser.add_argument(
+        "--rl_update_target_fraction", default=0.0, type=float,
+        help=(
+            "Minimum fraction of each update batch sampled from replay groups "
+            "that satisfy the exact active/update/advantage target contract."
+        ),
+    )
+    # Chapter-4 guided safe-set protocol.  The proposal pool is deliberately
+    # limited to 88: 16 frozen-reference natural + 16 current-policy natural +
+    # 24 medium-noise + 32 guided.  No high-noise exploration branch exists.
+    parser.add_argument("--rl_guided_safe_set_protocol", default=False, type=boolean)
+    parser.add_argument("--rl_guided_reference_count", default=16, type=int)
+    parser.add_argument("--rl_guided_policy_count", default=16, type=int)
+    parser.add_argument("--rl_guided_medium_count", default=24, type=int)
+    parser.add_argument("--rl_guided_count", default=32, type=int)
+    parser.add_argument("--rl_guided_low_noise_scale", default=0.1, type=float)
+    parser.add_argument("--rl_guided_medium_noise_scale", default=0.5, type=float)
+    parser.add_argument("--rl_guidance_scale", default=0.01, type=float)
+    parser.add_argument(
+        "--rl_guidance_deviations",
+        default="-0.5,-0.25,-0.125,0,0.125,0.25,0.5",
+        type=str,
+    )
+    parser.add_argument("--rl_guidance_progress_threshold", default=5.358, type=float)
+    parser.add_argument("--rl_guidance_corridor_half_width", default=3.5, type=float)
+    parser.add_argument("--rl_guidance_corridor_range", default=15.0, type=float)
+    parser.add_argument("--rl_safe_set_natural_slots", default=8, type=int)
+    parser.add_argument("--rl_safe_set_medium_elite_slots", default=8, type=int)
+    parser.add_argument("--rl_safe_set_medium_diverse_slots", default=8, type=int)
+    parser.add_argument("--rl_safe_set_global_elite_slots", default=8, type=int)
+    parser.add_argument("--rl_reference_reward_margin", default=0.0, type=float)
 
     # 【迁移自 HDP-NAVSIM】对每条 rollout 轨迹施加的局部纵向/横向高斯偏移标准差（米）。
     # 该偏移对整条轨迹共享，航向保持不变；0 表示关闭。
@@ -407,6 +501,21 @@ def get_args():
 
     # replay buffer 最多保存的样本数量。
     parser.add_argument("--rl_buffer_size", default=4096, type=int)
+    parser.add_argument(
+        "--rl_replay_backend",
+        default="memory",
+        choices=["memory", "disk_sharded"],
+        help="Use disk_sharded for full mini-train rollout coverage.",
+    )
+    parser.add_argument("--rl_replay_directory", default="", type=str)
+    parser.add_argument("--rl_replay_shard_size", default=1000, type=int)
+    parser.add_argument("--rl_replay_cache_shards", default=2, type=int)
+    parser.add_argument(
+        "--rl_update_cover_all_targets",
+        default=False,
+        type=boolean,
+        help="Visit every target-bearing replay group once before ending update.",
+    )
 
     # 【论文 HDP-RL】Table 6 记录 EMA=0.05。本文将其明确解释为每次更新时
     # 当前策略写入 EMA 的比例：ema <- 0.95*ema + 0.05*model。
@@ -460,7 +569,10 @@ def get_args():
     parser.add_argument(
         "--rl_weighting_mode",
         default="exp_advantage",
-        choices=["exp_advantage", "softmax_positive", "positive_advantage"],
+        choices=[
+            "exp_advantage", "softmax_positive", "positive_advantage",
+            "constraint_uniform_positive",
+        ],
     )
 
     # 【NuPlan 保守安全更新】只把通过 reward safety gate 的候选作为 rollout
@@ -520,6 +632,10 @@ def get_args():
 
     # 0 表示完整遍历；正数用于短步门禁，例如 20 表示每个 update epoch 最多 20 步。
     parser.add_argument("--rl_max_update_steps_per_epoch", default=0, type=int)
+
+    # 逗号分隔的实际 optimizer step 里程碑，例如 20,50,100,200。
+    # 留空保持历史行为；中间检查点不会覆盖 latest.pth。
+    parser.add_argument("--rl_update_checkpoint_steps", default="", type=str)
 
     # HDP 混合损失中 Detached Integral 的反向传播时间窗口。
     #
@@ -605,6 +721,18 @@ def get_args():
     parser.add_argument("--reward_risk_weight", default=1.0, type=float)
     parser.add_argument("--reward_follow_weight", default=3.0, type=float)
     parser.add_argument("--reward_lane_weight", default=2.5, type=float)
+    parser.add_argument(
+        "--reward_follow_assignment_mode",
+        default="expert_reference",
+        choices=["candidate", "expert_reference"],
+        help=(
+            "candidate reproduces the historical candidate-dependent leader; "
+            "expert_reference makes following applicability shared per scene"
+        ),
+    )
+    parser.add_argument(
+        "--reward_follow_reference_full_weight_steps", default=8, type=int
+    )
     # 【NuPlan 小数据适配，非论文原式】默认 0 保持论文奖励；显式开启后，
     # 使用相对专家进度的有界奖励抑制弱 IL 起点上的 stop hacking。
     parser.add_argument("--reward_progress_guard_weight", default=0.0, type=float)
@@ -700,6 +828,111 @@ def get_args():
         raise ValueError("rl_group_size 至少为 2，组内优势才有意义")
     if args.rl_sampling_noise_scale <= 0:
         raise ValueError("rl_sampling_noise_scale 必须大于 0")
+    if bool(args.rl_candidate_pool_profile) != bool(
+        args.rl_candidate_selection_profile
+    ):
+        raise ValueError(
+            "rl_candidate_pool_profile 和 rl_candidate_selection_profile "
+            "必须同时设置或同时留空"
+        )
+    if args.rl_candidate_pool_profile:
+        pool_scales = parse_scale_count_profile(args.rl_candidate_pool_profile)
+        selection_scales = parse_scale_count_profile(
+            args.rl_candidate_selection_profile
+        )
+        if len(pool_scales) <= args.rl_group_size:
+            raise ValueError("候选池大小必须大于 rl_group_size")
+        if len(selection_scales) != args.rl_group_size:
+            raise ValueError("候选筛选配置必须恰好生成 rl_group_size 条轨迹")
+        for scale in set(pool_scales) | set(selection_scales):
+            if selection_scales.count(scale) > pool_scales.count(scale):
+                raise ValueError("候选筛选配额不能超过对应尺度的候选池数量")
+        if set(pool_scales) != set(selection_scales):
+            raise ValueError("候选池和最终筛选配置必须使用相同的噪声尺度集合")
+        if args.rl_task_reference_selection_profile:
+            reference_scales = parse_scale_count_profile(
+                args.rl_task_reference_selection_profile
+            )
+            if len(reference_scales) != args.rl_group_size:
+                raise ValueError("任务参考筛选配置必须生成 rl_group_size 条轨迹")
+            if set(reference_scales) != set(pool_scales):
+                raise ValueError("任务参考筛选配置必须使用相同噪声尺度集合")
+    if args.rl_candidate_selection_mode == "quality" and not args.rl_candidate_pool_profile:
+        raise ValueError("quality candidate selection requires an oversampled pool")
+    if args.rl_component_dispersion_gate and args.reward_objective_mode != "nuplan_aligned":
+        raise ValueError("component dispersion gate requires nuplan_aligned reward")
+    if args.rl_task_preserving_update_mask:
+        if not args.rl_task_reference_selection_profile:
+            raise ValueError("task-preserving update mask requires a reference selection profile")
+        if args.rl_weighting_mode != "constraint_uniform_positive":
+            raise ValueError("task-preserving update mask requires constraint_uniform_positive")
+    if args.rl_min_component_dispersion < 0:
+        raise ValueError("rl_min_component_dispersion 不能为负数")
+    if args.rl_route_cost_tolerance < 0 or args.rl_progress_guard_tolerance < 0:
+        raise ValueError("任务保持容差不能为负数")
+    if args.rl_positive_advantage_margin < 0:
+        raise ValueError("rl_positive_advantage_margin 不能为负数")
+    for name in (
+        "rl_min_active_group_fraction",
+        "rl_min_target_group_retention",
+        "rl_update_target_fraction",
+    ):
+        value = getattr(args, name)
+        if value < 0 or value > 1:
+            raise ValueError(f"{name} 必须位于 [0,1]")
+    if args.rl_min_targets_per_retained_group < 0:
+        raise ValueError("rl_min_targets_per_retained_group 不能为负数")
+    if args.rl_min_target_group_count < 0:
+        raise ValueError("rl_min_target_group_count 不能为负数")
+    if args.rl_guided_safe_set_protocol:
+        if args.rl_candidate_pool_profile or args.rl_candidate_selection_profile:
+            raise ValueError("guided safe-set protocol cannot be combined with F25 pool profiles")
+        proposal_count = sum((
+            args.rl_guided_reference_count,
+            args.rl_guided_policy_count,
+            args.rl_guided_medium_count,
+            args.rl_guided_count,
+        ))
+        if proposal_count != 88:
+            raise ValueError("guided safe-set protocol fixes an 88-proposal pool")
+        if args.rl_group_size != 32:
+            raise ValueError("guided safe-set protocol compresses to rl_group_size=32")
+        safe_set_slots = (
+            args.rl_safe_set_natural_slots,
+            args.rl_safe_set_medium_elite_slots,
+            args.rl_safe_set_medium_diverse_slots,
+            args.rl_safe_set_global_elite_slots,
+        )
+        if min(safe_set_slots) < 0 or sum(safe_set_slots) != args.rl_group_size:
+            raise ValueError("safe-set compression slots must sum to group size")
+        if min(
+            args.rl_guided_low_noise_scale,
+            args.rl_guided_medium_noise_scale,
+            args.rl_guidance_scale,
+            args.rl_guidance_corridor_half_width,
+            args.rl_guidance_corridor_range,
+        ) <= 0:
+            raise ValueError("guided proposal scales and corridor sizes must be positive")
+        try:
+            guidance_deviations = [
+                float(value.strip())
+                for value in args.rl_guidance_deviations.split(",")
+                if value.strip()
+            ]
+        except ValueError as error:
+            raise ValueError("guided deviation ladder must contain only numbers") from error
+        if not (
+            any(value < 0 for value in guidance_deviations)
+            and any(value == 0 for value in guidance_deviations)
+            and any(value > 0 for value in guidance_deviations)
+        ):
+            raise ValueError(
+                "guided deviation ladder requires negative, zero and positive values"
+            )
+        if not args.rl_relative_to_reference:
+            raise ValueError("guided safe-set protocol requires reference-relative advantage")
+        if args.rl_reference_anchor_weight <= 0:
+            raise ValueError("guided safe-set protocol requires a positive reference anchor")
     if args.rl_trajectory_augmentation_std < 0:
         raise ValueError("rl_trajectory_augmentation_std 不能为负数")
     if args.rl_trajectory_augmentation_epochs < 0:
@@ -716,6 +949,37 @@ def get_args():
         raise ValueError("rl_rollout_loss_weight 和 rl_expert_anchor_weight 不能同时为 0")
     if args.rl_max_update_steps_per_epoch < 0:
         raise ValueError("rl_max_update_steps_per_epoch 不能为负数")
+    if args.rl_buffer_size < 1:
+        raise ValueError("rl_buffer_size 必须为正数")
+    if args.rl_replay_shard_size < 1 or args.rl_replay_cache_shards < 1:
+        raise ValueError("磁盘 replay shard/cache 参数必须为正数")
+    if args.rl_replay_backend == "disk_sharded" and not args.rl_replay_directory:
+        raise ValueError("disk_sharded replay requires rl_replay_directory")
+    if args.rl_update_cover_all_targets and args.rl_update_target_fraction <= 0:
+        raise ValueError(
+            "rl_update_cover_all_targets requires rl_update_target_fraction > 0"
+        )
+    try:
+        update_checkpoint_steps = tuple(
+            int(value.strip())
+            for value in args.rl_update_checkpoint_steps.split(",")
+            if value.strip()
+        )
+    except ValueError as error:
+        raise ValueError("rl_update_checkpoint_steps 必须是逗号分隔的正整数") from error
+    if any(step <= 0 for step in update_checkpoint_steps):
+        raise ValueError("rl_update_checkpoint_steps 必须全部为正数")
+    if len(set(update_checkpoint_steps)) != len(update_checkpoint_steps):
+        raise ValueError("rl_update_checkpoint_steps 不能包含重复步数")
+    if tuple(sorted(update_checkpoint_steps)) != update_checkpoint_steps:
+        raise ValueError("rl_update_checkpoint_steps 必须严格递增")
+    if (
+        update_checkpoint_steps
+        and args.rl_max_update_steps_per_epoch > 0
+        and update_checkpoint_steps[-1] > args.rl_max_update_steps_per_epoch
+    ):
+        raise ValueError("中间检查点不能超过 rl_max_update_steps_per_epoch")
+    args.rl_update_checkpoint_steps_parsed = update_checkpoint_steps
     if not 0 <= args.rl_min_progress_guard_reward <= 1:
         raise ValueError("rl_min_progress_guard_reward 必须在 [0,1]")
     if not 0 < args.rl_ema_update_rate <= 1:
@@ -729,6 +993,8 @@ def get_args():
         raise ValueError("multi-reward 及 progress guard 权重不能为负数")
     if args.reward_progress_guard_stop_tolerance <= 0:
         raise ValueError("reward_progress_guard_stop_tolerance 必须大于 0")
+    if args.reward_follow_reference_full_weight_steps <= 0:
+        raise ValueError("reward_follow_reference_full_weight_steps 必须大于 0")
     if not 0 <= args.reward_safety_gate_threshold <= 1:
         raise ValueError("reward_safety_gate_threshold 必须在 [0,1]")
     if args.reward_safety_gate_margin <= 0:
@@ -938,7 +1204,11 @@ def model_training(args):
     # 可选地保存一份冻结的 B Epoch 10 reference policy。必须在 DDP 包装前
     # 复制，确保每个进程拥有本地 reference；权重为 0 时不额外占用显存。
     reference_model = None
-    if args.rl_reference_anchor_weight > 0 or args.rl_relative_to_reference:
+    if (
+        args.rl_reference_anchor_weight > 0
+        or args.rl_relative_to_reference
+        or args.rl_guided_safe_set_protocol
+    ):
         reference_model = copy.deepcopy(model).eval()
         for parameter in reference_model.parameters():
             parameter.requires_grad_(False)
@@ -991,7 +1261,19 @@ def model_training(args):
     #
     # 它保存 rollout 阶段生成的候选轨迹及相关训练信息，
     # 供后续 update_epoch 重复使用。
-    replay_buffer = NuPlanReplayBuffer(max_size=args.rl_buffer_size)
+    if args.rl_replay_backend == "disk_sharded":
+        if ddp.get_world_size() != 1:
+            raise ValueError(
+                "disk_sharded replay currently requires single-process training"
+            )
+        replay_buffer = ShardedNuPlanReplayBuffer(
+            args.rl_replay_directory,
+            max_size=args.rl_buffer_size,
+            shard_size=args.rl_replay_shard_size,
+            cache_shards=args.rl_replay_cache_shards,
+        )
+    else:
+        replay_buffer = NuPlanReplayBuffer(max_size=args.rl_buffer_size)
 
     # 创建轨迹奖励计算器。
     vehicle_geometry = {}
@@ -1028,6 +1310,10 @@ def model_training(args):
             risk_weight=args.reward_risk_weight,
             follow_weight=args.reward_follow_weight,
             lane_weight=args.reward_lane_weight,
+            follow_assignment_mode=args.reward_follow_assignment_mode,
+            follow_reference_full_weight_steps=(
+                args.reward_follow_reference_full_weight_steps
+            ),
             progress_guard_weight=args.reward_progress_guard_weight,
             progress_guard_stop_tolerance=(
                 args.reward_progress_guard_stop_tolerance
@@ -1068,7 +1354,9 @@ def model_training(args):
     )
 
     # 获取当前时间，用于创建独立实验目录。
-    timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
+    # FAT/exFAT-backed external experiment disks reject ':' in path names.
+    # A hyphen-only timestamp is portable and preserves second-level identity.
+    timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
     # 构造日志和模型保存路径：
     #
@@ -1182,6 +1470,7 @@ def model_training(args):
                 epoch=epoch,
                 reference_model=reference_model,
             )
+            replay_buffer.finalize()
 
             # 标记当前阶段名称。
             phase = "rollout"
@@ -1212,6 +1501,22 @@ def model_training(args):
                 args,
                 device,
                 reference_model=reference_model,
+                update_checkpoint_callback=(
+                    lambda update_step, step_metrics: save_update_step_model(
+                        model,
+                        optimizer,
+                        scheduler,
+                        save_path,
+                        epoch,
+                        update_step,
+                        step_metrics["loss"],
+                        logger.id,
+                        ema.ema,
+                    )
+                    if global_rank == 0
+                    and update_step in args.rl_update_checkpoint_steps_parsed
+                    else None
+                ),
             )
 
             # 每个 update epoch 后更新一次学习率。

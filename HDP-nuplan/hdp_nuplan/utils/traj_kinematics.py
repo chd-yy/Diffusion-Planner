@@ -13,6 +13,60 @@
 import torch
 
 
+TRAJECTORY_REPRESENTATIONS = ("increment", "absolute")
+
+
+def validate_trajectory_representation(representation):
+    """Validate and return the configured trajectory representation."""
+    if representation not in TRAJECTORY_REPRESENTATIONS:
+        raise ValueError(
+            "trajectory_representation must be one of "
+            f"{TRAJECTORY_REPRESENTATIONS}, got {representation!r}"
+        )
+    return representation
+
+
+def encode_trajectory_representation(trajectory, representation):
+    """Convert physical waypoints to the diffusion state's XY representation.
+
+    The heading channels are preserved.  ``absolute`` keeps ego-local XY
+    waypoints unchanged, while ``increment`` replaces XY with frame-to-frame
+    displacements relative to the ego origin at the first future step.
+    """
+    representation = validate_trajectory_representation(representation)
+    if trajectory.shape[-1] < 2:
+        raise ValueError("trajectory must contain at least x and y channels")
+    if representation == "absolute":
+        return trajectory
+
+    encoded = trajectory.clone()
+    origin = torch.zeros_like(trajectory[..., :1, :2])
+    encoded[..., :2] = torch.diff(
+        torch.cat([origin, trajectory[..., :2]], dim=-2),
+        dim=-2,
+    )
+    return encoded
+
+
+def decode_trajectory_representation(
+    trajectory,
+    representation,
+    detach_window_size=0,
+):
+    """Recover ego-local absolute XY waypoints from a diffusion state."""
+    representation = validate_trajectory_representation(representation)
+    if trajectory.shape[-1] < 2:
+        raise ValueError("trajectory must contain at least x and y channels")
+    if representation == "absolute":
+        return trajectory
+
+    positions = detached_integral(
+        trajectory[..., :2],
+        detach_window_size=detach_window_size,
+    )
+    return torch.cat([positions, trajectory[..., 2:]], dim=-1)
+
+
 # detached_integral 用于执行“前向完整积分、反向截断梯度”的累积求和。
 #
 # 假设输入序列为：

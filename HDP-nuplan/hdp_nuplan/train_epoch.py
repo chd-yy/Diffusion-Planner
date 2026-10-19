@@ -145,6 +145,11 @@ def train_epoch(data_loader, model, optimizer, args, ema, aug: StatePerturbation
                 args.diffusion_model_type,
                 args.diffusion_supervision_type,
                 detach_window_size=args.planning_detach_window_size,
+                trajectory_representation=getattr(
+                    args,
+                    'trajectory_representation',
+                    'increment',
+                ),
             )
             
             # 【HDP 与原 Diffusion-Planner 的区别：总损失组成】原版使用
@@ -184,7 +189,7 @@ def train_epoch(data_loader, model, optimizer, args, ema, aug: StatePerturbation
             # 【HDP 与原 Diffusion-Planner 的区别：进度条指标】原版只显示组合后的 loss；
             # HDP 分别显示总损失、自车运动增量扩散损失和积分轨迹混合损失，便于观察
             # 两种自车监督项各自的变化。
-            data_epoch.set_postfix(total_loss='{:.4f}'.format(total_loss), velocity_loss='{:.4f}'.format(loss['ego_planning_loss'].item()), hybrid_loss='{:.4f}'.format(loss['ego_planning_hybrid_loss'].item()))
+            data_epoch.set_postfix(total_loss='{:.4f}'.format(total_loss), diffusion_loss='{:.4f}'.format(loss['ego_planning_loss'].item()), hybrid_loss='{:.4f}'.format(loss['ego_planning_hybrid_loss'].item()))
             # 只保存脱离计算图的 Python 标量，训练数值不变，同时避免跨 batch 保留计算图。
             epoch_loss.append(
                 {

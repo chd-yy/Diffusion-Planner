@@ -66,6 +66,7 @@ def _score_npz(path: Path, scorer: NuPlanTensorRewardScorer) -> dict:
         ego_future_raw = torch.from_numpy(data["ego_agent_future"]).float()
         neighbors_raw = torch.from_numpy(data["neighbor_agents_future"][:10]).float()
         neighbor_past = torch.from_numpy(data["neighbor_agents_past"][:10]).float()[None]
+        lanes = torch.from_numpy(data["lanes"]).float()[None]
         route_lanes = torch.from_numpy(data["route_lanes"]).float()[None]
         static_objects = torch.from_numpy(data["static_objects"]).float()[None]
         ego_current_state = torch.from_numpy(data["ego_current_state"]).float()[None]
@@ -84,6 +85,7 @@ def _score_npz(path: Path, scorer: NuPlanTensorRewardScorer) -> dict:
         ego_future=candidates[None, 0],
         neighbor_agents_past=neighbor_past,
         ego_current_state=ego_current_state,
+        lanes=lanes,
     )
 
     values = {}
@@ -156,12 +158,20 @@ def main() -> None:
         help="验证旧加性 reward 或新的 NuPlan 闭环对齐 reward",
     )
     parser.add_argument("--strict", action="store_true")
+    parser.add_argument(
+        "--follow-assignment-mode",
+        default="candidate",
+        choices=["candidate", "expert_reference"],
+    )
     args = parser.parse_args()
 
     names: List[str] = json.loads(args.manifest.read_text(encoding="utf-8"))
     names = names[: args.max_scenes]
     scorer = NuPlanTensorRewardScorer(
-        NuPlanRewardConfig(objective_mode=args.objective_mode)
+        NuPlanRewardConfig(
+            objective_mode=args.objective_mode,
+            follow_assignment_mode=args.follow_assignment_mode,
+        )
     )
     scene_results = [_score_npz(args.cache_dir / name, scorer) for name in names]
 
@@ -195,6 +205,7 @@ def main() -> None:
     )
     report = {
         "schema_version": 1,
+        "follow_assignment_mode": args.follow_assignment_mode,
         "scene_count": len(scene_results),
         "minimum_pass_rate": args.minimum_pass_rate,
         "accepted": accepted,

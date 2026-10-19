@@ -1,0 +1,26 @@
+# Seven preselected Test14-hard scenarios for paired B10/post-training replay.
+# Selection: visible progress gains with no regression in the stored collision,
+# drivable-area, TTC, direction, comfort, or speed-limit metrics.
+_target_: nuplan.planning.scenario_builder.scenario_filter.ScenarioFilter
+_convert_: all
+scenario_types: null
+scenario_tokens:
+  - "33b448fab23a5d03"  # stationary_in_traffic
+  - "00de3f6da9205a0c"  # stationary_in_traffic
+  - "ebf09047e62a5fb8"  # stationary_in_traffic
+  - "820bf3685bc955ef"  # waiting_for_pedestrian_to_cross
+  - "9e7b8fa4248d55de"  # waiting_for_pedestrian_to_cross
+  - "d3be3fa904135dd9"  # starting_unprotected_cross_turn
+  - "63aa10eaed9f53c5"  # on_traffic_light_intersection
+log_names: null
+map_names: null
+num_scenarios_per_type: null
+limit_total_scenarios: null
+timestamp_threshold_s: null
+ego_displacement_minimum_m: null
+ego_start_speed_threshold: null
+ego_stop_speed_threshold: null
+speed_noise_tolerance: null
+expand_scenarios: false
+remove_invalid_goals: true
+shuffle: false

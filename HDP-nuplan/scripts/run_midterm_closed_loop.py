@@ -22,6 +22,7 @@ from evaluate_rl_safety_geometry_multiseed import artifact_state, check_identity
 from manage_test14_chunk_results import archive_chunk, merge, validate_run
 from run_midterm_posttraining import B10_SHA, HDP, MANIFEST_SHA, ROOT, VARIANTS, sha256, variant_args
 from summarize_closed_loop_metrics import METRIC_COLUMNS, summarize_run
+from storage_paths import require_allowed_output
 
 DEVKIT = ROOT.parent / "nuplan-devkit"
 DATA = ROOT.parent / "nuplan/dataset"
@@ -288,9 +289,11 @@ def main():
     cli = parser.parse_args()
     if cli.train_seed < 0 or any(s < 0 for s in cli.inference_seeds) or len(set(cli.inference_seeds)) != len(cli.inference_seeds):
         parser.error("Seeds must be distinct nonnegative integers")
-    output = cli.output.resolve()
-    if (HDP / "tmp/midterm_closed_loop").resolve() not in output.parents:
-        raise ValueError("Use a child of HDP-nuplan/tmp/midterm_closed_loop")
+    output, _ = require_allowed_output(
+        cli.output,
+        HDP / "tmp/midterm_closed_loop",
+        "midterm_closed_loop",
+    )
     output.mkdir(parents=True, exist_ok=True)
     with (output / ".run.lock").open("a") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)

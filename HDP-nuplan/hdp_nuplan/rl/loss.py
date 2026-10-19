@@ -281,6 +281,9 @@ def group_advantage_weights(
     weighting_mode: str = "exp_advantage",
     candidate_mask: Optional[torch.Tensor] = None,
     reference_rewards: Optional[torch.Tensor] = None,
+    update_mask: Optional[torch.Tensor] = None,
+    active_group_mask: Optional[torch.Tensor] = None,
+    positive_margin: float = 0.0,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """生成组内权重；低方差组返回全零权重并跳过自蒸馏。
 
@@ -316,14 +319,17 @@ def group_advantage_weights(
             raise ValueError("reference_rewards must be finite")
     if min_reward_std < 0:
         raise ValueError("min_reward_std must be non-negative")
+    if positive_margin < 0:
+        raise ValueError("positive_margin must be non-negative")
     if weighting_mode not in {
         "exp_advantage",
         "softmax_positive",
         "positive_advantage",
+        "constraint_uniform_positive",
     }:
         raise ValueError(
             "weighting_mode must be 'exp_advantage', 'softmax_positive' "
-            "or 'positive_advantage'"
+            "'positive_advantage' or 'constraint_uniform_positive'"
         )
 
     # ------------------------------------------------------------------
@@ -353,6 +359,22 @@ def group_advantage_weights(
     mask, candidate_counts, mean, std = _masked_group_statistics(
         rewards, candidate_mask
     )
+    if update_mask is None:
+        update_mask = mask
+    else:
+        if update_mask.shape != rewards.shape:
+            raise ValueError("update_mask must have the same shape as rewards")
+        update_mask = update_mask.to(device=rewards.device, dtype=torch.bool)
+        if torch.any(update_mask & ~mask):
+            raise ValueError("update_mask cannot enable an ineligible candidate")
+    if active_group_mask is not None:
+        if active_group_mask.ndim == 2 and active_group_mask.shape[1] == 1:
+            active_group_mask = active_group_mask.squeeze(1)
+        if active_group_mask.shape != (rewards.shape[0],):
+            raise ValueError("active_group_mask must have shape [B] or [B,1]")
+        active_group_mask = active_group_mask.to(
+            device=rewards.device, dtype=torch.bool
+        )[:, None]
 
     # ------------------------------------------------------------------
     # 计算同一场景内部奖励的标准差
@@ -418,6 +440,8 @@ def group_advantage_weights(
     # 所以所有 advantage 都是 0。
     # advantages  [B,G],advantages[b,g]表示第 b 个场景中，第 g 条候选轨迹相对于该场景候选平均奖励的优势
     active_groups = (candidate_counts >= 2) & (std >= min_reward_std)
+    if active_group_mask is not None:
+        active_groups = active_groups & active_group_mask
     # 默认 baseline 是组内均值；显式参考 reward 模式下，baseline 是冻结
     # B Epoch10 的 reward。std 仍使用候选组内部方差，只负责判断当前组是否
     # 具有足够的候选区分度以及把差值归一化到相近尺度。
@@ -511,14 +535,26 @@ def group_advantage_weights(
         weights = torch.softmax(logits, dim=1)
         weights = weights * candidate_counts.to(rewards.dtype)
         weights = weights * mask.to(rewards.dtype)
-    else:
+    elif weighting_mode == "positive_advantage":
         # 【NuPlan v3 稳定更新】只保留正优势候选，去掉所有候选共同携带
         # 的常数监督分量。若 reward 差异很小，外层 active_groups 会先将
         # 整组清零；若 reward 差异达到门槛，则只有 A>0 的候选参与拟合。
         weights = torch.relu(advantages) * mask.to(rewards.dtype)
+    else:
+        # Constraint-aware target-set objective selected by the Chapter-4
+        # validation gate.  Advantages are still estimated over the complete
+        # safety set, but only task-compliant candidates above the fixed margin
+        # are regression targets.  Every retained target has unit weight; no
+        # candidate-count renormalization is allowed because it would amplify
+        # sparse one-target groups by up to hundreds of times.
+        weights = (
+            (advantages >= positive_margin)
+            & update_mask
+            & active_groups.expand_as(update_mask)
+        ).to(rewards.dtype)
 
     # 有效组按组归一化到均值 1，避免 exp 的 Jensen 偏差改变有效学习率。
-    if normalize_weights:
+    if normalize_weights and weighting_mode != "constraint_uniform_positive":
         eligible_mean = weights.sum(dim=1, keepdim=True) / candidate_counts.clamp_min(
             1
         ).to(rewards.dtype)
@@ -615,6 +651,9 @@ def reward_weighted_diffusion_loss(
     center_reward_weights: bool = False,
     weighting_mode: str = "exp_advantage",
     candidate_mask: Optional[torch.Tensor] = None,
+    update_mask: Optional[torch.Tensor] = None,
+    active_group_mask: Optional[torch.Tensor] = None,
+    positive_margin: float = 0.0,
     reference_model=None,
     reference_rewards: Optional[torch.Tensor] = None,
     eps: float = 1e-3,
@@ -989,6 +1028,7 @@ def reward_weighted_diffusion_loss(
     # 和 supervision space，因而该项只度量当前策略相对起点策略的漂移。
     # 不启用时保持旧 RL loss 的计算图和数值完全不变。
     reference_anchor_loss = prediction.new_zeros(())
+    reference_prediction = None
     if reference_model is not None:
         reference_model.eval()
         with torch.no_grad():
@@ -1158,6 +1198,9 @@ def reward_weighted_diffusion_loss(
         weighting_mode=weighting_mode,
         candidate_mask=candidate_mask,
         reference_rewards=reference_rewards,
+        update_mask=update_mask,
+        active_group_mask=active_group_mask,
+        positive_margin=positive_margin,
     )
 
     # 【NuPlan 小数据适配，非论文原式】论文直接使用正权重 w。在有限 replay
@@ -1171,6 +1214,13 @@ def reward_weighted_diffusion_loss(
     active_groups = (candidate_counts.squeeze(1) >= 2) & (
         reward_std >= min_reward_std
     )
+    if active_group_mask is not None:
+        external_active = active_group_mask.to(
+            device=rewards.device, dtype=torch.bool
+        ).reshape(-1)
+        if external_active.shape != active_groups.shape:
+            raise ValueError("active_group_mask must have one value per group")
+        active_groups = active_groups & external_active
     regression_weights = weights
     if center_reward_weights and weighting_mode == "exp_advantage":
         regression_weights = torch.where(
@@ -1531,12 +1581,24 @@ def reward_weighted_diffusion_loss(
         "no_eligible_group_fraction": (candidate_counts == 0).float().mean(),
         "positive_weighting_mode": torch.tensor(
             1.0
-            if weighting_mode in {"softmax_positive", "positive_advantage"}
+            if weighting_mode in {
+                "softmax_positive",
+                "positive_advantage",
+                "constraint_uniform_positive",
+            }
             else 0.0,
             device=rewards.device,
             dtype=rewards.dtype,
         ),
         "reference_anchor_loss": reference_anchor_loss,
+        "task_update_candidate_fraction": (
+            update_mask.to(rewards).mean()
+            if update_mask is not None
+            else candidate_mask.to(rewards).mean()
+        ),
+        "regression_targets_per_group": (
+            (regression_weights > 0).sum(dim=1).to(rewards).mean()
+        ),
     }
 
     # 返回：

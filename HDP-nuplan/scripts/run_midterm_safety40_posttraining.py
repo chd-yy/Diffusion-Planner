@@ -36,6 +36,7 @@ from run_chapter3_safety40_closed_loop import (
     write_json,
 )
 from summarize_closed_loop_metrics import summarize_run
+from storage_paths import require_allowed_output
 
 
 B10_RUN = HDP / "tmp/mini_train_full_306801_seed3407_v1/experiment_b_constant5e5_from_epoch4"
@@ -450,10 +451,11 @@ def main() -> None:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--execute", action="store_true")
     args = parser.parse_args()
-    output = args.output.resolve()
-    allowed_root = (HDP / "tmp/midterm_closed_loop").resolve()
-    if allowed_root not in output.parents:
-        raise ValueError(f"output must be a child of {allowed_root}")
+    output, _ = require_allowed_output(
+        args.output,
+        HDP / "tmp/midterm_closed_loop",
+        "midterm_closed_loop",
+    )
     output.mkdir(parents=True, exist_ok=True)
     with (output / ".run.lock").open("a") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)

@@ -185,6 +185,37 @@ def save_model(model, optimizer, scheduler, save_path, epoch, train_loss, wandb_
         fileio.put(f.getvalue(), f'{save_path}/model_epoch_{epoch+1}_trainloss_{train_loss:.4f}.pth')
         fileio.put(f.getvalue(), f"{save_path}/latest.pth")
 
+
+def save_update_step_model(
+    model,
+    optimizer,
+    scheduler,
+    save_path,
+    epoch,
+    update_step,
+    train_loss,
+    wandb_id,
+    ema,
+):
+    """Save an immutable checkpoint at an actual RL optimizer-step milestone."""
+
+    checkpoint = {
+        'epoch': epoch + 1,
+        'update_step': int(update_step),
+        'model': model.state_dict(),
+        'ema_state_dict': ema.state_dict(),
+        'optimizer': optimizer.state_dict(),
+        'schedule': scheduler.state_dict(),
+        'loss': train_loss,
+        'wandb_id': wandb_id,
+    }
+    with io.BytesIO() as stream:
+        torch.save(checkpoint, stream)
+        fileio.put(
+            stream.getvalue(),
+            f'{save_path}/model_update_step_{int(update_step):04d}.pth',
+        )
+
 def resume_model(path: str, model, optimizer, scheduler, ema, device):
     """
     load ckpt from path

@@ -203,6 +203,13 @@ class NuPlanRewardConfig:
     follow_comfort_acceleration: float = 2.0
     follow_comfort_deceleration: float = 3.0
     leader_lateral_margin: float = 0.5
+    # candidate 保留历史行为：每条候选自行决定 leader 是否存在。
+    # expert_reference 由专家未来轨迹统一决定 leader 与适用时域，
+    # 防止候选通过横向偏移删除 following objective。
+    follow_assignment_mode: str = "candidate"
+    # expert_reference 模式下，累计达到该有效帧数后 following
+    # 获得完整权重；更短的 leader 片段线性降权，避免单帧噪声主导。
+    follow_reference_full_weight_steps: int = 8
 
     # 【NuPlan 适配】地图缓存含车道中心线和左右边界偏移；当边界缺失时，
     # 使用 1.75 m 作为半车道宽回退值。
@@ -262,6 +269,16 @@ class NuPlanTensorRewardScorer:
         #
         # 则创建一份默认 NuPlanRewardConfig。
         self.config = config or NuPlanRewardConfig()
+        if self.config.follow_assignment_mode not in {
+            "candidate",
+            "expert_reference",
+        }:
+            raise ValueError(
+                "follow_assignment_mode must be 'candidate' or "
+                "'expert_reference'"
+            )
+        if self.config.follow_reference_full_weight_steps <= 0:
+            raise ValueError("follow_reference_full_weight_steps must be positive")
 
     # ------------------------------------------------------------------
     # 碰撞/安全距离代价
@@ -1490,6 +1507,7 @@ class NuPlanTensorRewardScorer:
         direction = self._normalize_direction(trajectories[..., 2:4])
         initial_direction = torch.zeros_like(direction[..., :1, :])
         initial_direction[..., 0] = 1.0
+        # [B, G, T, 2] : [2, 32, 80, 2]
         center_velocity = ego_velocity + cfg.ego_rear_axle_to_center * torch.diff(
             torch.cat([initial_direction, direction], dim=-2), dim=-2
         ) / cfg.dt
@@ -1652,17 +1670,17 @@ class NuPlanTensorRewardScorer:
             "occupancy_reward": occupancy_reward.clamp(0, 1),
         }
 
-    def _following_reward(
+    def _candidate_following_reward(
         self,
         trajectories: torch.Tensor,
         neighbors_future: torch.Tensor,
         neighbor_mask: torch.Tensor,
         neighbor_agents_past: Optional[torch.Tensor],
         ego_current_state: Optional[torch.Tensor],
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
-        """论文式 ACC 跟车奖励；没有前车时返回中性值 1。"""
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """历史 candidate-dependent ACC 跟车奖励。"""
         cfg = self.config
-        batch_size, group_size, _, _ = trajectories.shape
+        batch_size, group_size, trajectory_horizon, _ = trajectories.shape
         geometry = self._neighbor_geometry(
             trajectories, neighbors_future, neighbor_mask, neighbor_agents_past
         )
@@ -1670,6 +1688,13 @@ class NuPlanTensorRewardScorer:
             return (
                 trajectories.new_ones(batch_size, group_size),
                 trajectories.new_zeros(batch_size, group_size),
+                torch.zeros(
+                    batch_size,
+                    group_size,
+                    trajectory_horizon,
+                    device=trajectories.device,
+                    dtype=torch.bool,
+                ),
             )
 
         horizon = geometry["separation"].shape[-1]
@@ -1733,7 +1758,283 @@ class NuPlanTensorRewardScorer:
         reward = (per_step * has_leader).sum(dim=-1) / valid_count.clamp_min(1)
         reward = torch.where(valid_count > 0, reward, torch.ones_like(reward))
         leader_fraction = valid_count.to(trajectories.dtype) / max(horizon, 1)
-        return reward.clamp(0, 1), leader_fraction
+        return reward.clamp(0, 1), leader_fraction, has_leader
+
+    def _reference_following_reward(
+        self,
+        trajectories: torch.Tensor,
+        neighbors_future: torch.Tensor,
+        neighbor_mask: torch.Tensor,
+        neighbor_agents_past: Optional[torch.Tensor],
+        ego_current_state: Optional[torch.Tensor],
+        ego_future: Optional[torch.Tensor],
+        reference_applicable: Optional[torch.Tensor],
+        candidate_has_leader: torch.Tensor,
+    ) -> Tuple[torch.Tensor, torch.Tensor, Dict[str, torch.Tensor]]:
+        """用专家轨迹统一定义 leader，避免候选自行删除跟车目标。"""
+        cfg = self.config
+        batch_size, group_size, trajectory_horizon, _ = trajectories.shape
+        neutral = trajectories.new_ones(batch_size, group_size)
+        inactive = trajectories.new_zeros(batch_size, group_size)
+        empty_details = {
+            "reference_follow_reward": neutral,
+            "reference_leader_fraction": inactive,
+            "follow_applicable": inactive,
+            "leader_escape_fraction": inactive,
+            "reference_leader_switch_fraction": inactive,
+            "follow_confidence": inactive,
+        }
+        if ego_future is None:
+            return neutral, inactive, empty_details
+
+        reference_trajectory = ego_future[:, None]
+        reference_geometry = self._neighbor_geometry(
+            reference_trajectory,
+            neighbors_future,
+            neighbor_mask,
+            neighbor_agents_past,
+        )
+        if reference_geometry["separation"].numel() == 0:
+            return neutral, inactive, empty_details
+
+        horizon = min(
+            trajectory_horizon,
+            ego_future.shape[-2],
+            reference_geometry["separation"].shape[-1],
+        )
+        reference_longitudinal = reference_geometry["longitudinal"][:, 0, :, :horizon]
+        reference_lateral = reference_geometry["lateral"][:, 0, :, :horizon]
+        reference_valid = reference_geometry["valid"][:, 0, :, :horizon]
+        reference_vehicle = reference_geometry["vehicle"][:, 0, :, :horizon]
+        corridor = (
+            cfg.ego_width * 0.5
+            + reference_geometry["width"][:, :, None] * 0.5
+            + cfg.leader_lateral_margin
+        )
+        leader_valid = (
+            reference_valid
+            & reference_vehicle
+            & (reference_longitudinal > 0)
+            & (reference_lateral.abs() <= corridor)
+        )
+        reference_gap = (
+            reference_longitudinal
+            - cfg.ego_length * 0.5
+            - reference_geometry["length"][:, :, None] * 0.5
+        ).clamp_min(0)
+        candidate_gap = torch.where(
+            leader_valid,
+            reference_gap,
+            torch.full_like(reference_gap, float("inf")),
+        )
+        _, reference_leader_index = candidate_gap.min(dim=1)
+        reference_has_leader = leader_valid.any(dim=1)
+        if reference_applicable is not None:
+            reference_has_leader = reference_has_leader & reference_applicable[
+                :, None
+            ].to(dtype=torch.bool)
+
+        neighbor_count = neighbors_future.shape[1]
+        neighbor_xy = neighbors_future[:, :neighbor_count, :horizon, :2].permute(
+            0, 2, 1, 3
+        )
+        xy_index = reference_leader_index[..., None, None].expand(
+            -1, -1, 1, 2
+        )
+        leader_xy = torch.gather(neighbor_xy, 2, xy_index).squeeze(2)
+        leader_length = torch.gather(
+            reference_geometry["length"], 1, reference_leader_index
+        )
+
+        reference_forward = self._normalize_direction(
+            ego_future[..., :horizon, 2:4]
+        )
+        ego_center = self._ego_box_center(
+            trajectories[..., :horizon, :2],
+            trajectories[..., :horizon, 2:4],
+        )
+        delta = leader_xy[:, None] - ego_center
+        longitudinal = torch.sum(
+            delta * reference_forward[:, None], dim=-1
+        )
+        gap = (
+            longitudinal
+            - cfg.ego_length * 0.5
+            - leader_length[:, None] * 0.5
+        ).clamp_min(0)
+
+        candidate_geometry = self._neighbor_geometry(
+            trajectories,
+            neighbors_future,
+            neighbor_mask,
+            neighbor_agents_past,
+        )
+        velocity_index = reference_leader_index[:, None, None, :, None].expand(
+            -1, group_size, 1, -1, 2
+        )
+        leader_velocity = torch.gather(
+            candidate_geometry["neighbor_velocity"][..., :horizon, :],
+            2,
+            velocity_index,
+        ).squeeze(2)
+        ego_velocity, _, _ = self._ego_motion(trajectories, ego_current_state)
+        evaluation_forward = reference_forward[:, None]
+        speed = torch.sum(
+            ego_velocity[..., :horizon, :] * evaluation_forward, dim=-1
+        ).clamp_min(0)
+        leader_speed = torch.sum(
+            leader_velocity * evaluation_forward, dim=-1
+        ).clamp_min(0)
+        speed_ratio = (speed / cfg.risk_speed_reference).clamp(0, 1)
+        ideal_time_gap = cfg.follow_time_gap_low_speed + speed_ratio * (
+            cfg.follow_time_gap_high_speed - cfg.follow_time_gap_low_speed
+        )
+        actual_time_gap = gap / speed.clamp_min(0.1)
+        gap_score = (
+            1.0
+            - (actual_time_gap - ideal_time_gap).abs()
+            / ideal_time_gap.clamp_min(1e-3)
+        ).clamp(0, 1)
+        target_spacing = cfg.follow_min_spacing + ideal_time_gap * speed
+        spacing_score = (
+            1.0
+            - (gap - target_spacing).abs() / target_spacing.clamp_min(1.0)
+        ).clamp(0, 1)
+        speed_tolerance = torch.maximum(
+            torch.full_like(speed, cfg.follow_speed_tolerance), 0.25 * speed
+        )
+        speed_score = (
+            1.0 - (speed - leader_speed).abs() / speed_tolerance
+        ).clamp(0, 1)
+
+        if ego_current_state is None:
+            current_velocity = torch.zeros_like(ego_velocity[..., :1, :])
+        else:
+            current_velocity = ego_current_state[:, None, None, 4:6].expand(
+                -1, group_size, -1, -1
+            )
+        acceleration = torch.diff(
+            torch.cat([current_velocity, ego_velocity], dim=-2), dim=-2
+        ) / cfg.dt
+        longitudinal_acceleration = torch.sum(
+            acceleration[..., :horizon, :] * evaluation_forward, dim=-1
+        )
+        acceleration_violation = (
+            torch.relu(
+                longitudinal_acceleration - cfg.follow_comfort_acceleration
+            )
+            / max(cfg.follow_comfort_acceleration, 1e-3)
+            + torch.relu(
+                -cfg.follow_comfort_deceleration - longitudinal_acceleration
+            )
+            / max(cfg.follow_comfort_deceleration, 1e-3)
+        )
+        comfort_score = (1.0 - acceleration_violation).clamp(0, 1)
+
+        per_step = (
+            gap_score + spacing_score + speed_score + comfort_score
+        ) * 0.25
+        shared_mask = reference_has_leader[:, None].expand(
+            -1, group_size, -1
+        )
+        valid_count = shared_mask.sum(dim=-1)
+        reward = (per_step * shared_mask).sum(dim=-1) / valid_count.clamp_min(1)
+        reward = torch.where(valid_count > 0, reward, neutral)
+        reference_fraction = (
+            reference_has_leader.to(trajectories.dtype).mean(dim=-1, keepdim=True)
+        ).expand(-1, group_size)
+        reference_count = reference_has_leader.sum(dim=-1, keepdim=True).to(
+            trajectories.dtype
+        )
+        follow_confidence = (
+            reference_count / float(cfg.follow_reference_full_weight_steps)
+        ).clamp(0, 1).expand(-1, group_size)
+
+        candidate_mask = candidate_has_leader[..., :horizon]
+        escape_count = (shared_mask & ~candidate_mask).sum(dim=-1)
+        escape_fraction = escape_count.to(trajectories.dtype) / valid_count.clamp_min(
+            1
+        ).to(trajectories.dtype)
+        switch_valid = (
+            reference_has_leader[:, 1:] & reference_has_leader[:, :-1]
+        )
+        switch_count = (
+            switch_valid
+            & (reference_leader_index[:, 1:] != reference_leader_index[:, :-1])
+        ).sum(dim=-1)
+        switch_fraction = switch_count.to(trajectories.dtype) / switch_valid.sum(
+            dim=-1
+        ).clamp_min(1).to(trajectories.dtype)
+        switch_fraction = switch_fraction[:, None].expand(-1, group_size)
+        details = {
+            "reference_follow_reward": reward.clamp(0, 1),
+            "reference_leader_fraction": reference_fraction,
+            "follow_applicable": (reference_fraction > 0).to(trajectories.dtype),
+            "leader_escape_fraction": escape_fraction,
+            "reference_leader_switch_fraction": switch_fraction,
+            "follow_confidence": follow_confidence,
+        }
+        return reward.clamp(0, 1), reference_fraction, details
+
+    def _following_reward(
+        self,
+        trajectories: torch.Tensor,
+        neighbors_future: torch.Tensor,
+        neighbor_mask: torch.Tensor,
+        neighbor_agents_past: Optional[torch.Tensor],
+        ego_current_state: Optional[torch.Tensor],
+        ego_future: Optional[torch.Tensor] = None,
+        reference_applicable: Optional[torch.Tensor] = None,
+    ) -> Tuple[torch.Tensor, torch.Tensor, Dict[str, torch.Tensor]]:
+        """计算跟车质量，并显式区分奖励适用性与候选行为。"""
+        legacy_reward, candidate_fraction, candidate_has_leader = (
+            self._candidate_following_reward(
+                trajectories,
+                neighbors_future,
+                neighbor_mask,
+                neighbor_agents_past,
+                ego_current_state,
+            )
+        )
+        if self.config.follow_assignment_mode == "candidate":
+            ones = torch.ones_like(legacy_reward)
+            details = {
+                "legacy_follow_reward": legacy_reward,
+                "candidate_leader_fraction": candidate_fraction,
+                "reference_follow_reward": legacy_reward,
+                "reference_leader_fraction": candidate_fraction,
+                "follow_applicable": (candidate_fraction > 0).to(
+                    trajectories.dtype
+                ),
+                "leader_escape_fraction": torch.zeros_like(legacy_reward),
+                "reference_leader_switch_fraction": torch.zeros_like(
+                    legacy_reward
+                ),
+                "follow_confidence": ones,
+                # 历史模式必须保留“无 leader 仍贡献满分”的精确语义。
+                "follow_contribution_weight": ones,
+            }
+            return legacy_reward, candidate_fraction, details
+
+        reward, reference_fraction, details = self._reference_following_reward(
+            trajectories,
+            neighbors_future,
+            neighbor_mask,
+            neighbor_agents_past,
+            ego_current_state,
+            ego_future,
+            reference_applicable,
+            candidate_has_leader,
+        )
+        details.update(
+            {
+                "legacy_follow_reward": legacy_reward,
+                "candidate_leader_fraction": candidate_fraction,
+                # 候选无关的有效时域置信度控制实际权重。
+                "follow_contribution_weight": details["follow_confidence"],
+            }
+        )
+        return reward, reference_fraction, details
 
     def _lane_reward(
         self,
@@ -2383,16 +2684,21 @@ class NuPlanTensorRewardScorer:
             neighbor_agents_past,
             ego_current_state,
         )
-        follow_reward, leader_fraction = self._following_reward(
+        lane_source = route_lanes if lanes is None else lanes
+        lane_reward, lane_mask = self._lane_reward(
+            trajectories, lane_source, ego_future
+        )
+        # lane_mask 仅由专家轨迹与地图决定，同场景所有候选相同。
+        # 专家正在换道或地图走廊无法覆盖专家时，保守关闭 following。
+        reference_follow_applicable = lane_mask[:, 0] > 0
+        follow_reward, leader_fraction, follow_details = self._following_reward(
             trajectories,
             neighbors_future,
             neighbor_mask,
             neighbor_agents_past,
             ego_current_state,
-        )
-        lane_source = route_lanes if lanes is None else lanes
-        lane_reward, lane_mask = self._lane_reward(
-            trajectories, lane_source, ego_future
+            ego_future=ego_future,
+            reference_applicable=reference_follow_applicable,
         )
         drivable_area_compliance, drivable_area_min_clearance = (
             self._drivable_area_compliance(trajectories, lanes)
@@ -2428,9 +2734,18 @@ class NuPlanTensorRewardScorer:
         )
 
         cfg = self.config
+        follow_contribution_weight = follow_details[
+            "follow_contribution_weight"
+        ]
+        follow_contribution = follow_contribution_weight * follow_reward
+        # 几何组合中 quality=1 是真正的中性元素；coverage=0 时
+        # following 不应将整体质量压低。
+        effective_follow_quality = 1.0 - follow_contribution_weight * (
+            1.0 - follow_reward
+        )
         base_rewards = (
             cfg.risk_weight * risk["risk_reward"]
-            + cfg.follow_weight * follow_reward
+            + cfg.follow_weight * follow_contribution
             + cfg.lane_weight * lane_reward
             + cfg.progress_guard_weight * progress_guard_reward
         )
@@ -2449,7 +2764,7 @@ class NuPlanTensorRewardScorer:
                 no_collision,
                 progress_guard_reward,
                 lane_reward,
-                follow_reward,
+                effective_follow_quality,
                 comfort_cost,
             )
         elif cfg.objective_mode == "nuplan_score_proxy_v2":
@@ -2458,7 +2773,7 @@ class NuPlanTensorRewardScorer:
                 no_collision,
                 progress_guard_reward,
                 route_cost,
-                follow_reward,
+                effective_follow_quality,
                 comfort_cost,
                 backward_cost,
                 collision_cost,
@@ -2469,7 +2784,7 @@ class NuPlanTensorRewardScorer:
                 no_collision,
                 progress_guard_reward,
                 route_cost,
-                follow_reward,
+                effective_follow_quality,
                 comfort_cost,
                 backward_cost,
                 collision_cost,
@@ -2517,6 +2832,9 @@ class NuPlanTensorRewardScorer:
             "drivable_area_min_clearance": drivable_area_min_clearance,
             "follow_reward": follow_reward,
             "leader_fraction": leader_fraction,
+            "follow_contribution": follow_contribution,
+            "effective_follow_quality": effective_follow_quality,
+            **follow_details,
             "lane_reward": lane_reward,
             "lane_reward_mask": lane_mask,
             "progress_guard_reward": progress_guard_reward,

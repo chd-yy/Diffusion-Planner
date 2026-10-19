@@ -11,7 +11,10 @@ import torch.nn as nn
 from hdp_nuplan.utils.normalizer import StateNormalizer
 # 【HDP 与原 Diffusion-Planner 的区别：积分轨迹损失】HDP 新增位移积分工具，
 # 用于把模型预测的相邻时刻运动增量恢复成位置轨迹；原版 loss 没有该依赖。
-from hdp_nuplan.utils.traj_kinematics import detached_integral
+from hdp_nuplan.utils.traj_kinematics import (
+    decode_trajectory_representation,
+    encode_trajectory_representation,
+)
 
 
 # HDP 单个 batch 的扩散损失函数，主要完成：
@@ -42,6 +45,8 @@ def diffusion_loss_func(
     eps: float = 1e-3,
     # 积分轨迹混合损失的梯度窗口；0 表示普通 cumsum，不使用 stop-gradient。
     detach_window_size: int = 0,
+    # increment 学习逐帧位移；absolute 直接学习 ego-local waypoint。
+    trajectory_representation: str = "increment",
 ):
     # 从兼容 tuple 中解包自车未来、邻车未来和邻车 padding mask。
     ego_future, neighbors_future, neighbor_future_mask = futures
@@ -54,14 +59,12 @@ def diffusion_loss_func(
     # 未来位置轨迹加噪，并在时间轴前拼接当前状态；HDP 对自车 x/y 做相邻时刻差分，
     # 学习局部位移/速度增量，且不再拼接一个不加噪的当前状态时间步。
     # 在序列前补零后做 diff，使第一个 x/y 增量相对于自车坐标系原点计算。
-    ego_future_vel = torch.diff(
-        torch.cat([torch.zeros_like(ego_future[:, :1, :], device=ego_future.device), ego_future], dim=-2),
-        dim=-2
+    trajectory_target = encode_trajectory_representation(
+        ego_future,
+        trajectory_representation,
     )
-    # heading 不做时间差分，恢复为原轨迹中的 cos/sin 表示。
-    ego_future_vel[..., 2:] = ego_future[..., 2:]
-    # 对运动增量执行状态归一化；all_gt 形状为 [B, T, 4]。
-    all_gt = norm(ego_future_vel)
+    # 对所选轨迹表示执行状态归一化；all_gt 形状为 [B, T, 4]。
+    all_gt = norm(trajectory_target)
 
     # 为每个 batch 样本从 [eps, 1] 随机采样一个扩散时间，形状为 [B]。
     t = torch.rand(B, device=all_gt.device) * (1 - eps) + eps # [B,]
@@ -128,18 +131,20 @@ def diffusion_loss_func(
     # 【HDP 与原 Diffusion-Planner 的区别：混合轨迹损失】原版只计算扩散参数空间
     # 的自车/邻车损失；HDP 新增位置轨迹约束，弥补逐点运动增量误差的长期累积。
     # 无论 model_type 是什么，先把原始模型输出转换成 x_start，即去噪后的运动增量。
-    pred_v = sde.transform(f"{model_type}->x_start", model_pred, t, xT)
-    # 把归一化运动增量还原到真实数值尺度。
-    pred_v = norm.inverse(pred_v)
-    # 只取 x/y 增量并沿时间积分，恢复自车预测位置轨迹。
-    # 本参数必须由训练入口显式控制，不能再把 Detached Integral 窗口写死为 10。
-    # 当前正式监督训练传 0，使位置损失向此前全部 displacement 传播梯度。
-    pred_x = detached_integral(
-        pred_v[..., :2],
+    pred_state = sde.transform(f"{model_type}->x_start", model_pred, t, xT)
+    # 把归一化轨迹状态还原到真实数值尺度。
+    pred_state = norm.inverse(pred_state)
+    # increment 需要积分恢复位置；absolute 已经是位置。梯度窗口只对积分表示生效。
+    pred_waypoints = decode_trajectory_representation(
+        pred_state,
+        trajectory_representation,
         detach_window_size=detach_window_size,
     )
     # 预测位置与自车未来 x/y 真值的均方误差，作为混合损失项。
-    loss["ego_planning_hybrid_loss"] = torch.sum((pred_x - ego_future[..., :2])**2, dim=-1).mean()
+    loss["ego_planning_hybrid_loss"] = torch.sum(
+        (pred_waypoints[..., :2] - ego_future[..., :2])**2,
+        dim=-1,
+    ).mean()
 
     # 检查扩散逐点损失中是否出现 NaN，发现数值异常时立即终止并输出噪声信息。
     assert not torch.isnan(dpm_loss).sum(), f"loss cannot be nan, z={z}"
