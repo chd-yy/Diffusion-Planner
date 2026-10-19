@@ -13,3 +13,11 @@ checkpoints/
 
 # Generated paper build products.
 /paper/build/
+
+# Local link to large simulation/cache storage on the external PSSD.
+/HDP-nuplan/tmp_external
+
+# Local scratch files and imported reproduction bundles; retain them on disk.
+/tmp/
+/P1_reproduce_20260925/
+/P1_reproduce_20260925.zip
