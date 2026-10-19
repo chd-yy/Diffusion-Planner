@@ -1,0 +1,40 @@
+Evaluating C0: /home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/chapter3_hybrid_ablation_v1/C0/training_log/chapter3-C0-hybrid0/2026-09-17-22:47:24/model_epoch_10_trainloss_0.0031.pth
+repeat=1/3 batch=20/63
+repeat=1/3 batch=40/63
+repeat=1/3 batch=60/63
+repeat=1/3 batch=63/63
+repeat=2/3 batch=20/63
+repeat=2/3 batch=40/63
+repeat=2/3 batch=60/63
+repeat=2/3 batch=63/63
+repeat=3/3 batch=20/63
+repeat=3/3 batch=40/63
+repeat=3/3 batch=60/63
+repeat=3/3 batch=63/63
+Evaluating historical_B10: /home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_train_full_306801_seed3407_v1/experiment_b_constant5e5_from_epoch4/model_epoch_10_trainloss_0.0091.pth
+repeat=1/3 batch=20/63
+repeat=1/3 batch=40/63
+repeat=1/3 batch=60/63
+repeat=1/3 batch=63/63
+repeat=2/3 batch=20/63
+repeat=2/3 batch=40/63
+repeat=2/3 batch=60/63
+repeat=2/3 batch=63/63
+repeat=3/3 batch=20/63
+repeat=3/3 batch=40/63
+repeat=3/3 batch=60/63
+repeat=3/3 batch=63/63
+Evaluating C2: /home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/chapter3_hybrid_c2_w10_lambda003_v1/training_log/chapter3-C2-gradient-balanced-hybrid-w10-lambda003/2026-10-04-15:16:34/model_epoch_10_trainloss_0.0047.pth
+repeat=1/3 batch=20/63
+repeat=1/3 batch=40/63
+repeat=1/3 batch=60/63
+repeat=1/3 batch=63/63
+repeat=2/3 batch=20/63
+repeat=2/3 batch=40/63
+repeat=2/3 batch=60/63
+repeat=2/3 batch=63/63
+repeat=3/3 batch=20/63
+repeat=3/3 batch=40/63
+repeat=3/3 batch=60/63
+repeat=3/3 batch=63/63
+Saved open-loop evaluation to /home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/doc_hdp_nuplan/phd_midterm/stage_results/EXP_CH3_hybrid_gradient_balanced_C2/open_loop_C0_B10_C2.json

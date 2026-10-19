@@ -1,0 +1,2921 @@
+{
+  "schema_version": 1,
+  "purpose": "diagnose hybrid-loss gradient scale, direction conflict, and temporal imbalance without parameter updates",
+  "protocol": {
+    "dataset_size": 1000,
+    "batch_size": 4,
+    "max_batches": 64,
+    "seed_formula": "seed + batch_index",
+    "seed": 3407,
+    "hybrid_weight": 0.003,
+    "window_sizes": [
+      0,
+      10
+    ],
+    "parameter_scope": "all",
+    "no_parameter_updates": true
+  },
+  "inputs": {
+    "args_file": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/chapter3_hybrid_ablation_v1/C0/training_log/chapter3-C0-hybrid0/2026-09-17-22:47:24/args.json",
+    "args_file_sha256": "7eb8522eb8c87d3681d6d920aca4858b24babb614bd82ac8142fa960e4ef0948",
+    "per_model_args": {
+      "C2": {
+        "path": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/chapter3_hybrid_c2_w10_lambda003_v1/training_log/chapter3-C2-gradient-balanced-hybrid-w10-lambda003/2026-10-04-15:16:34/args.json",
+        "sha256": "557630b21096e1a82d7978a320ad0f39d1aa6ddc2cde5ce11727c69928dd0e4c",
+        "trajectory_representation": "increment",
+        "state_normalizer": {
+          "mean": [
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ],
+          "std": [
+            [
+              0.5,
+              0.5,
+              1.0,
+              1.0
+            ]
+          ]
+        }
+      }
+    },
+    "data_dir": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_val_balanced_1000_seed3407_v1/cache",
+    "data_list": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_val_balanced_1000_seed3407_v1/diffusion_planner_validation.json",
+    "data_list_sha256": "bf025308d6b2da624836033773f06a95c43930fe247d2a5729571fa0707f61ab",
+    "checkpoints": {
+      "C2": {
+        "path": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/chapter3_hybrid_c2_w10_lambda003_v1/training_log/chapter3-C2-gradient-balanced-hybrid-w10-lambda003/2026-10-04-15:16:34/model_epoch_10_trainloss_0.0047.pth",
+        "sha256": "28599d229bbb176eee6b14adb213841f02c363c9a2b16649cd0b318e3d7b3224",
+        "weight_source": "ema_state_dict",
+        "epoch": 10,
+        "train_loss": 0.004674290306866169
+      }
+    }
+  },
+  "models": {
+    "C2": {
+      "parameter_count": 5092996,
+      "aggregate": {
+        "batch_count": 64,
+        "scene_observations": 256,
+        "increment_loss": {
+          "mean": 0.16964814557650243,
+          "std": 0.12398250460931427,
+          "p10": 0.028876586258411413,
+          "p50": 0.16950725764036179,
+          "p90": 0.3183554142713547
+        },
+        "increment_output_gradient_norm": {
+          "mean": 0.042683407318181675,
+          "std": 0.017283767328538965,
+          "p10": 0.01896649979114925,
+          "p50": 0.04603009565514498,
+          "p90": 0.06307459061824952
+        },
+        "increment_parameter_gradient_norm": {
+          "mean": 8.179603567985165,
+          "std": 4.725779101036985,
+          "p10": 2.700139472546956,
+          "p50": 8.15908511375626,
+          "p90": 13.950862234700008
+        },
+        "windows": {
+          "0": {
+            "waypoint_loss": {
+              "mean": 35.05107032880187,
+              "std": 22.96439162722413,
+              "p10": 4.831699323654175,
+              "p50": 33.208932876586914,
+              "p90": 66.32676467895509
+            },
+            "raw_output_gradient_norm": {
+              "mean": 14.733982346737857,
+              "std": 6.012662933026161,
+              "p10": 5.4648899390547525,
+              "p50": 14.93979667506894,
+              "p90": 22.152767080320157
+            },
+            "weighted_output_gradient_norm": {
+              "mean": 0.044201947040213574,
+              "std": 0.018037988799078485,
+              "p10": 0.016394669817164257,
+              "p50": 0.04481939002520682,
+              "p90": 0.06645830124096047
+            },
+            "weighted_to_increment_output_gradient_ratio": {
+              "mean": 1.051567026253989,
+              "std": 0.2238800243804287,
+              "p10": 0.7894204222711165,
+              "p50": 0.9964467046769989,
+              "p90": 1.38653322745078
+            },
+            "output_gradient_cosine": {
+              "mean": 0.6095333569392799,
+              "std": 0.0907525556546338,
+              "p10": 0.5212215422278121,
+              "p50": 0.5834354863649527,
+              "p90": 0.749842674816605
+            },
+            "raw_parameter_gradient_norm": {
+              "mean": 3200.2932555463653,
+              "std": 1794.2956402686802,
+              "p10": 917.421705691171,
+              "p50": 3374.5907110818484,
+              "p90": 5646.89517428499
+            },
+            "weighted_parameter_gradient_norm": {
+              "mean": 9.600879766639096,
+              "std": 5.38288692080604,
+              "p10": 2.7522651170735135,
+              "p50": 10.123772133245545,
+              "p90": 16.94068552285497
+            },
+            "weighted_to_increment_parameter_gradient_ratio": {
+              "mean": 1.2692484181454948,
+              "std": 0.6188610509837932,
+              "p10": 0.9410983682345526,
+              "p50": 1.178106097734533,
+              "p90": 1.5364061235401734
+            },
+            "parameter_gradient_cosine": {
+              "mean": 0.8943392864889892,
+              "std": 0.10926762442573562,
+              "p10": 0.7663127092798185,
+              "p50": 0.9408941630171905,
+              "p90": 0.9884301700495978
+            }
+          },
+          "10": {
+            "waypoint_loss": {
+              "mean": 35.05107032880187,
+              "std": 22.96439162722413,
+              "p10": 4.831699323654175,
+              "p50": 33.208932876586914,
+              "p90": 66.32676467895509
+            },
+            "raw_output_gradient_norm": {
+              "mean": 2.9325387375508205,
+              "std": 1.164273935750149,
+              "p10": 1.1589957581784553,
+              "p50": 3.05866290948644,
+              "p90": 4.358654890782104
+            },
+            "weighted_output_gradient_norm": {
+              "mean": 0.00879761621265246,
+              "std": 0.0034928218072504476,
+              "p10": 0.0034769872745353666,
+              "p50": 0.00917598872845932,
+              "p90": 0.013075964672346311
+            },
+            "weighted_to_increment_output_gradient_ratio": {
+              "mean": 0.20925688563321285,
+              "std": 0.03951751371903244,
+              "p10": 0.1640256503290045,
+              "p50": 0.20084263035146802,
+              "p90": 0.26887744376736183
+            },
+            "output_gradient_cosine": {
+              "mean": 0.7968916860400665,
+              "std": 0.1412726046699495,
+              "p10": 0.6178799564370112,
+              "p50": 0.8375787920660649,
+              "p90": 0.9158912183325715
+            },
+            "raw_parameter_gradient_norm": {
+              "mean": 555.0746684423226,
+              "std": 311.32393254863143,
+              "p10": 167.22559447066124,
+              "p50": 584.6548949906226,
+              "p90": 940.6213276429563
+            },
+            "weighted_parameter_gradient_norm": {
+              "mean": 1.665224005326968,
+              "std": 0.9339717976458943,
+              "p10": 0.5016767834119836,
+              "p50": 1.753964684971868,
+              "p90": 2.821863982928869
+            },
+            "weighted_to_increment_parameter_gradient_ratio": {
+              "mean": 0.22644748621994493,
+              "std": 0.1372943992890092,
+              "p10": 0.14527700374329333,
+              "p50": 0.21003267031836997,
+              "p90": 0.27772208658231545
+            },
+            "parameter_gradient_cosine": {
+              "mean": 0.9071118607829247,
+              "std": 0.10937286565065685,
+              "p10": 0.7817303015359176,
+              "p50": 0.9523195065758763,
+              "p90": 0.9926200815559271
+            }
+          }
+        }
+      },
+      "temporal_output_gradient_xy": {
+        "increment": {
+          "mean_by_timestep": [
+            0.0001977114212934339,
+            0.00021928487797140406,
+            0.0002483438912292968,
+            0.0002897336085254665,
+            0.0003497261948552932,
+            0.0004277885954024896,
+            0.0004998758158762939,
+            0.0005796956449160007,
+            0.0006439427540954057,
+            0.0006978572370428537,
+            0.0007446063198131014,
+            0.0007868167634228485,
+            0.0008246543010272944,
+            0.0008399182693779039,
+            0.0008794650988761532,
+            0.0008758552272354336,
+            0.000891267205645363,
+            0.0009155482298979223,
+            0.0009115610138792363,
+            0.0009075818862243068,
+            0.0009198358641242521,
+            0.0009344874170835737,
+            0.0009681514997055274,
+            0.0010354958960476779,
+            0.0010688013343553848,
+            0.0010907206298043093,
+            0.001132887270387073,
+            0.001151325673959036,
+            0.0012153509042036603,
+            0.0012752702215266254,
+            0.0013109953108596528,
+            0.0013050211138079248,
+            0.001356071034820161,
+            0.0014100235546266049,
+            0.0014764698422595757,
+            0.001490408143354216,
+            0.001530646353899101,
+            0.0016150688827565318,
+            0.0016434929910928986,
+            0.001669476682138793,
+            0.0017023390547592498,
+            0.0017486217165583184,
+            0.001765296737346489,
+            0.0018365672624440776,
+            0.001865067982180335,
+            0.001904848030676476,
+            0.0019122102843880384,
+            0.0019120922286219866,
+            0.002025729912134011,
+            0.0020000832903974697,
+            0.0020397563746143987,
+            0.002008170819692623,
+            0.0021519886436465185,
+            0.002100804615963625,
+            0.0022026948384450407,
+            0.00224233770464366,
+            0.002221735160702565,
+            0.0023129779841042364,
+            0.0023678363509134215,
+            0.002387570092025726,
+            0.00240395053492648,
+            0.0024585787030559914,
+            0.002451875422480043,
+            0.0025688880652978696,
+            0.002584031131732445,
+            0.0025752483265932824,
+            0.0027049095837128334,
+            0.002780628335244728,
+            0.0027978782613899966,
+            0.0028389635726853157,
+            0.00286675404890957,
+            0.0028668436125371954,
+            0.0029687701751299755,
+            0.0030029122185624146,
+            0.003060164866838022,
+            0.0031073224899955676,
+            0.0031413070782946306,
+            0.003151530534523772,
+            0.003253674079587654,
+            0.003319192154776829
+          ],
+          "first_10_mean": 0.0004153960041207938,
+          "middle_10_mean": 0.001686698580653001,
+          "last_10_mean": 0.003073847125915563,
+          "first_to_last_ratio": 0.13513879744330673
+        },
+        "waypoint_weighted_window_0": {
+          "mean_by_timestep": [
+            0.002725802912260407,
+            0.0027257622694596647,
+            0.00272565647936426,
+            0.0027254628437804068,
+            0.002725139751448297,
+            0.0027246323850704363,
+            0.0027238956384826453,
+            0.0027228694033110514,
+            0.0027214935170486567,
+            0.0027197222759714353,
+            0.002717520278063603,
+            0.0027148439782904467,
+            0.0027116759199416274,
+            0.0027079762900248166,
+            0.002703725359286182,
+            0.0026988912213128068,
+            0.002693472341867164,
+            0.002687453860184177,
+            0.0026808096959721303,
+            0.002673539594979957,
+            0.002665640058112331,
+            0.00265710344107356,
+            0.002647912948275917,
+            0.0026380417789332554,
+            0.002627435979782604,
+            0.00261606748122722,
+            0.0026039188017603016,
+            0.0025909547712653865,
+            0.002577157615218312,
+            0.0025624829028965904,
+            0.0025468785145785653,
+            0.0025303186078090216,
+            0.0025128072530496873,
+            0.0024943090102169654,
+            0.002474781933473424,
+            0.002454175720224158,
+            0.00243248164909892,
+            0.00240966905944515,
+            0.002385676071862689,
+            0.0023604823563946405,
+            0.0023340701484703447,
+            0.0023064166292315353,
+            0.002277488569496199,
+            0.002247274691762868,
+            0.0022157227818388496,
+            0.0021828146654879676,
+            0.00214852409530431,
+            0.002112846778531093,
+            0.002075786428176798,
+            0.0020372580768889745,
+            0.001997287454840262,
+            0.0019558459446416235,
+            0.0019129578868160024,
+            0.0018685243450454441,
+            0.001822578749503009,
+            0.0017750512829516085,
+            0.0017259142047842033,
+            0.0016751845438848247,
+            0.001622799295932054,
+            0.0015687267034663823,
+            0.0015129508382524363,
+            0.0014554665139876301,
+            0.0013962351582013075,
+            0.001335267683432903,
+            0.0012724842418392658,
+            0.0012078758442658002,
+            0.0011414613342785745,
+            0.001073148419003701,
+            0.0010028863250627182,
+            0.000930665936350124,
+            0.000856457701243926,
+            0.0007802496589429212,
+            0.0007020440029737075,
+            0.000621777602849761,
+            0.000539426966191968,
+            0.00045495222674799164,
+            0.00036833150242455303,
+            0.00027954837017023237,
+            0.00018860236725595322,
+            9.543383331401854e-05
+          ],
+          "first_10_mean": 0.002724043747619726,
+          "middle_10_mean": 0.0023423457677825355,
+          "last_10_mean": 0.0004886824232115032,
+          "first_to_last_ratio": 5.574261766400285
+        },
+        "waypoint_weighted_window_10": {
+          "mean_by_timestep": [
+            1.2702689403340628e-05,
+            1.6034496836255133e-05,
+            1.9788267892636213e-05,
+            2.3955469834618263e-05,
+            2.85089309822979e-05,
+            3.340941402075259e-05,
+            3.8621756553766325e-05,
+            4.410824407568726e-05,
+            4.98155983559627e-05,
+            5.568389051677515e-05,
+            6.168710596557503e-05,
+            6.781946093269655e-05,
+            7.405578494763175e-05,
+            8.041053195302083e-05,
+            8.693492967177005e-05,
+            9.363466953618621e-05,
+            0.00010050891593164124,
+            0.00010758518859984179,
+            0.0001148382433602819,
+            0.00012229732648484063,
+            0.00013002081978993375,
+            0.00013802299187227617,
+            0.00014628855301634754,
+            0.00015484015324182112,
+            0.000163694605238561,
+            0.00017283823571051477,
+            0.00018225740566413148,
+            0.0001919416345554055,
+            0.0002019345636799699,
+            0.0002122103005312965,
+            0.00022273486194899312,
+            0.00023350315219431648,
+            0.00024455286741431343,
+            0.0002558611951244529,
+            0.00026743900302972183,
+            0.00027926444487820853,
+            0.0002913641417690088,
+            0.0003037931981234579,
+            0.0003165465400961693,
+            0.0003295782745408361,
+            0.00034282835791236716,
+            0.0003563007899501828,
+            0.000369940176140517,
+            0.0003838340221991529,
+            0.0003978978209052002,
+            0.00041218265856150533,
+            0.0004266930977610171,
+            0.00044142183009535075,
+            0.00045651794901641594,
+            0.00047185318975243707,
+            0.00048745766839419975,
+            0.0005033073381782742,
+            0.0005194640276022254,
+            0.0005358192315325143,
+            0.0005524849912180797,
+            0.0005693989521096227,
+            0.0005865138346416646,
+            0.0006039398678258296,
+            0.0006216691521112808,
+            0.0006396740300551756,
+            0.0006579616501985584,
+            0.0006765399618598169,
+            0.0006953699404257349,
+            0.0007145203035761366,
+            0.0007339353420829865,
+            0.0007536447136080822,
+            0.0007736897385329939,
+            0.0007939971365849487,
+            0.0008145210478396619,
+            0.0008353337943262886,
+            0.000856457701243926,
+            0.0007802496589429212,
+            0.0007020440029737075,
+            0.000621777602849761,
+            0.000539426966191968,
+            0.00045495222674799164,
+            0.00036833150242455303,
+            0.00027954837017023237,
+            0.00018860236725595322,
+            9.543383331401854e-05
+          ],
+          "first_10_mean": 3.2262875847209215e-05,
+          "middle_10_mean": 0.0003371347766515101,
+          "last_10_mean": 0.0004886824232115032,
+          "first_to_last_ratio": 0.06602012741769055
+        }
+      },
+      "batch_records": [
+        {
+          "batch_index": 0,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_02aa28b0b1ce56ab.npz",
+            "sg-one-north_04581897cbc45c2b.npz",
+            "sg-one-north_04c29563319b58bf.npz",
+            "sg-one-north_08dd79a302275f09.npz"
+          ],
+          "diffusion_time_mean": 0.4846249222755432,
+          "increment_loss": 0.14490848779678345,
+          "increment_output_gradient_norm": 0.04256002988348937,
+          "increment_parameter_gradient_norm": 10.243587380529272,
+          "windows": {
+            "0": {
+              "waypoint_loss": 29.1953182220459,
+              "raw_output_gradient_norm": 14.939299851368505,
+              "weighted_output_gradient_norm": 0.04481789955410551,
+              "weighted_to_increment_output_gradient_ratio": 1.0530514117776044,
+              "output_gradient_cosine": 0.5739724958997688,
+              "raw_parameter_gradient_norm": 4619.059607652907,
+              "weighted_parameter_gradient_norm": 13.857178822958723,
+              "weighted_to_increment_parameter_gradient_ratio": 1.352766204669476,
+              "parameter_gradient_cosine": 0.9485394312275098
+            },
+            "10": {
+              "waypoint_loss": 29.1953182220459,
+              "raw_output_gradient_norm": 2.890129975485698,
+              "weighted_output_gradient_norm": 0.008670389926457094,
+              "weighted_to_increment_output_gradient_ratio": 0.20372142477796198,
+              "output_gradient_cosine": 0.7247124068694772,
+              "raw_parameter_gradient_norm": 831.2843335023291,
+              "weighted_parameter_gradient_norm": 2.4938530005069874,
+              "weighted_to_increment_parameter_gradient_ratio": 0.2434550424441377,
+              "parameter_gradient_cosine": 0.9517285455182152
+            }
+          }
+        },
+        {
+          "batch_index": 1,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_09bf3ad3184e55a7.npz",
+            "sg-one-north_0c7d35521d30566c.npz",
+            "sg-one-north_0d759d1cf79e54d8.npz",
+            "sg-one-north_0e81099627885a9c.npz"
+          ],
+          "diffusion_time_mean": 0.4928165674209595,
+          "increment_loss": 0.19697318971157074,
+          "increment_output_gradient_norm": 0.04962020685049001,
+          "increment_parameter_gradient_norm": 8.473304608901225,
+          "windows": {
+            "0": {
+              "waypoint_loss": 64.72405242919922,
+              "raw_output_gradient_norm": 22.460634591623982,
+              "weighted_output_gradient_norm": 0.06738190377487195,
+              "weighted_to_increment_output_gradient_ratio": 1.3579528996704804,
+              "output_gradient_cosine": 0.7259305755589682,
+              "raw_parameter_gradient_norm": 4018.4215501313297,
+              "weighted_parameter_gradient_norm": 12.055264650393989,
+              "weighted_to_increment_parameter_gradient_ratio": 1.422734718840381,
+              "parameter_gradient_cosine": 0.9041044756761858
+            },
+            "10": {
+              "waypoint_loss": 64.72405242919922,
+              "raw_output_gradient_norm": 4.336733466988859,
+              "weighted_output_gradient_norm": 0.013010200400966577,
+              "weighted_to_increment_output_gradient_ratio": 0.26219560994913704,
+              "output_gradient_cosine": 0.7964696864095526,
+              "raw_parameter_gradient_norm": 771.0130501321235,
+              "weighted_parameter_gradient_norm": 2.3130391503963703,
+              "weighted_to_increment_parameter_gradient_ratio": 0.2729795820117829,
+              "parameter_gradient_cosine": 0.9142616781663927
+            }
+          }
+        },
+        {
+          "batch_index": 2,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_10ad4c6ffd135c82.npz",
+            "sg-one-north_12525b7a50835d59.npz",
+            "sg-one-north_1375f2c86ccf5898.npz",
+            "sg-one-north_15eb0818724c5169.npz"
+          ],
+          "diffusion_time_mean": 0.3130739629268646,
+          "increment_loss": 0.32675814628601074,
+          "increment_output_gradient_norm": 0.06390991292297826,
+          "increment_parameter_gradient_norm": 10.172711425636056,
+          "windows": {
+            "0": {
+              "waypoint_loss": 29.56927490234375,
+              "raw_output_gradient_norm": 14.22739952224293,
+              "weighted_output_gradient_norm": 0.04268219856672879,
+              "weighted_to_increment_output_gradient_ratio": 0.6678494245199131,
+              "output_gradient_cosine": 0.40649656551516894,
+              "raw_parameter_gradient_norm": 2526.9987079100533,
+              "weighted_parameter_gradient_norm": 7.58099612373016,
+              "weighted_to_increment_parameter_gradient_ratio": 0.7452286619106718,
+              "parameter_gradient_cosine": 0.7056809070987404
+            },
+            "10": {
+              "waypoint_loss": 29.56927490234375,
+              "raw_output_gradient_norm": 2.875995513232309,
+              "weighted_output_gradient_norm": 0.008627986539696928,
+              "weighted_to_increment_output_gradient_ratio": 0.13500232037704452,
+              "output_gradient_cosine": 0.6147545799497449,
+              "raw_parameter_gradient_norm": 394.7485663318306,
+              "weighted_parameter_gradient_norm": 1.184245698995492,
+              "weighted_to_increment_parameter_gradient_ratio": 0.11641396766756766,
+              "parameter_gradient_cosine": 0.6919046663736818
+            }
+          }
+        },
+        {
+          "batch_index": 3,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_16d2ab15ce885500.npz",
+            "sg-one-north_1709cf0d2415585f.npz",
+            "sg-one-north_1aeaf3d73b3a5638.npz",
+            "sg-one-north_1fb0bb88f9d35d59.npz"
+          ],
+          "diffusion_time_mean": 0.41207945346832275,
+          "increment_loss": 0.20967714488506317,
+          "increment_output_gradient_norm": 0.05119535512024391,
+          "increment_parameter_gradient_norm": 10.822836152120296,
+          "windows": {
+            "0": {
+              "waypoint_loss": 50.443153381347656,
+              "raw_output_gradient_norm": 19.360301449297314,
+              "weighted_output_gradient_norm": 0.05808090434789194,
+              "weighted_to_increment_output_gradient_ratio": 1.1344955848333458,
+              "output_gradient_cosine": 0.6361646935272942,
+              "raw_parameter_gradient_norm": 4549.228889329366,
+              "weighted_parameter_gradient_norm": 13.647686667988099,
+              "weighted_to_increment_parameter_gradient_ratio": 1.2610083416364377,
+              "parameter_gradient_cosine": 0.8962392750942016
+            },
+            "10": {
+              "waypoint_loss": 50.443153381347656,
+              "raw_output_gradient_norm": 3.8031007480228043,
+              "weighted_output_gradient_norm": 0.011409302244068413,
+              "weighted_to_increment_output_gradient_ratio": 0.2228581522146116,
+              "output_gradient_cosine": 0.7957713209502952,
+              "raw_parameter_gradient_norm": 786.3706785289862,
+              "weighted_parameter_gradient_norm": 2.359112035586959,
+              "weighted_to_increment_parameter_gradient_ratio": 0.21797539964834325,
+              "parameter_gradient_cosine": 0.8949038893978615
+            }
+          }
+        },
+        {
+          "batch_index": 4,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_227f052cfadf5771.npz",
+            "sg-one-north_22b6fe3f276459f7.npz",
+            "sg-one-north_24cf20a084455135.npz",
+            "sg-one-north_25e2150818d95540.npz"
+          ],
+          "diffusion_time_mean": 0.4195875823497772,
+          "increment_loss": 0.13605313003063202,
+          "increment_output_gradient_norm": 0.04123910873095183,
+          "increment_parameter_gradient_norm": 8.647569346889846,
+          "windows": {
+            "0": {
+              "waypoint_loss": 37.6546516418457,
+              "raw_output_gradient_norm": 17.15036544645538,
+              "weighted_output_gradient_norm": 0.051451096339366134,
+              "weighted_to_increment_output_gradient_ratio": 1.247628717561244,
+              "output_gradient_cosine": 0.6654968228907887,
+              "raw_parameter_gradient_norm": 4323.969247731435,
+              "weighted_parameter_gradient_norm": 12.971907743194304,
+              "weighted_to_increment_parameter_gradient_ratio": 1.5000640321964849,
+              "parameter_gradient_cosine": 0.9805984473650071
+            },
+            "10": {
+              "waypoint_loss": 37.6546516418457,
+              "raw_output_gradient_norm": 3.3036460910942735,
+              "weighted_output_gradient_norm": 0.009910938273282821,
+              "weighted_to_increment_output_gradient_ratio": 0.24032862441190952,
+              "output_gradient_cosine": 0.7505951237200096,
+              "raw_parameter_gradient_norm": 770.2203275771891,
+              "weighted_parameter_gradient_norm": 2.310660982731567,
+              "weighted_to_increment_parameter_gradient_ratio": 0.26720352159565064,
+              "parameter_gradient_cosine": 0.9812394781263927
+            }
+          }
+        },
+        {
+          "batch_index": 5,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_29052ad3d24c59b3.npz",
+            "sg-one-north_2d341e25e7db582f.npz",
+            "sg-one-north_2f3414c5ecb15506.npz",
+            "sg-one-north_302350746c2d5a41.npz"
+          ],
+          "diffusion_time_mean": 0.4972532391548157,
+          "increment_loss": 0.7340106964111328,
+          "increment_output_gradient_norm": 0.0957869173444736,
+          "increment_parameter_gradient_norm": 17.897983504095805,
+          "windows": {
+            "0": {
+              "waypoint_loss": 78.52576446533203,
+              "raw_output_gradient_norm": 24.05505672427962,
+              "weighted_output_gradient_norm": 0.07216517017283886,
+              "weighted_to_increment_output_gradient_ratio": 0.7533927614907465,
+              "output_gradient_cosine": 0.4259999718638682,
+              "raw_parameter_gradient_norm": 4180.939685904898,
+              "weighted_parameter_gradient_norm": 12.542819057714695,
+              "weighted_to_increment_parameter_gradient_ratio": 0.7007950954276148,
+              "parameter_gradient_cosine": 0.4795666558952245
+            },
+            "10": {
+              "waypoint_loss": 78.52576446533203,
+              "raw_output_gradient_norm": 4.749426451471343,
+              "weighted_output_gradient_norm": 0.014248279354414028,
+              "weighted_to_increment_output_gradient_ratio": 0.14874974317394168,
+              "output_gradient_cosine": 0.521690486839761,
+              "raw_parameter_gradient_norm": 759.2129318713919,
+              "weighted_parameter_gradient_norm": 2.277638795614176,
+              "weighted_to_increment_parameter_gradient_ratio": 0.12725672671968644,
+              "parameter_gradient_cosine": 0.4795097314915946
+            }
+          }
+        },
+        {
+          "batch_index": 6,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_309faa67e28354b3.npz",
+            "sg-one-north_324b68f0ceb65b99.npz",
+            "sg-one-north_36b0447fd8235d0c.npz",
+            "sg-one-north_3bcbd050706f548e.npz"
+          ],
+          "diffusion_time_mean": 0.6288231015205383,
+          "increment_loss": 0.17644809186458588,
+          "increment_output_gradient_norm": 0.04696382994456257,
+          "increment_parameter_gradient_norm": 10.015367238143368,
+          "windows": {
+            "0": {
+              "waypoint_loss": 56.367347717285156,
+              "raw_output_gradient_norm": 20.64066534830952,
+              "weighted_output_gradient_norm": 0.061921996044928554,
+              "weighted_to_increment_output_gradient_ratio": 1.3185039660952487,
+              "output_gradient_cosine": 0.7268594826692353,
+              "raw_parameter_gradient_norm": 4884.59488957142,
+              "weighted_parameter_gradient_norm": 14.65378466871426,
+              "weighted_to_increment_parameter_gradient_ratio": 1.46313004009534,
+              "parameter_gradient_cosine": 0.9938936878503568
+            },
+            "10": {
+              "waypoint_loss": 56.367347717285156,
+              "raw_output_gradient_norm": 4.020081215414086,
+              "weighted_output_gradient_norm": 0.012060243646242258,
+              "weighted_to_increment_output_gradient_ratio": 0.25679855455737977,
+              "output_gradient_cosine": 0.9154416969230793,
+              "raw_parameter_gradient_norm": 836.5937112241439,
+              "weighted_parameter_gradient_norm": 2.509781133672432,
+              "weighted_to_increment_parameter_gradient_ratio": 0.2505930211040061,
+              "parameter_gradient_cosine": 0.9992257392097923
+            }
+          }
+        },
+        {
+          "batch_index": 7,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_3d81a99239635971.npz",
+            "sg-one-north_3f0fa2c317b65765.npz",
+            "sg-one-north_41f3e8767509539a.npz",
+            "sg-one-north_45844a8b771857dd.npz"
+          ],
+          "diffusion_time_mean": 0.4473312795162201,
+          "increment_loss": 0.24929697811603546,
+          "increment_output_gradient_norm": 0.05582304437793752,
+          "increment_parameter_gradient_norm": 8.137556837994328,
+          "windows": {
+            "0": {
+              "waypoint_loss": 62.59670639038086,
+              "raw_output_gradient_norm": 21.881510316332584,
+              "weighted_output_gradient_norm": 0.06564453094899775,
+              "weighted_to_increment_output_gradient_ratio": 1.1759396442903765,
+              "output_gradient_cosine": 0.6405760778672275,
+              "raw_parameter_gradient_norm": 4341.9219323599655,
+              "weighted_parameter_gradient_norm": 13.025765797079897,
+              "weighted_to_increment_parameter_gradient_ratio": 1.6006973661016384,
+              "parameter_gradient_cosine": 0.8847541746323283
+            },
+            "10": {
+              "waypoint_loss": 62.59670639038086,
+              "raw_output_gradient_norm": 4.250584018901053,
+              "weighted_output_gradient_norm": 0.01275175205670316,
+              "weighted_to_increment_output_gradient_ratio": 0.2284316844199728,
+              "output_gradient_cosine": 0.748333618578138,
+              "raw_parameter_gradient_norm": 831.8143404473776,
+              "weighted_parameter_gradient_norm": 2.495443021342133,
+              "weighted_to_increment_parameter_gradient_ratio": 0.306657522770334,
+              "parameter_gradient_cosine": 0.8961904689795513
+            }
+          }
+        },
+        {
+          "batch_index": 8,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_460c18a53e305e65.npz",
+            "sg-one-north_47b79be224785d54.npz",
+            "sg-one-north_4c82ed04f9475666.npz",
+            "sg-one-north_4c8e49fa30b959d5.npz"
+          ],
+          "diffusion_time_mean": 0.3726992607116699,
+          "increment_loss": 0.3250417411327362,
+          "increment_output_gradient_norm": 0.06374183859795368,
+          "increment_parameter_gradient_norm": 10.39521702169711,
+          "windows": {
+            "0": {
+              "waypoint_loss": 42.894874572753906,
+              "raw_output_gradient_norm": 17.21680761812736,
+              "weighted_output_gradient_norm": 0.05165042285438207,
+              "weighted_to_increment_output_gradient_ratio": 0.8103064484876691,
+              "output_gradient_cosine": 0.4885828657645059,
+              "raw_parameter_gradient_norm": 2805.4417251019745,
+              "weighted_parameter_gradient_norm": 8.416325175305923,
+              "weighted_to_increment_parameter_gradient_ratio": 0.8096343883671882,
+              "parameter_gradient_cosine": 0.8059132185413386
+            },
+            "10": {
+              "waypoint_loss": 42.894874572753906,
+              "raw_output_gradient_norm": 3.463532168780602,
+              "weighted_output_gradient_norm": 0.010390596506341807,
+              "weighted_to_increment_output_gradient_ratio": 0.1630106180632728,
+              "output_gradient_cosine": 0.7498132732716722,
+              "raw_parameter_gradient_norm": 452.7641137875231,
+              "weighted_parameter_gradient_norm": 1.3582923413625694,
+              "weighted_to_increment_parameter_gradient_ratio": 0.13066512594470261,
+              "parameter_gradient_cosine": 0.7932267330910883
+            }
+          }
+        },
+        {
+          "batch_index": 9,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_4cda1dff3a8a5edb.npz",
+            "sg-one-north_536f859d727a5af0.npz",
+            "sg-one-north_5959eda71da55b8a.npz",
+            "sg-one-north_59f377ba0c1e50f7.npz"
+          ],
+          "diffusion_time_mean": 0.1342107653617859,
+          "increment_loss": 0.03540169820189476,
+          "increment_output_gradient_norm": 0.021036188465202478,
+          "increment_parameter_gradient_norm": 2.6919298856252474,
+          "windows": {
+            "0": {
+              "waypoint_loss": 6.508213996887207,
+              "raw_output_gradient_norm": 6.864821835813015,
+              "weighted_output_gradient_norm": 0.020594465507439045,
+              "weighted_to_increment_output_gradient_ratio": 0.9790017588740413,
+              "output_gradient_cosine": 0.5633459445503439,
+              "raw_parameter_gradient_norm": 1168.4845321934067,
+              "weighted_parameter_gradient_norm": 3.50545359658022,
+              "weighted_to_increment_parameter_gradient_ratio": 1.302208358137091,
+              "parameter_gradient_cosine": 0.852070891711436
+            },
+            "10": {
+              "waypoint_loss": 6.508213996887207,
+              "raw_output_gradient_norm": 1.3631138948069574,
+              "weighted_output_gradient_norm": 0.004089341684420872,
+              "weighted_to_increment_output_gradient_ratio": 0.1943955622562213,
+              "output_gradient_cosine": 0.7256003167555516,
+              "raw_parameter_gradient_norm": 224.14943446711584,
+              "weighted_parameter_gradient_norm": 0.6724483034013475,
+              "weighted_to_increment_parameter_gradient_ratio": 0.24980156689525357,
+              "parameter_gradient_cosine": 0.8523869481851246
+            }
+          }
+        },
+        {
+          "batch_index": 10,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_5b05a15360d05a6e.npz",
+            "sg-one-north_5cc8b954c9055a7d.npz",
+            "sg-one-north_5d31275120c059f5.npz",
+            "sg-one-north_61322c11988d5ab2.npz"
+          ],
+          "diffusion_time_mean": 0.629160463809967,
+          "increment_loss": 0.1933787614107132,
+          "increment_output_gradient_norm": 0.04916538036530078,
+          "increment_parameter_gradient_norm": 11.63663437798887,
+          "windows": {
+            "0": {
+              "waypoint_loss": 67.01364135742188,
+              "raw_output_gradient_norm": 22.892701048420662,
+              "weighted_output_gradient_norm": 0.06867810314526199,
+              "weighted_to_increment_output_gradient_ratio": 1.3968793210787933,
+              "output_gradient_cosine": 0.7442466280053659,
+              "raw_parameter_gradient_norm": 6553.067519747709,
+              "weighted_parameter_gradient_norm": 19.659202559243127,
+              "weighted_to_increment_parameter_gradient_ratio": 1.689423412359612,
+              "parameter_gradient_cosine": 0.9709598428777503
+            },
+            "10": {
+              "waypoint_loss": 67.01364135742188,
+              "raw_output_gradient_norm": 4.423456348919849,
+              "weighted_output_gradient_norm": 0.013270369046759548,
+              "weighted_to_increment_output_gradient_ratio": 0.2699128725977541,
+              "output_gradient_cosine": 0.7745688965370383,
+              "raw_parameter_gradient_norm": 1196.4123714415389,
+              "weighted_parameter_gradient_norm": 3.5892371143246167,
+              "weighted_to_increment_parameter_gradient_ratio": 0.3084428880152661,
+              "parameter_gradient_cosine": 0.970490349139136
+            }
+          }
+        },
+        {
+          "batch_index": 11,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_61ea8e83855c5617.npz",
+            "sg-one-north_63d952d407125aea.npz",
+            "sg-one-north_65fb72dd52f45972.npz",
+            "sg-one-north_6bdcd57751c7537b.npz"
+          ],
+          "diffusion_time_mean": 0.6529269218444824,
+          "increment_loss": 0.22382426261901855,
+          "increment_output_gradient_norm": 0.052894266616818314,
+          "increment_parameter_gradient_norm": 8.180613389518193,
+          "windows": {
+            "0": {
+              "waypoint_loss": 46.61985397338867,
+              "raw_output_gradient_norm": 18.618225560753107,
+              "weighted_output_gradient_norm": 0.055854676682259324,
+              "weighted_to_increment_output_gradient_ratio": 1.0559684490360193,
+              "output_gradient_cosine": 0.5917443706137798,
+              "raw_parameter_gradient_norm": 3812.077109888643,
+              "weighted_parameter_gradient_norm": 11.43623132966593,
+              "weighted_to_increment_parameter_gradient_ratio": 1.39796746101205,
+              "parameter_gradient_cosine": 0.8152338934101885
+            },
+            "10": {
+              "waypoint_loss": 46.61985397338867,
+              "raw_output_gradient_norm": 3.670591798923399,
+              "weighted_output_gradient_norm": 0.011011775396770196,
+              "weighted_to_increment_output_gradient_ratio": 0.208184669172989,
+              "output_gradient_cosine": 0.6875414366811282,
+              "raw_parameter_gradient_norm": 710.897504170168,
+              "weighted_parameter_gradient_norm": 2.132692512510504,
+              "weighted_to_increment_parameter_gradient_ratio": 0.26070080701321485,
+              "parameter_gradient_cosine": 0.8019917534124924
+            }
+          }
+        },
+        {
+          "batch_index": 12,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_6d7bb11e9763575b.npz",
+            "sg-one-north_6dfff93407255d4e.npz",
+            "sg-one-north_72b7d7ac917c5d3f.npz",
+            "sg-one-north_7ae25c244a7c5f29.npz"
+          ],
+          "diffusion_time_mean": 0.5916591882705688,
+          "increment_loss": 0.21479986608028412,
+          "increment_output_gradient_norm": 0.05181697154507567,
+          "increment_parameter_gradient_norm": 11.634238038799955,
+          "windows": {
+            "0": {
+              "waypoint_loss": 83.31438446044922,
+              "raw_output_gradient_norm": 25.60530513778302,
+              "weighted_output_gradient_norm": 0.07681591541334906,
+              "weighted_to_increment_output_gradient_ratio": 1.4824470269654175,
+              "output_gradient_cosine": 0.7849246863635381,
+              "raw_parameter_gradient_norm": 5364.436169583215,
+              "weighted_parameter_gradient_norm": 16.093308508749644,
+              "weighted_to_increment_parameter_gradient_ratio": 1.3832713801349754,
+              "parameter_gradient_cosine": 0.9706206603390249
+            },
+            "10": {
+              "waypoint_loss": 83.31438446044922,
+              "raw_output_gradient_norm": 4.915032493963785,
+              "weighted_output_gradient_norm": 0.014745097481891354,
+              "weighted_to_increment_output_gradient_ratio": 0.2845611590608797,
+              "output_gradient_cosine": 0.8776728085565549,
+              "raw_parameter_gradient_norm": 947.501519586766,
+              "weighted_parameter_gradient_norm": 2.842504558760298,
+              "weighted_to_increment_parameter_gradient_ratio": 0.24432236552841718,
+              "parameter_gradient_cosine": 0.9706346525525922
+            }
+          }
+        },
+        {
+          "batch_index": 13,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_7eacc306d0125c3f.npz",
+            "sg-one-north_7fb6ef91b3e85bd2.npz",
+            "sg-one-north_7fbb13b94d3859b1.npz",
+            "sg-one-north_8169a59e84365e84.npz"
+          ],
+          "diffusion_time_mean": 0.5828052759170532,
+          "increment_loss": 0.27134329080581665,
+          "increment_output_gradient_norm": 0.05823908568046887,
+          "increment_parameter_gradient_norm": 8.211931450187986,
+          "windows": {
+            "0": {
+              "waypoint_loss": 46.623497009277344,
+              "raw_output_gradient_norm": 18.21912412180586,
+              "weighted_output_gradient_norm": 0.054657372365417574,
+              "weighted_to_increment_output_gradient_ratio": 0.9384998360945687,
+              "output_gradient_cosine": 0.5492535337320833,
+              "raw_parameter_gradient_norm": 3553.2410606404696,
+              "weighted_parameter_gradient_norm": 10.659723181921409,
+              "weighted_to_increment_parameter_gradient_ratio": 1.2980774677164881,
+              "parameter_gradient_cosine": 0.9501769108747962
+            },
+            "10": {
+              "waypoint_loss": 46.623497009277344,
+              "raw_output_gradient_norm": 3.630084878116742,
+              "weighted_output_gradient_norm": 0.010890254634350227,
+              "weighted_to_increment_output_gradient_ratio": 0.18699219788751587,
+              "output_gradient_cosine": 0.7798130016264946,
+              "raw_parameter_gradient_norm": 600.8098228470459,
+              "weighted_parameter_gradient_norm": 1.8024294685411377,
+              "weighted_to_increment_parameter_gradient_ratio": 0.21948910307816522,
+              "parameter_gradient_cosine": 0.9529104676335374
+            }
+          }
+        },
+        {
+          "batch_index": 14,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_819cc3183a6c5299.npz",
+            "sg-one-north_841ce7e916ed502c.npz",
+            "sg-one-north_84b88fec4a1555a5.npz",
+            "sg-one-north_8511a3a13d4f5452.npz"
+          ],
+          "diffusion_time_mean": 0.3780020475387573,
+          "increment_loss": 0.3664037883281708,
+          "increment_output_gradient_norm": 0.067676049529834,
+          "increment_parameter_gradient_norm": 5.17427725033257,
+          "windows": {
+            "0": {
+              "waypoint_loss": 69.0457534790039,
+              "raw_output_gradient_norm": 22.586565526471492,
+              "weighted_output_gradient_norm": 0.06775969657941448,
+              "weighted_to_increment_output_gradient_ratio": 1.0012359919079439,
+              "output_gradient_cosine": 0.5646271360988351,
+              "raw_parameter_gradient_norm": 1955.365231200463,
+              "weighted_parameter_gradient_norm": 5.866095693601389,
+              "weighted_to_increment_parameter_gradient_ratio": 1.1337033965901913,
+              "parameter_gradient_cosine": 0.4825641946166169
+            },
+            "10": {
+              "waypoint_loss": 69.0457534790039,
+              "raw_output_gradient_norm": 4.439034578561454,
+              "weighted_output_gradient_norm": 0.013317103735684363,
+              "weighted_to_increment_output_gradient_ratio": 0.19677720298691062,
+              "output_gradient_cosine": 0.7384739843729806,
+              "raw_parameter_gradient_norm": 420.3681799106066,
+              "weighted_parameter_gradient_norm": 1.26110453973182,
+              "weighted_to_increment_parameter_gradient_ratio": 0.24372573766718125,
+              "parameter_gradient_cosine": 0.4867729743712927
+            }
+          }
+        },
+        {
+          "batch_index": 15,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_85ec20c6ed1853f8.npz",
+            "sg-one-north_86532c21be625864.npz",
+            "sg-one-north_88f584f530e853a2.npz",
+            "sg-one-north_8bad5c5107115a0f.npz"
+          ],
+          "diffusion_time_mean": 0.43294426798820496,
+          "increment_loss": 0.19313167035579681,
+          "increment_output_gradient_norm": 0.04913395911798838,
+          "increment_parameter_gradient_norm": 11.20996973143579,
+          "windows": {
+            "0": {
+              "waypoint_loss": 47.577301025390625,
+              "raw_output_gradient_norm": 18.913541116067922,
+              "weighted_output_gradient_norm": 0.05674062334820377,
+              "weighted_to_increment_output_gradient_ratio": 1.1548148035852157,
+              "output_gradient_cosine": 0.6399635275168983,
+              "raw_parameter_gradient_norm": 5065.082789816698,
+              "weighted_parameter_gradient_norm": 15.195248369450095,
+              "weighted_to_increment_parameter_gradient_ratio": 1.3555119891928438,
+              "parameter_gradient_cosine": 0.9180842558140446
+            },
+            "10": {
+              "waypoint_loss": 47.577301025390625,
+              "raw_output_gradient_norm": 3.704765930458454,
+              "weighted_output_gradient_norm": 0.011114297791375361,
+              "weighted_to_increment_output_gradient_ratio": 0.22620399395631682,
+              "output_gradient_cosine": 0.7544104306385319,
+              "raw_parameter_gradient_norm": 895.3591999069555,
+              "weighted_parameter_gradient_norm": 2.6860775997208663,
+              "weighted_to_increment_parameter_gradient_ratio": 0.2396150626694716,
+              "parameter_gradient_cosine": 0.9093838028027774
+            }
+          }
+        },
+        {
+          "batch_index": 16,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_9084cf56de6a526f.npz",
+            "sg-one-north_9346a9401d675df8.npz",
+            "sg-one-north_93836953580955a8.npz",
+            "sg-one-north_984775fa1f4253f5.npz"
+          ],
+          "diffusion_time_mean": 0.5191590189933777,
+          "increment_loss": 0.10678374767303467,
+          "increment_output_gradient_norm": 0.03653487128963759,
+          "increment_parameter_gradient_norm": 9.66847109883908,
+          "windows": {
+            "0": {
+              "waypoint_loss": 33.972049713134766,
+              "raw_output_gradient_norm": 16.17620778537515,
+              "weighted_output_gradient_norm": 0.048528623356125455,
+              "weighted_to_increment_output_gradient_ratio": 1.3282823133932775,
+              "output_gradient_cosine": 0.7185342439921233,
+              "raw_parameter_gradient_norm": 4381.009261252159,
+              "weighted_parameter_gradient_norm": 13.143027783756478,
+              "weighted_to_increment_parameter_gradient_ratio": 1.359369816530206,
+              "parameter_gradient_cosine": 0.953597109569859
+            },
+            "10": {
+              "waypoint_loss": 33.972049713134766,
+              "raw_output_gradient_norm": 3.1335976104921945,
+              "weighted_output_gradient_norm": 0.009400792831476584,
+              "weighted_to_increment_output_gradient_ratio": 0.2573101395910196,
+              "output_gradient_cosine": 0.8337052981858262,
+              "raw_parameter_gradient_norm": 762.0719925536973,
+              "weighted_parameter_gradient_norm": 2.286215977661092,
+              "weighted_to_increment_parameter_gradient_ratio": 0.23646096205796224,
+              "parameter_gradient_cosine": 0.9543006641628461
+            }
+          }
+        },
+        {
+          "batch_index": 17,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_98d2c7d6f3c95367.npz",
+            "sg-one-north_9fdd130331c158d6.npz",
+            "sg-one-north_a59aafecdcd1551d.npz",
+            "sg-one-north_a64c5259e7255889.npz"
+          ],
+          "diffusion_time_mean": 0.6205363273620605,
+          "increment_loss": 0.05573591589927673,
+          "increment_output_gradient_norm": 0.02639505626996572,
+          "increment_parameter_gradient_norm": 7.23355921937413,
+          "windows": {
+            "0": {
+              "waypoint_loss": 19.04026222229004,
+              "raw_output_gradient_norm": 11.98680751242459,
+              "weighted_output_gradient_norm": 0.03596042253727377,
+              "weighted_to_increment_output_gradient_ratio": 1.3623923423187487,
+              "output_gradient_cosine": 0.7522409805928504,
+              "raw_parameter_gradient_norm": 3409.439344419828,
+              "weighted_parameter_gradient_norm": 10.228318033259484,
+              "weighted_to_increment_parameter_gradient_ratio": 1.4140090269620367,
+              "parameter_gradient_cosine": 0.9881020603668706
+            },
+            "10": {
+              "waypoint_loss": 19.04026222229004,
+              "raw_output_gradient_norm": 2.344421595355549,
+              "weighted_output_gradient_norm": 0.007033264786066647,
+              "weighted_to_increment_output_gradient_ratio": 0.26646144316311327,
+              "output_gradient_cosine": 0.8915882474136951,
+              "raw_parameter_gradient_norm": 582.3263103446528,
+              "weighted_parameter_gradient_norm": 1.7469789310339585,
+              "weighted_to_increment_parameter_gradient_ratio": 0.2415102825666937,
+              "parameter_gradient_cosine": 0.9915494959836548
+            }
+          }
+        },
+        {
+          "batch_index": 18,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_a7e2e7072e375a30.npz",
+            "sg-one-north_ad70bd0cc7c2501c.npz",
+            "sg-one-north_b1d773bc1b0b548e.npz",
+            "sg-one-north_b6d0016dcd425b4c.npz"
+          ],
+          "diffusion_time_mean": 0.49137285351753235,
+          "increment_loss": 0.1476573348045349,
+          "increment_output_gradient_norm": 0.04296180524383489,
+          "increment_parameter_gradient_norm": 12.30904125253795,
+          "windows": {
+            "0": {
+              "waypoint_loss": 61.67280197143555,
+              "raw_output_gradient_norm": 22.068564675017623,
+              "weighted_output_gradient_norm": 0.06620569402505287,
+              "weighted_to_increment_output_gradient_ratio": 1.5410361284702656,
+              "output_gradient_cosine": 0.8131058017409687,
+              "raw_parameter_gradient_norm": 6367.800637705441,
+              "weighted_parameter_gradient_norm": 19.103401913116322,
+              "weighted_to_increment_parameter_gradient_ratio": 1.551981305544611,
+              "parameter_gradient_cosine": 0.9922399686864684
+            },
+            "10": {
+              "waypoint_loss": 61.67280197143555,
+              "raw_output_gradient_norm": 4.233969585219403,
+              "weighted_output_gradient_norm": 0.01270190875565821,
+              "weighted_to_increment_output_gradient_ratio": 0.2956558432209028,
+              "output_gradient_cosine": 0.8898263274288046,
+              "raw_parameter_gradient_norm": 1147.8369236464553,
+              "weighted_parameter_gradient_norm": 3.443510770939366,
+              "weighted_to_increment_parameter_gradient_ratio": 0.27975458854111507,
+              "parameter_gradient_cosine": 0.9922001053617794
+            }
+          }
+        },
+        {
+          "batch_index": 19,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_ba6291040281513c.npz",
+            "sg-one-north_c11fc1ba5d2d5e82.npz",
+            "sg-one-north_c137ee0de1c35e18.npz",
+            "sg-one-north_c14c5e23a8e8515b.npz"
+          ],
+          "diffusion_time_mean": 0.34660208225250244,
+          "increment_loss": 0.04457491636276245,
+          "increment_output_gradient_norm": 0.023604797169007815,
+          "increment_parameter_gradient_norm": 3.1939541711872095,
+          "windows": {
+            "0": {
+              "waypoint_loss": 12.646927833557129,
+              "raw_output_gradient_norm": 9.973244414568507,
+              "weighted_output_gradient_norm": 0.02991973324370552,
+              "weighted_to_increment_output_gradient_ratio": 1.2675276567505935,
+              "output_gradient_cosine": 0.671519101432856,
+              "raw_parameter_gradient_norm": 1276.855340797874,
+              "weighted_parameter_gradient_norm": 3.830566022393622,
+              "weighted_to_increment_parameter_gradient_ratio": 1.1993177788677478,
+              "parameter_gradient_cosine": 0.9222483311703712
+            },
+            "10": {
+              "waypoint_loss": 12.646927833557129,
+              "raw_output_gradient_norm": 1.9414197823386263,
+              "weighted_output_gradient_norm": 0.005824259347015879,
+              "weighted_to_increment_output_gradient_ratio": 0.24674049538806908,
+              "output_gradient_cosine": 0.5314198834747271,
+              "raw_parameter_gradient_norm": 209.29936634127813,
+              "weighted_parameter_gradient_norm": 0.6278980990238344,
+              "weighted_to_increment_parameter_gradient_ratio": 0.19658957685997147,
+              "parameter_gradient_cosine": 0.8791146905391227
+            }
+          }
+        },
+        {
+          "batch_index": 20,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_c304cd5729315677.npz",
+            "sg-one-north_c843cfa589645c85.npz",
+            "sg-one-north_cecbfadb565859d4.npz",
+            "sg-one-north_cfb51769b4245813.npz"
+          ],
+          "diffusion_time_mean": 0.3956335783004761,
+          "increment_loss": 0.1315743625164032,
+          "increment_output_gradient_norm": 0.04055464724573805,
+          "increment_parameter_gradient_norm": 10.976992293718903,
+          "windows": {
+            "0": {
+              "waypoint_loss": 55.52885818481445,
+              "raw_output_gradient_norm": 21.050323178139475,
+              "weighted_output_gradient_norm": 0.06315096953441843,
+              "weighted_to_increment_output_gradient_ratio": 1.5571820697085477,
+              "output_gradient_cosine": 0.8130728516268091,
+              "raw_parameter_gradient_norm": 6055.824329869482,
+              "weighted_parameter_gradient_norm": 18.16747298960845,
+              "weighted_to_increment_parameter_gradient_ratio": 1.6550501725325961,
+              "parameter_gradient_cosine": 0.9684293179444529
+            },
+            "10": {
+              "waypoint_loss": 55.52885818481445,
+              "raw_output_gradient_norm": 4.0395107574395155,
+              "weighted_output_gradient_norm": 0.012118532272318547,
+              "weighted_to_increment_output_gradient_ratio": 0.2988198170948732,
+              "output_gradient_cosine": 0.7798408178619757,
+              "raw_parameter_gradient_norm": 1101.4297566778885,
+              "weighted_parameter_gradient_norm": 3.3042892700336655,
+              "weighted_to_increment_parameter_gradient_ratio": 0.3010195490366153,
+              "parameter_gradient_cosine": 0.9657481842666851
+            }
+          }
+        },
+        {
+          "batch_index": 21,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_d1c67758aa3d5c63.npz",
+            "sg-one-north_d2d95c755b49527a.npz",
+            "sg-one-north_d5258618463d5566.npz",
+            "sg-one-north_d5f960430cf15842.npz"
+          ],
+          "diffusion_time_mean": 0.6228817701339722,
+          "increment_loss": 0.2354847937822342,
+          "increment_output_gradient_norm": 0.05425458584100786,
+          "increment_parameter_gradient_norm": 12.873734881823859,
+          "windows": {
+            "0": {
+              "waypoint_loss": 60.65083694458008,
+              "raw_output_gradient_norm": 21.372603516458398,
+              "weighted_output_gradient_norm": 0.0641178105493752,
+              "weighted_to_increment_output_gradient_ratio": 1.1817952262555527,
+              "output_gradient_cosine": 0.653812043995098,
+              "raw_parameter_gradient_norm": 5681.5519335734225,
+              "weighted_parameter_gradient_norm": 17.044655800720268,
+              "weighted_to_increment_parameter_gradient_ratio": 1.3239868582958967,
+              "parameter_gradient_cosine": 0.8818483566055567
+            },
+            "10": {
+              "waypoint_loss": 60.65083694458008,
+              "raw_output_gradient_norm": 4.1815219898718405,
+              "weighted_output_gradient_norm": 0.012544565969615522,
+              "weighted_to_increment_output_gradient_ratio": 0.23121669394688882,
+              "output_gradient_cosine": 0.7762053154231864,
+              "raw_parameter_gradient_norm": 1003.8358012424702,
+              "weighted_parameter_gradient_norm": 3.0115074037274105,
+              "weighted_to_increment_parameter_gradient_ratio": 0.2339264736591159,
+              "parameter_gradient_cosine": 0.874948464290512
+            }
+          }
+        },
+        {
+          "batch_index": 22,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_da1ccbba203b5eb2.npz",
+            "sg-one-north_dd43ff9c382e5e1b.npz",
+            "sg-one-north_e3f884c649ad50e1.npz",
+            "sg-one-north_e75e7fb1c2f0591b.npz"
+          ],
+          "diffusion_time_mean": 0.335267573595047,
+          "increment_loss": 0.07683148235082626,
+          "increment_output_gradient_norm": 0.030990216933307266,
+          "increment_parameter_gradient_norm": 7.702660716671965,
+          "windows": {
+            "0": {
+              "waypoint_loss": 20.8697452545166,
+              "raw_output_gradient_norm": 12.434212356158621,
+              "weighted_output_gradient_norm": 0.03730263706847586,
+              "weighted_to_increment_output_gradient_ratio": 1.2036907372656762,
+              "output_gradient_cosine": 0.6769929912879517,
+              "raw_parameter_gradient_norm": 3850.750952971519,
+              "weighted_parameter_gradient_norm": 11.552252858914557,
+              "weighted_to_increment_parameter_gradient_ratio": 1.4997743356279956,
+              "parameter_gradient_cosine": 0.9947578377048427
+            },
+            "10": {
+              "waypoint_loss": 20.8697452545166,
+              "raw_output_gradient_norm": 2.4474858286617436,
+              "weighted_output_gradient_norm": 0.0073424574859852305,
+              "weighted_to_increment_output_gradient_ratio": 0.2369282377656995,
+              "output_gradient_cosine": 0.8365236086106905,
+              "raw_parameter_gradient_norm": 684.2427053925475,
+              "weighted_parameter_gradient_norm": 2.0527281161776423,
+              "weighted_to_increment_parameter_gradient_ratio": 0.26649597998450464,
+              "parameter_gradient_cosine": 0.996451722716426
+            }
+          }
+        },
+        {
+          "batch_index": 23,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_ebc8f5b4fb925980.npz",
+            "sg-one-north_f025449c1d5f5f99.npz",
+            "sg-one-north_f2e75b055ba757eb.npz",
+            "sg-one-north_f47a99d489be5522.npz"
+          ],
+          "diffusion_time_mean": 0.2805309295654297,
+          "increment_loss": 0.0728277713060379,
+          "increment_output_gradient_norm": 0.030171959337243336,
+          "increment_parameter_gradient_norm": 3.592343904521982,
+          "windows": {
+            "0": {
+              "waypoint_loss": 13.704055786132812,
+              "raw_output_gradient_norm": 9.9499224316746,
+              "weighted_output_gradient_norm": 0.029849767295023803,
+              "weighted_to_increment_output_gradient_ratio": 0.9893214743325659,
+              "output_gradient_cosine": 0.5706054072703785,
+              "raw_parameter_gradient_norm": 1164.3243496119424,
+              "weighted_parameter_gradient_norm": 3.492973048835827,
+              "weighted_to_increment_parameter_gradient_ratio": 0.972338156277001,
+              "parameter_gradient_cosine": 0.826511100668023
+            },
+            "10": {
+              "waypoint_loss": 13.704055786132812,
+              "raw_output_gradient_norm": 1.994059741962671,
+              "weighted_output_gradient_norm": 0.005982179225888014,
+              "weighted_to_increment_output_gradient_ratio": 0.1982694978149396,
+              "output_gradient_cosine": 0.6447005041556295,
+              "raw_parameter_gradient_norm": 215.30294329578317,
+              "weighted_parameter_gradient_norm": 0.6459088298873495,
+              "weighted_to_increment_parameter_gradient_ratio": 0.17980150204280007,
+              "parameter_gradient_cosine": 0.8251123032510168
+            }
+          }
+        },
+        {
+          "batch_index": 24,
+          "scene_count": 4,
+          "scene_names": [
+            "sg-one-north_f90af02694d05bd4.npz",
+            "sg-one-north_fbeb869aba5c5f31.npz",
+            "sg-one-north_fc1563183f0d58c6.npz",
+            "sg-one-north_fd60e1ef1c785a25.npz"
+          ],
+          "diffusion_time_mean": 0.6205084323883057,
+          "increment_loss": 0.11232572048902512,
+          "increment_output_gradient_norm": 0.03747094080994456,
+          "increment_parameter_gradient_norm": 10.058429655461325,
+          "windows": {
+            "0": {
+              "waypoint_loss": 40.123985290527344,
+              "raw_output_gradient_norm": 17.59087659771145,
+              "weighted_output_gradient_norm": 0.05277262979313435,
+              "weighted_to_increment_output_gradient_ratio": 1.4083614836574592,
+              "output_gradient_cosine": 0.7609076484280728,
+              "raw_parameter_gradient_norm": 4949.786249316161,
+              "weighted_parameter_gradient_norm": 14.849358747948484,
+              "weighted_to_increment_parameter_gradient_ratio": 1.4763098472221134,
+              "parameter_gradient_cosine": 0.9947092057324606
+            },
+            "10": {
+              "waypoint_loss": 40.123985290527344,
+              "raw_output_gradient_norm": 3.4007763557936577,
+              "weighted_output_gradient_norm": 0.010202329067380974,
+              "weighted_to_increment_output_gradient_ratio": 0.27227309608071915,
+              "output_gradient_cosine": 0.9143075546348355,
+              "raw_parameter_gradient_norm": 865.6430390698262,
+              "weighted_parameter_gradient_norm": 2.5969291172094784,
+              "weighted_to_increment_parameter_gradient_ratio": 0.2581843494624879,
+              "parameter_gradient_cosine": 0.9964220402556241
+            }
+          }
+        },
+        {
+          "batch_index": 25,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_0685e36d99d75972.npz",
+            "us-ma-boston_116d0d3623705446.npz",
+            "us-ma-boston_13bc671ceeac57b7.npz",
+            "us-ma-boston_1645c4693c365d6e.npz"
+          ],
+          "diffusion_time_mean": 0.5481393337249756,
+          "increment_loss": 0.1714702844619751,
+          "increment_output_gradient_norm": 0.046296637266668265,
+          "increment_parameter_gradient_norm": 4.0080363142613145,
+          "windows": {
+            "0": {
+              "waypoint_loss": 31.28107261657715,
+              "raw_output_gradient_norm": 14.544585915505476,
+              "weighted_output_gradient_norm": 0.04363375774651643,
+              "weighted_to_increment_output_gradient_ratio": 0.9424822259808272,
+              "output_gradient_cosine": 0.5806852783583635,
+              "raw_parameter_gradient_norm": 980.2101342101535,
+              "weighted_parameter_gradient_norm": 2.9406304026304606,
+              "weighted_to_increment_parameter_gradient_ratio": 0.7336835727179338,
+              "parameter_gradient_cosine": 0.7923098740166562
+            },
+            "10": {
+              "waypoint_loss": 31.28107261657715,
+              "raw_output_gradient_norm": 2.960526538649889,
+              "weighted_output_gradient_norm": 0.008881579615949667,
+              "weighted_to_increment_output_gradient_ratio": 0.19184070680537418,
+              "output_gradient_cosine": 0.8573455287744649,
+              "raw_parameter_gradient_norm": 200.7258405029419,
+              "weighted_parameter_gradient_norm": 0.6021775215088258,
+              "weighted_to_increment_parameter_gradient_ratio": 0.15024253132791482,
+              "parameter_gradient_cosine": 0.9065299501959182
+            }
+          }
+        },
+        {
+          "batch_index": 26,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_1768745367c957b3.npz",
+            "us-ma-boston_18637681409c5c0e.npz",
+            "us-ma-boston_19930311b4cc5c89.npz",
+            "us-ma-boston_1c13c54a7fe956ce.npz"
+          ],
+          "diffusion_time_mean": 0.7257545590400696,
+          "increment_loss": 0.27173420786857605,
+          "increment_output_gradient_norm": 0.05828102195722576,
+          "increment_parameter_gradient_norm": 16.525002859213597,
+          "windows": {
+            "0": {
+              "waypoint_loss": 36.18562698364258,
+              "raw_output_gradient_norm": 14.940293498769377,
+              "weighted_output_gradient_norm": 0.044820880496308134,
+              "weighted_to_increment_output_gradient_ratio": 0.7690476074562241,
+              "output_gradient_cosine": 0.5194691765495587,
+              "raw_parameter_gradient_norm": 5200.29992923034,
+              "weighted_parameter_gradient_norm": 15.600899787691022,
+              "weighted_to_increment_parameter_gradient_ratio": 0.944078492488288,
+              "parameter_gradient_cosine": 0.959961894186481
+            },
+            "10": {
+              "waypoint_loss": 36.18562698364258,
+              "raw_output_gradient_norm": 3.134339723590939,
+              "weighted_output_gradient_norm": 0.009403019170772816,
+              "weighted_to_increment_output_gradient_ratio": 0.1613392980252471,
+              "output_gradient_cosine": 0.9259505531496369,
+              "raw_parameter_gradient_norm": 839.2057316561057,
+              "weighted_parameter_gradient_norm": 2.5176171949683175,
+              "weighted_to_increment_parameter_gradient_ratio": 0.15235199754078152,
+              "parameter_gradient_cosine": 0.990528785117025
+            }
+          }
+        },
+        {
+          "batch_index": 27,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_1c32606299585c0c.npz",
+            "us-ma-boston_1d345856fb4f5ba6.npz",
+            "us-ma-boston_282e22c6f3ae52a6.npz",
+            "us-ma-boston_28b649351c6e50a8.npz"
+          ],
+          "diffusion_time_mean": 0.6760295629501343,
+          "increment_loss": 0.17688272893428802,
+          "increment_output_gradient_norm": 0.04702163486440186,
+          "increment_parameter_gradient_norm": 12.729660839371078,
+          "windows": {
+            "0": {
+              "waypoint_loss": 33.14783477783203,
+              "raw_output_gradient_norm": 15.032533324688186,
+              "weighted_output_gradient_norm": 0.04509759997406456,
+              "weighted_to_increment_output_gradient_ratio": 0.9590819226961012,
+              "output_gradient_cosine": 0.5861856943715418,
+              "raw_parameter_gradient_norm": 4908.957850098951,
+              "weighted_parameter_gradient_norm": 14.726873550296853,
+              "weighted_to_increment_parameter_gradient_ratio": 1.1568944166013184,
+              "parameter_gradient_cosine": 0.9727693935625901
+            },
+            "10": {
+              "waypoint_loss": 33.14783477783203,
+              "raw_output_gradient_norm": 3.044927064575509,
+              "weighted_output_gradient_norm": 0.009134781193726528,
+              "weighted_to_increment_output_gradient_ratio": 0.19426762212902327,
+              "output_gradient_cosine": 0.8838269837483971,
+              "raw_parameter_gradient_norm": 827.6695666282592,
+              "weighted_parameter_gradient_norm": 2.4830086998847776,
+              "weighted_to_increment_parameter_gradient_ratio": 0.19505694073208735,
+              "parameter_gradient_cosine": 0.988988222936046
+            }
+          }
+        },
+        {
+          "batch_index": 28,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_303bfe0dda9c5385.npz",
+            "us-ma-boston_316d68a3e5555b3c.npz",
+            "us-ma-boston_31e740c9dfab57f7.npz",
+            "us-ma-boston_335bfae8bdbc5444.npz"
+          ],
+          "diffusion_time_mean": 0.511139988899231,
+          "increment_loss": 0.1263430267572403,
+          "increment_output_gradient_norm": 0.039740255799144905,
+          "increment_parameter_gradient_norm": 7.505767210337685,
+          "windows": {
+            "0": {
+              "waypoint_loss": 25.7508544921875,
+              "raw_output_gradient_norm": 13.47044985946889,
+              "weighted_output_gradient_norm": 0.04041134957840667,
+              "weighted_to_increment_output_gradient_ratio": 1.0168870020025438,
+              "output_gradient_cosine": 0.6012968941033948,
+              "raw_parameter_gradient_norm": 2547.0044948393847,
+              "weighted_parameter_gradient_norm": 7.6410134845181545,
+              "weighted_to_increment_parameter_gradient_ratio": 1.0180189806571933,
+              "parameter_gradient_cosine": 0.9166933708839347
+            },
+            "10": {
+              "waypoint_loss": 25.7508544921875,
+              "raw_output_gradient_norm": 2.693307364316166,
+              "weighted_output_gradient_norm": 0.008079922092948498,
+              "weighted_to_increment_output_gradient_ratio": 0.20331832119516338,
+              "output_gradient_cosine": 0.8602861981287744,
+              "raw_parameter_gradient_norm": 407.661644437744,
+              "weighted_parameter_gradient_norm": 1.2229849333132319,
+              "weighted_to_increment_parameter_gradient_ratio": 0.16293936369740006,
+              "parameter_gradient_cosine": 0.9299993933659225
+            }
+          }
+        },
+        {
+          "batch_index": 29,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_366398bf57245002.npz",
+            "us-ma-boston_382669a4a96b528a.npz",
+            "us-ma-boston_3901d4256e365765.npz",
+            "us-ma-boston_3c0a1466cab25685.npz"
+          ],
+          "diffusion_time_mean": 0.6723713874816895,
+          "increment_loss": 0.25226497650146484,
+          "increment_output_gradient_norm": 0.05615436230875104,
+          "increment_parameter_gradient_norm": 5.5818504311880845,
+          "windows": {
+            "0": {
+              "waypoint_loss": 59.215816497802734,
+              "raw_output_gradient_norm": 20.615698287991957,
+              "weighted_output_gradient_norm": 0.061847094863975875,
+              "weighted_to_increment_output_gradient_ratio": 1.1013764972331934,
+              "output_gradient_cosine": 0.6393905116010253,
+              "raw_parameter_gradient_norm": 2624.5158765295355,
+              "weighted_parameter_gradient_norm": 7.873547629588606,
+              "weighted_to_increment_parameter_gradient_ratio": 1.4105622726105076,
+              "parameter_gradient_cosine": 0.7539090025509781
+            },
+            "10": {
+              "waypoint_loss": 59.215816497802734,
+              "raw_output_gradient_norm": 4.094021244996486,
+              "weighted_output_gradient_norm": 0.012282063734989457,
+              "weighted_to_increment_output_gradient_ratio": 0.218719672524452,
+              "output_gradient_cosine": 0.8881783244517495,
+              "raw_parameter_gradient_norm": 440.71869006879353,
+              "weighted_parameter_gradient_norm": 1.3221560702063806,
+              "weighted_to_increment_parameter_gradient_ratio": 0.2368669828232862,
+              "parameter_gradient_cosine": 0.7777607816085493
+            }
+          }
+        },
+        {
+          "batch_index": 30,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_3d657ffe68585965.npz",
+            "us-ma-boston_44548ac8c7315b8b.npz",
+            "us-ma-boston_498d263162e15858.npz",
+            "us-ma-boston_4c49937e734d543e.npz"
+          ],
+          "diffusion_time_mean": 0.05318449065089226,
+          "increment_loss": 0.02535911276936531,
+          "increment_output_gradient_norm": 0.01780418269541913,
+          "increment_parameter_gradient_norm": 4.666802472218852,
+          "windows": {
+            "0": {
+              "waypoint_loss": 3.2687790393829346,
+              "raw_output_gradient_norm": 4.60408659729449,
+              "weighted_output_gradient_norm": 0.01381225979188347,
+              "weighted_to_increment_output_gradient_ratio": 0.775787354475825,
+              "output_gradient_cosine": 0.4984596686972464,
+              "raw_parameter_gradient_norm": 1495.1211511581985,
+              "weighted_parameter_gradient_norm": 4.485363453474595,
+              "weighted_to_increment_parameter_gradient_ratio": 0.9611213416843009,
+              "parameter_gradient_cosine": 0.9137819349205519
+            },
+            "10": {
+              "waypoint_loss": 3.2687790393829346,
+              "raw_output_gradient_norm": 0.9478475055923783,
+              "weighted_output_gradient_norm": 0.002843542516777135,
+              "weighted_to_increment_output_gradient_ratio": 0.15971204999535055,
+              "output_gradient_cosine": 0.8348373137971534,
+              "raw_parameter_gradient_norm": 235.340384954723,
+              "weighted_parameter_gradient_norm": 0.7060211548641689,
+              "weighted_to_increment_parameter_gradient_ratio": 0.1512858448728146,
+              "parameter_gradient_cosine": 0.91944131933472
+            }
+          }
+        },
+        {
+          "batch_index": 31,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_5080a061bf3b54ad.npz",
+            "us-ma-boston_520f48518680551d.npz",
+            "us-ma-boston_52bf5f98e58a5d2f.npz",
+            "us-ma-boston_5388f7c717215d8c.npz"
+          ],
+          "diffusion_time_mean": 0.4289011061191559,
+          "increment_loss": 0.21152205765247345,
+          "increment_output_gradient_norm": 0.05142009150883899,
+          "increment_parameter_gradient_norm": 13.141657660988216,
+          "windows": {
+            "0": {
+              "waypoint_loss": 35.112754821777344,
+              "raw_output_gradient_norm": 15.224460724540979,
+              "weighted_output_gradient_norm": 0.04567338217362294,
+              "weighted_to_increment_output_gradient_ratio": 0.8882400017855238,
+              "output_gradient_cosine": 0.5606607259144765,
+              "raw_parameter_gradient_norm": 4465.044697552412,
+              "weighted_parameter_gradient_norm": 13.395134092657235,
+              "weighted_to_increment_parameter_gradient_ratio": 1.0192880105545192,
+              "parameter_gradient_cosine": 0.9614734769024356
+            },
+            "10": {
+              "waypoint_loss": 35.112754821777344,
+              "raw_output_gradient_norm": 3.116004587524937,
+              "weighted_output_gradient_norm": 0.009348013762574811,
+              "weighted_to_increment_output_gradient_ratio": 0.18179691027908632,
+              "output_gradient_cosine": 0.9051212686740995,
+              "raw_parameter_gradient_norm": 730.1708831917044,
+              "weighted_parameter_gradient_norm": 2.1905126495751133,
+              "weighted_to_increment_parameter_gradient_ratio": 0.16668465319088163,
+              "parameter_gradient_cosine": 0.9790971880278492
+            }
+          }
+        },
+        {
+          "batch_index": 32,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_543679868b1d54f8.npz",
+            "us-ma-boston_544cbea33746532d.npz",
+            "us-ma-boston_57524af7a35a50c2.npz",
+            "us-ma-boston_5a63e42dda8b5a74.npz"
+          ],
+          "diffusion_time_mean": 0.4616864025592804,
+          "increment_loss": 0.16754423081874847,
+          "increment_output_gradient_norm": 0.045763554043621694,
+          "increment_parameter_gradient_norm": 6.806771231500695,
+          "windows": {
+            "0": {
+              "waypoint_loss": 30.077911376953125,
+              "raw_output_gradient_norm": 14.254053168443223,
+              "weighted_output_gradient_norm": 0.04276215950532967,
+              "weighted_to_increment_output_gradient_ratio": 0.9344151781692676,
+              "output_gradient_cosine": 0.5763677904188862,
+              "raw_parameter_gradient_norm": 2134.6676181856647,
+              "weighted_parameter_gradient_norm": 6.404002854556994,
+              "weighted_to_increment_parameter_gradient_ratio": 0.9408282777185532,
+              "parameter_gradient_cosine": 0.8988068275200739
+            },
+            "10": {
+              "waypoint_loss": 30.077911376953125,
+              "raw_output_gradient_norm": 2.8914998202262114,
+              "weighted_output_gradient_norm": 0.008674499460678635,
+              "weighted_to_increment_output_gradient_ratio": 0.18955038877465955,
+              "output_gradient_cosine": 0.9036089595255106,
+              "raw_parameter_gradient_norm": 323.4069964360216,
+              "weighted_parameter_gradient_norm": 0.9702209893080648,
+              "weighted_to_increment_parameter_gradient_ratio": 0.14253762265698464,
+              "parameter_gradient_cosine": 0.9476784532665352
+            }
+          }
+        },
+        {
+          "batch_index": 33,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_5aa0a9aa8e885360.npz",
+            "us-ma-boston_5af41155e1c65469.npz",
+            "us-ma-boston_605409fb6ed454d4.npz",
+            "us-ma-boston_614cf8546f4a5c59.npz"
+          ],
+          "diffusion_time_mean": 0.1694602370262146,
+          "increment_loss": 0.0728275403380394,
+          "increment_output_gradient_norm": 0.030171910882402477,
+          "increment_parameter_gradient_norm": 3.4191471926033192,
+          "windows": {
+            "0": {
+              "waypoint_loss": 11.317781448364258,
+              "raw_output_gradient_norm": 8.64895627873963,
+              "weighted_output_gradient_norm": 0.02594686883621889,
+              "weighted_to_increment_output_gradient_ratio": 0.8599677009967636,
+              "output_gradient_cosine": 0.5421318643711858,
+              "raw_parameter_gradient_norm": 1093.5554000723284,
+              "weighted_parameter_gradient_norm": 3.2806662002169853,
+              "weighted_to_increment_parameter_gradient_ratio": 0.9594983823200384,
+              "parameter_gradient_cosine": 0.8747714970377597
+            },
+            "10": {
+              "waypoint_loss": 11.317781448364258,
+              "raw_output_gradient_norm": 1.767781576089481,
+              "weighted_output_gradient_norm": 0.005303344728268444,
+              "weighted_to_increment_output_gradient_ratio": 0.17577092644011408,
+              "output_gradient_cosine": 0.8782817731484055,
+              "raw_parameter_gradient_norm": 163.71911920703317,
+              "weighted_parameter_gradient_norm": 0.4911573576210995,
+              "weighted_to_increment_parameter_gradient_ratio": 0.14364908263780685,
+              "parameter_gradient_cosine": 0.9108085932588146
+            }
+          }
+        },
+        {
+          "batch_index": 34,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_693b2a7d30625959.npz",
+            "us-ma-boston_6b223d5672285f73.npz",
+            "us-ma-boston_6d5db9b89a665994.npz",
+            "us-ma-boston_6dbf5843f7cb5a92.npz"
+          ],
+          "diffusion_time_mean": 0.5307989716529846,
+          "increment_loss": 0.17594128847122192,
+          "increment_output_gradient_norm": 0.046896334540959435,
+          "increment_parameter_gradient_norm": 2.443653229223731,
+          "windows": {
+            "0": {
+              "waypoint_loss": 53.67104721069336,
+              "raw_output_gradient_norm": 19.99764745508387,
+              "weighted_output_gradient_norm": 0.059992942365251614,
+              "weighted_to_increment_output_gradient_ratio": 1.2792671954532726,
+              "output_gradient_cosine": 0.7153725370420332,
+              "raw_parameter_gradient_norm": 797.8598109358429,
+              "weighted_parameter_gradient_norm": 2.393579432807529,
+              "weighted_to_increment_parameter_gradient_ratio": 0.9795086324780587,
+              "parameter_gradient_cosine": 0.6774172380298126
+            },
+            "10": {
+              "waypoint_loss": 53.67104721069336,
+              "raw_output_gradient_norm": 3.9298976770736163,
+              "weighted_output_gradient_norm": 0.01178969303122085,
+              "weighted_to_increment_output_gradient_ratio": 0.25139903036395495,
+              "output_gradient_cosine": 0.8749416858565745,
+              "raw_parameter_gradient_norm": 175.4073700857933,
+              "weighted_parameter_gradient_norm": 0.52622211025738,
+              "weighted_to_increment_parameter_gradient_ratio": 0.21534238326628022,
+              "parameter_gradient_cosine": 0.7687982444063182
+            }
+          }
+        },
+        {
+          "batch_index": 35,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_6f2626c9078e5d0b.npz",
+            "us-ma-boston_7145a3f558f0517e.npz",
+            "us-ma-boston_71f35dd866395f06.npz",
+            "us-ma-boston_7200a3ea4ba35faa.npz"
+          ],
+          "diffusion_time_mean": 0.3649250566959381,
+          "increment_loss": 0.1377737820148468,
+          "increment_output_gradient_norm": 0.041499064483958084,
+          "increment_parameter_gradient_norm": 4.3425119833919235,
+          "windows": {
+            "0": {
+              "waypoint_loss": 33.2700309753418,
+              "raw_output_gradient_norm": 15.479807208438054,
+              "weighted_output_gradient_norm": 0.04643942162531416,
+              "weighted_to_increment_output_gradient_ratio": 1.1190474340274785,
+              "output_gradient_cosine": 0.6473801873836256,
+              "raw_parameter_gradient_norm": 1772.3034629888705,
+              "weighted_parameter_gradient_norm": 5.316910388966612,
+              "weighted_to_increment_parameter_gradient_ratio": 1.2243858875464952,
+              "parameter_gradient_cosine": 0.7926055768864093
+            },
+            "10": {
+              "waypoint_loss": 33.2700309753418,
+              "raw_output_gradient_norm": 3.0723987543973705,
+              "weighted_output_gradient_norm": 0.009217196263192113,
+              "weighted_to_increment_output_gradient_ratio": 0.2221061216152263,
+              "output_gradient_cosine": 0.8929136845836193,
+              "raw_parameter_gradient_norm": 284.99812681838023,
+              "weighted_parameter_gradient_norm": 0.8549943804551408,
+              "weighted_to_increment_parameter_gradient_ratio": 0.19688935430117274,
+              "parameter_gradient_cosine": 0.7783128261298269
+            }
+          }
+        },
+        {
+          "batch_index": 36,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_72c17a94e27a50a9.npz",
+            "us-ma-boston_77e358e94747513a.npz",
+            "us-ma-boston_78f2201574a65224.npz",
+            "us-ma-boston_7c5e11c8ad375489.npz"
+          ],
+          "diffusion_time_mean": 0.5608493685722351,
+          "increment_loss": 0.20622074604034424,
+          "increment_output_gradient_norm": 0.05077163862054313,
+          "increment_parameter_gradient_norm": 14.297664194862199,
+          "windows": {
+            "0": {
+              "waypoint_loss": 28.25531578063965,
+              "raw_output_gradient_norm": 13.32014699684092,
+              "weighted_output_gradient_norm": 0.03996044099052276,
+              "weighted_to_increment_output_gradient_ratio": 0.7870622669711125,
+              "output_gradient_cosine": 0.5222518650078075,
+              "raw_parameter_gradient_norm": 4512.909066440805,
+              "weighted_parameter_gradient_norm": 13.538727199322414,
+              "weighted_to_increment_parameter_gradient_ratio": 0.946918812388075,
+              "parameter_gradient_cosine": 0.9608356454987852
+            },
+            "10": {
+              "waypoint_loss": 28.25531578063965,
+              "raw_output_gradient_norm": 2.772907525044683,
+              "weighted_output_gradient_norm": 0.008318722575134049,
+              "weighted_to_increment_output_gradient_ratio": 0.1638458557011816,
+              "output_gradient_cosine": 0.924228789394176,
+              "raw_parameter_gradient_norm": 742.4290613857394,
+              "weighted_parameter_gradient_norm": 2.2272871841572184,
+              "weighted_to_increment_parameter_gradient_ratio": 0.15577979408395842,
+              "parameter_gradient_cosine": 0.9902391361688783
+            }
+          }
+        },
+        {
+          "batch_index": 37,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_7cedc54e8e5f5dc9.npz",
+            "us-ma-boston_7f1b71cb6904555e.npz",
+            "us-ma-boston_81057c226af65ffd.npz",
+            "us-ma-boston_843b764334945301.npz"
+          ],
+          "diffusion_time_mean": 0.677696704864502,
+          "increment_loss": 0.3027539849281311,
+          "increment_output_gradient_norm": 0.06151767866560646,
+          "increment_parameter_gradient_norm": 17.72632383243365,
+          "windows": {
+            "0": {
+              "waypoint_loss": 43.01716232299805,
+              "raw_output_gradient_norm": 16.403264468076852,
+              "weighted_output_gradient_norm": 0.04920979340423056,
+              "weighted_to_increment_output_gradient_ratio": 0.7999292962876858,
+              "output_gradient_cosine": 0.5328703662141067,
+              "raw_parameter_gradient_norm": 5707.973236642113,
+              "weighted_parameter_gradient_norm": 17.12391970992634,
+              "weighted_to_increment_parameter_gradient_ratio": 0.9660164099335082,
+              "parameter_gradient_cosine": 0.9654493059387286
+            },
+            "10": {
+              "waypoint_loss": 43.01716232299805,
+              "raw_output_gradient_norm": 3.425306509362233,
+              "weighted_output_gradient_norm": 0.010275919528086699,
+              "weighted_to_increment_output_gradient_ratio": 0.16704010539708156,
+              "output_gradient_cosine": 0.9271113955802963,
+              "raw_parameter_gradient_norm": 924.5675464407334,
+              "weighted_parameter_gradient_norm": 2.7737026393222,
+              "weighted_to_increment_parameter_gradient_ratio": 0.1564736527179532,
+              "parameter_gradient_cosine": 0.9926491503827721
+            }
+          }
+        },
+        {
+          "batch_index": 38,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_84fcbd8fdd8759d2.npz",
+            "us-ma-boston_85674efd35ba5927.npz",
+            "us-ma-boston_87c202fc48df560d.npz",
+            "us-ma-boston_8e14661429aa5776.npz"
+          ],
+          "diffusion_time_mean": 0.6445057392120361,
+          "increment_loss": 0.38490787148475647,
+          "increment_output_gradient_norm": 0.06936388270895302,
+          "increment_parameter_gradient_norm": 20.36103419233244,
+          "windows": {
+            "0": {
+              "waypoint_loss": 68.83292388916016,
+              "raw_output_gradient_norm": 21.36179120876334,
+              "weighted_output_gradient_norm": 0.06408537362629002,
+              "weighted_to_increment_output_gradient_ratio": 0.9239011878154034,
+              "output_gradient_cosine": 0.5806777795923743,
+              "raw_parameter_gradient_norm": 7178.106157231087,
+              "weighted_parameter_gradient_norm": 21.53431847169326,
+              "weighted_to_increment_parameter_gradient_ratio": 1.0576240022131418,
+              "parameter_gradient_cosine": 0.969487401416896
+            },
+            "10": {
+              "waypoint_loss": 68.83292388916016,
+              "raw_output_gradient_norm": 4.368049786693494,
+              "weighted_output_gradient_norm": 0.013104149360080483,
+              "weighted_to_increment_output_gradient_ratio": 0.1889189135369593,
+              "output_gradient_cosine": 0.9273620997353448,
+              "raw_parameter_gradient_norm": 1178.078144276265,
+              "weighted_parameter_gradient_norm": 3.534234432828795,
+              "weighted_to_increment_parameter_gradient_ratio": 0.1735783359255748,
+              "parameter_gradient_cosine": 0.9925522542932886
+            }
+          }
+        },
+        {
+          "batch_index": 39,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_8e2be576cb60593a.npz",
+            "us-ma-boston_8f4ac262e78e58bc.npz",
+            "us-ma-boston_91c220f2664154ab.npz",
+            "us-ma-boston_92c576157e955d39.npz"
+          ],
+          "diffusion_time_mean": 0.3514983057975769,
+          "increment_loss": 0.10835640877485275,
+          "increment_output_gradient_norm": 0.03680292351225769,
+          "increment_parameter_gradient_norm": 9.36723997088085,
+          "windows": {
+            "0": {
+              "waypoint_loss": 15.68384075164795,
+              "raw_output_gradient_norm": 10.091952267070818,
+              "weighted_output_gradient_norm": 0.030275856801212454,
+              "weighted_to_increment_output_gradient_ratio": 0.8226481461759061,
+              "output_gradient_cosine": 0.5278431980905666,
+              "raw_parameter_gradient_norm": 3137.2834535178513,
+              "weighted_parameter_gradient_norm": 9.411850360553554,
+              "weighted_to_increment_parameter_gradient_ratio": 1.0047623835635024,
+              "parameter_gradient_cosine": 0.9577969813935991
+            },
+            "10": {
+              "waypoint_loss": 15.68384075164795,
+              "raw_output_gradient_norm": 2.0748427507427643,
+              "weighted_output_gradient_norm": 0.006224528252228293,
+              "weighted_to_increment_output_gradient_ratio": 0.16913135311533425,
+              "output_gradient_cosine": 0.8826918342855479,
+              "raw_parameter_gradient_norm": 503.64311875314667,
+              "weighted_parameter_gradient_norm": 1.5109293562594401,
+              "weighted_to_increment_parameter_gradient_ratio": 0.16129931131863165,
+              "parameter_gradient_cosine": 0.9747257984407598
+            }
+          }
+        },
+        {
+          "batch_index": 40,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_93512363a332504d.npz",
+            "us-ma-boston_9601c6de19315037.npz",
+            "us-ma-boston_97fd985ca4945d8e.npz",
+            "us-ma-boston_9a1f3a3c55985b84.npz"
+          ],
+          "diffusion_time_mean": 0.6934018135070801,
+          "increment_loss": 0.4076657295227051,
+          "increment_output_gradient_norm": 0.07138502609891692,
+          "increment_parameter_gradient_norm": 6.318153052726798,
+          "windows": {
+            "0": {
+              "waypoint_loss": 98.60200500488281,
+              "raw_output_gradient_norm": 26.690553508494855,
+              "weighted_output_gradient_norm": 0.08007166052548456,
+              "weighted_to_increment_output_gradient_ratio": 1.121687066619976,
+              "output_gradient_cosine": 0.6468911378231748,
+              "raw_parameter_gradient_norm": 2615.3859166983343,
+              "weighted_parameter_gradient_norm": 7.846157750095003,
+              "weighted_to_increment_parameter_gradient_ratio": 1.241843571153875,
+              "parameter_gradient_cosine": 0.7607416269565593
+            },
+            "10": {
+              "waypoint_loss": 98.60200500488281,
+              "raw_output_gradient_norm": 5.275197122918948,
+              "weighted_output_gradient_norm": 0.015825591368756844,
+              "weighted_to_increment_output_gradient_ratio": 0.22169343115218046,
+              "output_gradient_cosine": 0.9236471069357896,
+              "raw_parameter_gradient_norm": 512.2541564857033,
+              "weighted_parameter_gradient_norm": 1.53676246945711,
+              "weighted_to_increment_parameter_gradient_ratio": 0.2432296996657705,
+              "parameter_gradient_cosine": 0.9092268996905722
+            }
+          }
+        },
+        {
+          "batch_index": 41,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_9b1baddc163c52f3.npz",
+            "us-ma-boston_9bed48218b195468.npz",
+            "us-ma-boston_9f0bbe07f6245f94.npz",
+            "us-ma-boston_a256fc1fabc25817.npz"
+          ],
+          "diffusion_time_mean": 0.39699557423591614,
+          "increment_loss": 0.18845072388648987,
+          "increment_output_gradient_norm": 0.048534875156379,
+          "increment_parameter_gradient_norm": 11.555680308091382,
+          "windows": {
+            "0": {
+              "waypoint_loss": 26.23614501953125,
+              "raw_output_gradient_norm": 12.860492703785473,
+              "weighted_output_gradient_norm": 0.03858147811135642,
+              "weighted_to_increment_output_gradient_ratio": 0.7949227846377928,
+              "output_gradient_cosine": 0.5254102260969371,
+              "raw_parameter_gradient_norm": 3957.252811767366,
+              "weighted_parameter_gradient_norm": 11.871758435302098,
+              "weighted_to_increment_parameter_gradient_ratio": 1.0273526195588325,
+              "parameter_gradient_cosine": 0.9543818965626534
+            },
+            "10": {
+              "waypoint_loss": 26.23614501953125,
+              "raw_output_gradient_norm": 2.6794020405285868,
+              "weighted_output_gradient_norm": 0.00803820612158576,
+              "weighted_to_increment_output_gradient_ratio": 0.16561711749925637,
+              "output_gradient_cosine": 0.8959607740176084,
+              "raw_parameter_gradient_norm": 652.4932866736099,
+              "weighted_parameter_gradient_norm": 1.9574798600208296,
+              "weighted_to_increment_parameter_gradient_ratio": 0.16939546680347206,
+              "parameter_gradient_cosine": 0.9777099822267823
+            }
+          }
+        },
+        {
+          "batch_index": 42,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_a29ac0bcd1ac59df.npz",
+            "us-ma-boston_a40b89f333185169.npz",
+            "us-ma-boston_a552509690b35980.npz",
+            "us-ma-boston_a741c044673e5ad4.npz"
+          ],
+          "diffusion_time_mean": 0.6228982210159302,
+          "increment_loss": 0.28907233476638794,
+          "increment_output_gradient_norm": 0.060111598289695506,
+          "increment_parameter_gradient_norm": 17.53089726836551,
+          "windows": {
+            "0": {
+              "waypoint_loss": 46.02738952636719,
+              "raw_output_gradient_norm": 17.381400499628565,
+              "weighted_output_gradient_norm": 0.0521442014988857,
+              "weighted_to_increment_output_gradient_ratio": 0.8674565804686714,
+              "output_gradient_cosine": 0.5506597566607885,
+              "raw_parameter_gradient_norm": 5868.69758538454,
+              "weighted_parameter_gradient_norm": 17.60609275615362,
+              "weighted_to_increment_parameter_gradient_ratio": 1.0042893119865461,
+              "parameter_gradient_cosine": 0.9608191608703781
+            },
+            "10": {
+              "waypoint_loss": 46.02738952636719,
+              "raw_output_gradient_norm": 3.562154428885592,
+              "weighted_output_gradient_norm": 0.010686463286656777,
+              "weighted_to_increment_output_gradient_ratio": 0.1777770611780369,
+              "output_gradient_cosine": 0.9030542771450835,
+              "raw_parameter_gradient_norm": 976.4189451755121,
+              "weighted_parameter_gradient_norm": 2.9292568355265365,
+              "weighted_to_increment_parameter_gradient_ratio": 0.16709109583411785,
+              "parameter_gradient_cosine": 0.9832671191964422
+            }
+          }
+        },
+        {
+          "batch_index": 43,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_abaa8db2885a518c.npz",
+            "us-ma-boston_b473cd67d0745aa5.npz",
+            "us-ma-boston_c184bb4684285816.npz",
+            "us-ma-boston_c46f9db1e9385dbc.npz"
+          ],
+          "diffusion_time_mean": 0.3636104464530945,
+          "increment_loss": 0.10275814682245255,
+          "increment_output_gradient_norm": 0.03583960078095353,
+          "increment_parameter_gradient_norm": 5.493711170182733,
+          "windows": {
+            "0": {
+              "waypoint_loss": 19.92626953125,
+              "raw_output_gradient_norm": 11.84686865091265,
+              "weighted_output_gradient_norm": 0.035540605952737954,
+              "weighted_to_increment_output_gradient_ratio": 0.9916574174460538,
+              "output_gradient_cosine": 0.5866367692216659,
+              "raw_parameter_gradient_norm": 1533.5598236118462,
+              "weighted_parameter_gradient_norm": 4.600679470835539,
+              "weighted_to_increment_parameter_gradient_ratio": 0.8374447305868303,
+              "parameter_gradient_cosine": 0.8293571802166814
+            },
+            "10": {
+              "waypoint_loss": 19.92626953125,
+              "raw_output_gradient_norm": 2.3697973066993767,
+              "weighted_output_gradient_norm": 0.00710939192009813,
+              "weighted_to_increment_output_gradient_ratio": 0.19836693950777265,
+              "output_gradient_cosine": 0.8386339755214394,
+              "raw_parameter_gradient_norm": 215.28216018019583,
+              "weighted_parameter_gradient_norm": 0.6458464805405875,
+              "weighted_to_increment_parameter_gradient_ratio": 0.11756105491055606,
+              "parameter_gradient_cosine": 0.8011780486676857
+            }
+          }
+        },
+        {
+          "batch_index": 44,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_c85f45009edb596f.npz",
+            "us-ma-boston_cc99768fe42053f1.npz",
+            "us-ma-boston_cf5e3005ec2c50ad.npz",
+            "us-ma-boston_d179a56bc5da5409.npz"
+          ],
+          "diffusion_time_mean": 0.5046669244766235,
+          "increment_loss": 0.18676722049713135,
+          "increment_output_gradient_norm": 0.04831759893344425,
+          "increment_parameter_gradient_norm": 5.019189957696858,
+          "windows": {
+            "0": {
+              "waypoint_loss": 45.79454040527344,
+              "raw_output_gradient_norm": 18.322448243951914,
+              "weighted_output_gradient_norm": 0.054967344731855744,
+              "weighted_to_increment_output_gradient_ratio": 1.1376257501448133,
+              "output_gradient_cosine": 0.6465991230209037,
+              "raw_parameter_gradient_norm": 1752.364784553116,
+              "weighted_parameter_gradient_norm": 5.2570943536593475,
+              "weighted_to_increment_parameter_gradient_ratio": 1.0473989623759241,
+              "parameter_gradient_cosine": 0.7793119013674231
+            },
+            "10": {
+              "waypoint_loss": 45.79454040527344,
+              "raw_output_gradient_norm": 3.6053321992870324,
+              "weighted_output_gradient_norm": 0.010815996597861097,
+              "weighted_to_increment_output_gradient_ratio": 0.2238521126175939,
+              "output_gradient_cosine": 0.8764588632602809,
+              "raw_parameter_gradient_norm": 291.1857192378787,
+              "weighted_parameter_gradient_norm": 0.8735571577136361,
+              "weighted_to_increment_parameter_gradient_ratio": 0.17404345423787923,
+              "parameter_gradient_cosine": 0.795376844933039
+            }
+          }
+        },
+        {
+          "batch_index": 45,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_d38b5f0b6f5d51a7.npz",
+            "us-ma-boston_d391794919be5e8b.npz",
+            "us-ma-boston_d76aa57c86b55f8e.npz",
+            "us-ma-boston_d89b95ad8b9b5490.npz"
+          ],
+          "diffusion_time_mean": 0.35583388805389404,
+          "increment_loss": 0.26447954773902893,
+          "increment_output_gradient_norm": 0.057497779260468236,
+          "increment_parameter_gradient_norm": 16.696612910192695,
+          "windows": {
+            "0": {
+              "waypoint_loss": 40.318241119384766,
+              "raw_output_gradient_norm": 16.184630028943776,
+              "weighted_output_gradient_norm": 0.04855389008683133,
+              "weighted_to_increment_output_gradient_ratio": 0.8444480936712255,
+              "output_gradient_cosine": 0.5415739119195783,
+              "raw_parameter_gradient_norm": 5566.02940261198,
+              "weighted_parameter_gradient_norm": 16.69808820783594,
+              "weighted_to_increment_parameter_gradient_ratio": 1.0000883590972123,
+              "parameter_gradient_cosine": 0.9523666058124448
+            },
+            "10": {
+              "waypoint_loss": 40.318241119384766,
+              "raw_output_gradient_norm": 3.3299705931580212,
+              "weighted_output_gradient_norm": 0.009989911779474064,
+              "weighted_to_increment_output_gradient_ratio": 0.17374430644041383,
+              "output_gradient_cosine": 0.8994580673134958,
+              "raw_parameter_gradient_norm": 909.8762639485929,
+              "weighted_parameter_gradient_norm": 2.7296287918457787,
+              "weighted_to_increment_parameter_gradient_ratio": 0.16348398363954622,
+              "parameter_gradient_cosine": 0.9755075367479694
+            }
+          }
+        },
+        {
+          "batch_index": 46,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_d9a59d9f0fe855c0.npz",
+            "us-ma-boston_dc9f837d449d5549.npz",
+            "us-ma-boston_ddb9bce97a555ccd.npz",
+            "us-ma-boston_deb15ce129cb5b6b.npz"
+          ],
+          "diffusion_time_mean": 0.4405987560749054,
+          "increment_loss": 0.20003218948841095,
+          "increment_output_gradient_norm": 0.050004025670718585,
+          "increment_parameter_gradient_norm": 13.092873809347433,
+          "windows": {
+            "0": {
+              "waypoint_loss": 30.777877807617188,
+              "raw_output_gradient_norm": 14.11587038580466,
+              "weighted_output_gradient_norm": 0.042347611157413985,
+              "weighted_to_increment_output_gradient_ratio": 0.8468840376228338,
+              "output_gradient_cosine": 0.5450496053241259,
+              "raw_parameter_gradient_norm": 4346.833454247991,
+              "weighted_parameter_gradient_norm": 13.040500362743972,
+              "weighted_to_increment_parameter_gradient_ratio": 0.9959998509596824,
+              "parameter_gradient_cosine": 0.9598859793286711
+            },
+            "10": {
+              "waypoint_loss": 30.777877807617188,
+              "raw_output_gradient_norm": 2.9077709092491144,
+              "weighted_output_gradient_norm": 0.008723312727747344,
+              "weighted_to_increment_output_gradient_ratio": 0.17445220881197074,
+              "output_gradient_cosine": 0.916083870365211,
+              "raw_parameter_gradient_norm": 709.0705273012144,
+              "weighted_parameter_gradient_norm": 2.127211581903643,
+              "weighted_to_increment_parameter_gradient_ratio": 0.16247094510182758,
+              "parameter_gradient_cosine": 0.9801732816510057
+            }
+          }
+        },
+        {
+          "batch_index": 47,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_ded4a8bcecea5b3f.npz",
+            "us-ma-boston_e3633fa7134b54fe.npz",
+            "us-ma-boston_ebe0906163025290.npz",
+            "us-ma-boston_ec2f6dfacbb456e3.npz"
+          ],
+          "diffusion_time_mean": 0.765950083732605,
+          "increment_loss": 0.12463631480932236,
+          "increment_output_gradient_norm": 0.0394709257265351,
+          "increment_parameter_gradient_norm": 2.719295175364275,
+          "windows": {
+            "0": {
+              "waypoint_loss": 19.698678970336914,
+              "raw_output_gradient_norm": 11.329504791136408,
+              "weighted_output_gradient_norm": 0.033988514373409225,
+              "weighted_to_increment_output_gradient_ratio": 0.8611025393447963,
+              "output_gradient_cosine": 0.5506284628067343,
+              "raw_parameter_gradient_norm": 853.612660856635,
+              "weighted_parameter_gradient_norm": 2.560837982569905,
+              "weighted_to_increment_parameter_gradient_ratio": 0.9417285794385513,
+              "parameter_gradient_cosine": 0.8077406698872756
+            },
+            "10": {
+              "waypoint_loss": 19.698678970336914,
+              "raw_output_gradient_norm": 2.3362550729989935,
+              "weighted_output_gradient_norm": 0.00700876521899698,
+              "weighted_to_increment_output_gradient_ratio": 0.1775677942685089,
+              "output_gradient_cosine": 0.8761020688367855,
+              "raw_parameter_gradient_norm": 150.3338334438634,
+              "weighted_parameter_gradient_norm": 0.4510015003315902,
+              "weighted_to_increment_parameter_gradient_ratio": 0.16585235189525696,
+              "parameter_gradient_cosine": 0.9046347153738031
+            }
+          }
+        },
+        {
+          "batch_index": 48,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_eda89c2bc2b55bd1.npz",
+            "us-ma-boston_efde4031874d5991.npz",
+            "us-ma-boston_f1b63c82b97f55a9.npz",
+            "us-ma-boston_f315dc8404e855db.npz"
+          ],
+          "diffusion_time_mean": 0.4989898204803467,
+          "increment_loss": 0.1786983162164688,
+          "increment_output_gradient_norm": 0.04726234144454618,
+          "increment_parameter_gradient_norm": 10.862736148774433,
+          "windows": {
+            "0": {
+              "waypoint_loss": 30.495283126831055,
+              "raw_output_gradient_norm": 14.260839051879708,
+              "weighted_output_gradient_norm": 0.042782517155639126,
+              "weighted_to_increment_output_gradient_ratio": 0.9052136616176049,
+              "output_gradient_cosine": 0.5655648540728122,
+              "raw_parameter_gradient_norm": 3642.3258005366465,
+              "weighted_parameter_gradient_norm": 10.926977401609939,
+              "weighted_to_increment_parameter_gradient_ratio": 1.0059139108191222,
+              "parameter_gradient_cosine": 0.9409934762827042
+            },
+            "10": {
+              "waypoint_loss": 30.495283126831055,
+              "raw_output_gradient_norm": 2.909706675530534,
+              "weighted_output_gradient_norm": 0.008729120026591602,
+              "weighted_to_increment_output_gradient_ratio": 0.18469503964025244,
+              "output_gradient_cosine": 0.8931529481051429,
+              "raw_parameter_gradient_norm": 609.5548598455555,
+              "weighted_parameter_gradient_norm": 1.8286645795366665,
+              "weighted_to_increment_parameter_gradient_ratio": 0.16834290684147585,
+              "parameter_gradient_cosine": 0.9612146562792327
+            }
+          }
+        },
+        {
+          "batch_index": 49,
+          "scene_count": 4,
+          "scene_names": [
+            "us-ma-boston_f720008bdf595790.npz",
+            "us-ma-boston_f8c893162dd551d5.npz",
+            "us-ma-boston_fcabafcea0b1539a.npz",
+            "us-ma-boston_fd40a656a2395620.npz"
+          ],
+          "diffusion_time_mean": 0.6404881477355957,
+          "increment_loss": 0.25664377212524414,
+          "increment_output_gradient_norm": 0.056639626081926756,
+          "increment_parameter_gradient_norm": 10.563477227535818,
+          "windows": {
+            "0": {
+              "waypoint_loss": 35.32046890258789,
+              "raw_output_gradient_norm": 14.69255486032872,
+              "weighted_output_gradient_norm": 0.04407766458098616,
+              "weighted_to_increment_output_gradient_ratio": 0.7782124923852733,
+              "output_gradient_cosine": 0.5305408120144058,
+              "raw_parameter_gradient_norm": 3339.742077743869,
+              "weighted_parameter_gradient_norm": 10.019226233231606,
+              "weighted_to_increment_parameter_gradient_ratio": 0.9484780453840036,
+              "parameter_gradient_cosine": 0.9344457978722371
+            },
+            "10": {
+              "waypoint_loss": 35.32046890258789,
+              "raw_output_gradient_norm": 3.1047043345421166,
+              "weighted_output_gradient_norm": 0.00931411300362635,
+              "weighted_to_increment_output_gradient_ratio": 0.16444517112725798,
+              "output_gradient_cosine": 0.9132351306643811,
+              "raw_parameter_gradient_norm": 586.9834796365924,
+              "weighted_parameter_gradient_norm": 1.7609504389097772,
+              "weighted_to_increment_parameter_gradient_ratio": 0.1667017783045442,
+              "parameter_gradient_cosine": 0.9843905641533982
+            }
+          }
+        },
+        {
+          "batch_index": 50,
+          "scene_count": 4,
+          "scene_names": [
+            "us-nv-las-vegas-strip_00c6d058ceee586b.npz",
+            "us-nv-las-vegas-strip_00e5cb1662ed54ee.npz",
+            "us-nv-las-vegas-strip_0112985bf5885c57.npz",
+            "us-nv-las-vegas-strip_015e501cf6705689.npz"
+          ],
+          "diffusion_time_mean": 0.5860810279846191,
+          "increment_loss": 0.03662591055035591,
+          "increment_output_gradient_norm": 0.02139681930915748,
+          "increment_parameter_gradient_norm": 2.9984046087315033,
+          "windows": {
+            "0": {
+              "waypoint_loss": 4.634162425994873,
+              "raw_output_gradient_norm": 5.311851573959967,
+              "weighted_output_gradient_norm": 0.015935554721879904,
+              "weighted_to_increment_output_gradient_ratio": 0.7447627842078264,
+              "output_gradient_cosine": 0.5096664591476016,
+              "raw_parameter_gradient_norm": 997.7394159664976,
+              "weighted_parameter_gradient_norm": 2.993218247899493,
+              "weighted_to_increment_parameter_gradient_ratio": 0.9982702932029562,
+              "parameter_gradient_cosine": 0.9521920012682982
+            },
+            "10": {
+              "waypoint_loss": 4.634162425994873,
+              "raw_output_gradient_norm": 1.1337187686580226,
+              "weighted_output_gradient_norm": 0.003401156305974068,
+              "weighted_to_increment_output_gradient_ratio": 0.15895616338258417,
+              "output_gradient_cosine": 0.7897728564046465,
+              "raw_parameter_gradient_norm": 148.99620841301973,
+              "weighted_parameter_gradient_norm": 0.4469886252390592,
+              "weighted_to_increment_parameter_gradient_ratio": 0.1490754863227618,
+              "parameter_gradient_cosine": 0.9644840309075484
+            }
+          }
+        },
+        {
+          "batch_index": 51,
+          "scene_count": 4,
+          "scene_names": [
+            "us-nv-las-vegas-strip_02568e5eb74955f4.npz",
+            "us-nv-las-vegas-strip_0285e718e4cd55f6.npz",
+            "us-nv-las-vegas-strip_02a8496ef7ba5087.npz",
+            "us-nv-las-vegas-strip_02af20bfbd7b57d7.npz"
+          ],
+          "diffusion_time_mean": 0.7528771758079529,
+          "increment_loss": 0.3305070698261261,
+          "increment_output_gradient_norm": 0.06427548997710635,
+          "increment_parameter_gradient_norm": 8.742056697065417,
+          "windows": {
+            "0": {
+              "waypoint_loss": 68.48453521728516,
+              "raw_output_gradient_norm": 22.188853825449815,
+              "weighted_output_gradient_norm": 0.06656656147634944,
+              "weighted_to_increment_output_gradient_ratio": 1.0356445590700145,
+              "output_gradient_cosine": 0.6002362172286899,
+              "raw_parameter_gradient_norm": 3781.433287900871,
+              "weighted_parameter_gradient_norm": 11.344299863702613,
+              "weighted_to_increment_parameter_gradient_ratio": 1.297669445167375,
+              "parameter_gradient_cosine": 0.9623775218959452
+            },
+            "10": {
+              "waypoint_loss": 68.48453521728516,
+              "raw_output_gradient_norm": 4.38319298563918,
+              "weighted_output_gradient_norm": 0.01314957895691754,
+              "weighted_to_increment_output_gradient_ratio": 0.20458154362730116,
+              "output_gradient_cosine": 0.8920008512045583,
+              "raw_parameter_gradient_norm": 686.5935993413772,
+              "weighted_parameter_gradient_norm": 2.0597807980241316,
+              "weighted_to_increment_parameter_gradient_ratio": 0.23561741468864764,
+              "parameter_gradient_cosine": 0.9816164252566818
+            }
+          }
+        },
+        {
+          "batch_index": 52,
+          "scene_count": 4,
+          "scene_names": [
+            "us-nv-las-vegas-strip_0361424a48dd5021.npz",
+            "us-nv-las-vegas-strip_0379d605ba1958f9.npz",
+            "us-nv-las-vegas-strip_03867e0ff04e5bf2.npz",
+            "us-nv-las-vegas-strip_047561b033815966.npz"
+          ],
+          "diffusion_time_mean": 0.6500065326690674,
+          "increment_loss": 0.02661779522895813,
+          "increment_output_gradient_norm": 0.01824068100804128,
+          "increment_parameter_gradient_norm": 4.058179829732351,
+          "windows": {
+            "0": {
+              "waypoint_loss": 11.003617286682129,
+              "raw_output_gradient_norm": 9.407625730660836,
+              "weighted_output_gradient_norm": 0.02822287719198251,
+              "weighted_to_increment_output_gradient_ratio": 1.5472490955540885,
+              "output_gradient_cosine": 0.8015386177359446,
+              "raw_parameter_gradient_norm": 2605.579128167614,
+              "weighted_parameter_gradient_norm": 7.816737384502842,
+              "weighted_to_increment_parameter_gradient_ratio": 1.9261683100471125,
+              "parameter_gradient_cosine": 0.9964534900187071
+            },
+            "10": {
+              "waypoint_loss": 11.003617286682129,
+              "raw_output_gradient_norm": 1.8096683492927057,
+              "weighted_output_gradient_norm": 0.005429005047878117,
+              "weighted_to_increment_output_gradient_ratio": 0.2976317082396637,
+              "output_gradient_cosine": 0.6251725015739659,
+              "raw_parameter_gradient_norm": 505.39333207836546,
+              "weighted_parameter_gradient_norm": 1.5161799962350964,
+              "weighted_to_increment_parameter_gradient_ratio": 0.3736108452185306,
+              "parameter_gradient_cosine": 0.9959600818861554
+            }
+          }
+        },
+        {
+          "batch_index": 53,
+          "scene_count": 4,
+          "scene_names": [
+            "us-nv-las-vegas-strip_05260b8529da5db0.npz",
+            "us-nv-las-vegas-strip_0563c47988005540.npz",
+            "us-nv-las-vegas-strip_0593711c4b2a5c21.npz",
+            "us-nv-las-vegas-strip_05f22bb462015e32.npz"
+          ],
+          "diffusion_time_mean": 0.6831414699554443,
+          "increment_loss": 0.06256584078073502,
+          "increment_output_gradient_norm": 0.02796556778013543,
+          "increment_parameter_gradient_norm": 3.3667018174734555,
+          "windows": {
+            "0": {
+              "waypoint_loss": 13.643176078796387,
+              "raw_output_gradient_norm": 10.124648709817889,
+              "weighted_output_gradient_norm": 0.030373946129453665,
+              "weighted_to_increment_output_gradient_ratio": 1.0861194154273157,
+              "output_gradient_cosine": 0.6023124920689737,
+              "raw_parameter_gradient_norm": 1536.3852601622407,
+              "weighted_parameter_gradient_norm": 4.609155780486722,
+              "weighted_to_increment_parameter_gradient_ratio": 1.3690418784832175,
+              "parameter_gradient_cosine": 0.8606457633788354
+            },
+            "10": {
+              "waypoint_loss": 13.643176078796387,
+              "raw_output_gradient_norm": 1.9889081220430989,
+              "weighted_output_gradient_norm": 0.005966724366129297,
+              "weighted_to_increment_output_gradient_ratio": 0.21335967190223096,
+              "output_gradient_cosine": 0.6857147820356297,
+              "raw_parameter_gradient_norm": 268.1495400757701,
+              "weighted_parameter_gradient_norm": 0.8044486202273103,
+              "weighted_to_increment_parameter_gradient_ratio": 0.23894263996061568,
+              "parameter_gradient_cosine": 0.8576979919467571
+            }
+          }
+        },
+        {
+          "batch_index": 54,
+          "scene_count": 4,
+          "scene_names": [
+            "us-nv-las-vegas-strip_06fc50e4e0595981.npz",
+            "us-nv-las-vegas-strip_07bd91be53f85c36.npz",
+            "us-nv-las-vegas-strip_07c5c53b33cf501d.npz",
+            "us-nv-las-vegas-strip_07dbb11fdb565643.npz"
+          ],
+          "diffusion_time_mean": 0.38627129793167114,
+          "increment_loss": 0.004149348475039005,
+          "increment_output_gradient_norm": 0.007201864916943839,
+          "increment_parameter_gradient_norm": 0.7452105144533042,
+          "windows": {
+            "0": {
+              "waypoint_loss": 1.10289466381073,
+              "raw_output_gradient_norm": 2.919927093501722,
+              "weighted_output_gradient_norm": 0.008759781280505165,
+              "weighted_to_increment_output_gradient_ratio": 1.2163212420016396,
+              "output_gradient_cosine": 0.6555811711960019,
+              "raw_parameter_gradient_norm": 664.2271438055665,
+              "weighted_parameter_gradient_norm": 1.9926814314166994,
+              "weighted_to_increment_parameter_gradient_ratio": 2.67398458927885,
+              "parameter_gradient_cosine": 0.9772071824982727
+            },
+            "10": {
+              "waypoint_loss": 1.10289466381073,
+              "raw_output_gradient_norm": 0.5799468357581249,
+              "weighted_output_gradient_norm": 0.0017398405072743747,
+              "weighted_to_increment_output_gradient_ratio": 0.24158194125261212,
+              "output_gradient_cosine": 0.3106416031520067,
+              "raw_parameter_gradient_norm": 138.8106780371598,
+              "weighted_parameter_gradient_norm": 0.4164320341114794,
+              "weighted_to_increment_parameter_gradient_ratio": 0.5588112701509307,
+              "parameter_gradient_cosine": 0.9649220019898882
+            }
+          }
+        },
+        {
+          "batch_index": 55,
+          "scene_count": 4,
+          "scene_names": [
+            "us-nv-las-vegas-strip_07e766d22ee55881.npz",
+            "us-nv-las-vegas-strip_081648cebc1a5696.npz",
+            "us-nv-las-vegas-strip_084c565ed4825e7e.npz",
+            "us-nv-las-vegas-strip_0870dfcf7d855bf5.npz"
+          ],
+          "diffusion_time_mean": 0.40906792879104614,
+          "increment_loss": 0.14923782646656036,
+          "increment_output_gradient_norm": 0.04319111967748788,
+          "increment_parameter_gradient_norm": 7.645650495538174,
+          "windows": {
+            "0": {
+              "waypoint_loss": 53.48896026611328,
+              "raw_output_gradient_norm": 20.28499216219038,
+              "weighted_output_gradient_norm": 0.06085497648657114,
+              "weighted_to_increment_output_gradient_ratio": 1.4089696433197596,
+              "output_gradient_cosine": 0.7631413114008405,
+              "raw_parameter_gradient_norm": 3484.313073079134,
+              "weighted_parameter_gradient_norm": 10.452939219237402,
+              "weighted_to_increment_parameter_gradient_ratio": 1.3671746080124245,
+              "parameter_gradient_cosine": 0.9938906628447646
+            },
+            "10": {
+              "waypoint_loss": 53.48896026611328,
+              "raw_output_gradient_norm": 3.9243206369803296,
+              "weighted_output_gradient_norm": 0.01177296191094099,
+              "weighted_to_increment_output_gradient_ratio": 0.2725782984754921,
+              "output_gradient_cosine": 0.9216902231329938,
+              "raw_parameter_gradient_norm": 620.0734746534683,
+              "weighted_parameter_gradient_norm": 1.860220423960405,
+              "weighted_to_increment_parameter_gradient_ratio": 0.24330440229330216,
+              "parameter_gradient_cosine": 0.9983204618110063
+            }
+          }
+        },
+        {
+          "batch_index": 56,
+          "scene_count": 4,
+          "scene_names": [
+            "us-nv-las-vegas-strip_08f42b9910135df1.npz",
+            "us-nv-las-vegas-strip_08fc0c858d865876.npz",
+            "us-nv-las-vegas-strip_095d7e9516735f70.npz",
+            "us-nv-las-vegas-strip_0a9ad76fbe3f5c93.npz"
+          ],
+          "diffusion_time_mean": 0.5652666091918945,
+          "increment_loss": 0.05679534748196602,
+          "increment_output_gradient_norm": 0.02664473447515056,
+          "increment_parameter_gradient_norm": 4.365770346836199,
+          "windows": {
+            "0": {
+              "waypoint_loss": 11.645374298095703,
+              "raw_output_gradient_norm": 8.657282275607068,
+              "weighted_output_gradient_norm": 0.025971846826821205,
+              "weighted_to_increment_output_gradient_ratio": 0.9747459428069397,
+              "output_gradient_cosine": 0.6310597590348422,
+              "raw_parameter_gradient_norm": 1568.215736723991,
+              "weighted_parameter_gradient_norm": 4.704647210171974,
+              "weighted_to_increment_parameter_gradient_ratio": 1.077621321419564,
+              "parameter_gradient_cosine": 0.9385100108050657
+            },
+            "10": {
+              "waypoint_loss": 11.645374298095703,
+              "raw_output_gradient_norm": 1.8127072638520434,
+              "weighted_output_gradient_norm": 0.00543812179155613,
+              "weighted_to_increment_output_gradient_ratio": 0.20409742857928784,
+              "output_gradient_cosine": 0.9153294508817239,
+              "raw_parameter_gradient_norm": 297.9244722015215,
+              "weighted_parameter_gradient_norm": 0.8937734166045646,
+              "weighted_to_increment_parameter_gradient_ratio": 0.20472295737045976,
+              "parameter_gradient_cosine": 0.9932481478835006
+            }
+          }
+        },
+        {
+          "batch_index": 57,
+          "scene_count": 4,
+          "scene_names": [
+            "us-nv-las-vegas-strip_0c14210399d45694.npz",
+            "us-nv-las-vegas-strip_0c2122cdc2ea5108.npz",
+            "us-nv-las-vegas-strip_0c777b2253695c87.npz",
+            "us-nv-las-vegas-strip_0cb0a588c9dc55ed.npz"
+          ],
+          "diffusion_time_mean": 0.5171946883201599,
+          "increment_loss": 0.02491653524339199,
+          "increment_output_gradient_norm": 0.017648136240572328,
+          "increment_parameter_gradient_norm": 2.1245611421366273,
+          "windows": {
+            "0": {
+              "waypoint_loss": 4.067794322967529,
+              "raw_output_gradient_norm": 5.36192045526821,
+              "weighted_output_gradient_norm": 0.01608576136580463,
+              "weighted_to_increment_output_gradient_ratio": 0.9114708287906423,
+              "output_gradient_cosine": 0.5373408208009623,
+              "raw_parameter_gradient_norm": 534.6947875101484,
+              "weighted_parameter_gradient_norm": 1.6040843625304453,
+              "weighted_to_increment_parameter_gradient_ratio": 0.7550191569997607,
+              "parameter_gradient_cosine": 0.7314410238585293
+            },
+            "10": {
+              "waypoint_loss": 4.067794322967529,
+              "raw_output_gradient_norm": 1.0753802871514044,
+              "weighted_output_gradient_norm": 0.0032261408614542133,
+              "weighted_to_increment_output_gradient_ratio": 0.18280348799877522,
+              "output_gradient_cosine": 0.725914146817549,
+              "raw_parameter_gradient_norm": 80.06996486632461,
+              "weighted_parameter_gradient_norm": 0.24020989459897385,
+              "weighted_to_increment_parameter_gradient_ratio": 0.11306330038466189,
+              "parameter_gradient_cosine": 0.7089249075240756
+            }
+          }
+        },
+        {
+          "batch_index": 58,
+          "scene_count": 4,
+          "scene_names": [
+            "us-nv-las-vegas-strip_0cb577aadba3532d.npz",
+            "us-nv-las-vegas-strip_0d141d1b11895572.npz",
+            "us-nv-las-vegas-strip_0d5be00495da5df5.npz",
+            "us-nv-las-vegas-strip_0e001f36c2275cb4.npz"
+          ],
+          "diffusion_time_mean": 0.49089863896369934,
+          "increment_loss": 0.09238383919000626,
+          "increment_output_gradient_norm": 0.033982319154885664,
+          "increment_parameter_gradient_norm": 4.313285570239517,
+          "windows": {
+            "0": {
+              "waypoint_loss": 16.338308334350586,
+              "raw_output_gradient_norm": 10.552822905929279,
+              "weighted_output_gradient_norm": 0.03165846871778784,
+              "weighted_to_increment_output_gradient_ratio": 0.9316158962987161,
+              "output_gradient_cosine": 0.5695019879281701,
+              "raw_parameter_gradient_norm": 1548.5959662444764,
+              "weighted_parameter_gradient_norm": 4.645787898733429,
+              "weighted_to_increment_parameter_gradient_ratio": 1.077087946781935,
+              "parameter_gradient_cosine": 0.9501573875113446
+            },
+            "10": {
+              "waypoint_loss": 16.338308334350586,
+              "raw_output_gradient_norm": 2.1472689220884935,
+              "weighted_output_gradient_norm": 0.00644180676626548,
+              "weighted_to_increment_output_gradient_ratio": 0.1895634826129675,
+              "output_gradient_cosine": 0.8087727938190703,
+              "raw_parameter_gradient_norm": 243.38119838535016,
+              "weighted_parameter_gradient_norm": 0.7301435951560505,
+              "weighted_to_increment_parameter_gradient_ratio": 0.16927782389226448,
+              "parameter_gradient_cosine": 0.9326311797663768
+            }
+          }
+        },
+        {
+          "batch_index": 59,
+          "scene_count": 4,
+          "scene_names": [
+            "us-nv-las-vegas-strip_0e486ab808cf5668.npz",
+            "us-nv-las-vegas-strip_0e7d9ad6d9ae577e.npz",
+            "us-nv-las-vegas-strip_0ea077e0d4955b8e.npz",
+            "us-nv-las-vegas-strip_0ea5e85c20a85c80.npz"
+          ],
+          "diffusion_time_mean": 0.6947799921035767,
+          "increment_loss": 0.011524404399096966,
+          "increment_output_gradient_norm": 0.01200229439442646,
+          "increment_parameter_gradient_norm": 1.7846833886777458,
+          "windows": {
+            "0": {
+              "waypoint_loss": 1.9787912368774414,
+              "raw_output_gradient_norm": 3.7938232792806517,
+              "weighted_output_gradient_norm": 0.011381469837841955,
+              "weighted_to_increment_output_gradient_ratio": 0.9482745101742548,
+              "output_gradient_cosine": 0.5432110606382868,
+              "raw_parameter_gradient_norm": 755.9548181674812,
+              "weighted_parameter_gradient_norm": 2.2678644545024436,
+              "weighted_to_increment_parameter_gradient_ratio": 1.27073769436644,
+              "parameter_gradient_cosine": 0.7957696441645504
+            },
+            "10": {
+              "waypoint_loss": 1.9787912368774414,
+              "raw_output_gradient_norm": 0.7581474615956942,
+              "weighted_output_gradient_norm": 0.0022744423847870826,
+              "weighted_to_increment_output_gradient_ratio": 0.18950063296591624,
+              "output_gradient_cosine": 0.5950885128953161,
+              "raw_parameter_gradient_norm": 136.90321067695555,
+              "weighted_parameter_gradient_norm": 0.4107096320308667,
+              "weighted_to_increment_parameter_gradient_ratio": 0.23013024866845283,
+              "parameter_gradient_cosine": 0.7897044108167961
+            }
+          }
+        },
+        {
+          "batch_index": 60,
+          "scene_count": 4,
+          "scene_names": [
+            "us-nv-las-vegas-strip_0f05e76f569d52c0.npz",
+            "us-nv-las-vegas-strip_0f0cc860648b5bc6.npz",
+            "us-nv-las-vegas-strip_0f9598fd6eb45c46.npz",
+            "us-nv-las-vegas-strip_0fa13cb985b65382.npz"
+          ],
+          "diffusion_time_mean": 0.22168830037117004,
+          "increment_loss": 0.002862741472199559,
+          "increment_output_gradient_norm": 0.005981995366757006,
+          "increment_parameter_gradient_norm": 0.7478243206284171,
+          "windows": {
+            "0": {
+              "waypoint_loss": 0.48845982551574707,
+              "raw_output_gradient_norm": 1.9599211320246963,
+              "weighted_output_gradient_norm": 0.005879763396074089,
+              "weighted_to_increment_output_gradient_ratio": 0.9829100551881003,
+              "output_gradient_cosine": 0.5207799753220999,
+              "raw_parameter_gradient_norm": 330.08922065757974,
+              "weighted_parameter_gradient_norm": 0.9902676619727393,
+              "weighted_to_increment_parameter_gradient_ratio": 1.324198257072718,
+              "parameter_gradient_cosine": 0.9885707884850522
+            },
+            "10": {
+              "waypoint_loss": 0.48845982551574707,
+              "raw_output_gradient_norm": 0.38095694475185515,
+              "weighted_output_gradient_norm": 0.0011428708342555655,
+              "weighted_to_increment_output_gradient_ratio": 0.19105177523317696,
+              "output_gradient_cosine": 0.3984674508212032,
+              "raw_parameter_gradient_norm": 63.10121837311366,
+              "weighted_parameter_gradient_norm": 0.189303655119341,
+              "weighted_to_increment_parameter_gradient_ratio": 0.2531392064920595,
+              "parameter_gradient_cosine": 0.9899188011844297
+            }
+          }
+        },
+        {
+          "batch_index": 61,
+          "scene_count": 4,
+          "scene_names": [
+            "us-nv-las-vegas-strip_0fe65d24e74d50de.npz",
+            "us-nv-las-vegas-strip_1060dc6afbbd5553.npz",
+            "us-nv-las-vegas-strip_1096065ebcc25a37.npz",
+            "us-nv-las-vegas-strip_10efec7c8197599f.npz"
+          ],
+          "diffusion_time_mean": 0.4018021523952484,
+          "increment_loss": 0.009755929931998253,
+          "increment_output_gradient_norm": 0.011043057843213428,
+          "increment_parameter_gradient_norm": 0.4860707089962607,
+          "windows": {
+            "0": {
+              "waypoint_loss": 1.9152778387069702,
+              "raw_output_gradient_norm": 3.743595548273547,
+              "weighted_output_gradient_norm": 0.011230786644820641,
+              "weighted_to_increment_output_gradient_ratio": 1.016999711879856,
+              "output_gradient_cosine": 0.5791134191029064,
+              "raw_parameter_gradient_norm": 890.5123791830356,
+              "weighted_parameter_gradient_norm": 2.671537137549107,
+              "weighted_to_increment_parameter_gradient_ratio": 5.496190344540302,
+              "parameter_gradient_cosine": 0.8477263487681758
+            },
+            "10": {
+              "waypoint_loss": 1.9152778387069702,
+              "raw_output_gradient_norm": 0.7626662238518972,
+              "weighted_output_gradient_norm": 0.0022879986715556916,
+              "weighted_to_increment_output_gradient_ratio": 0.20718886960841137,
+              "output_gradient_cosine": 0.3302724923122366,
+              "raw_parameter_gradient_norm": 189.067869504548,
+              "weighted_parameter_gradient_norm": 0.567203608513644,
+              "weighted_to_increment_parameter_gradient_ratio": 1.1669158375844604,
+              "parameter_gradient_cosine": 0.8319683828949667
+            }
+          }
+        },
+        {
+          "batch_index": 62,
+          "scene_count": 4,
+          "scene_names": [
+            "us-nv-las-vegas-strip_120670699aff5a57.npz",
+            "us-nv-las-vegas-strip_121de99d07115efd.npz",
+            "us-nv-las-vegas-strip_1363cf498bdd50ef.npz",
+            "us-nv-las-vegas-strip_14a6eda21c5651d0.npz"
+          ],
+          "diffusion_time_mean": 0.4023478627204895,
+          "increment_loss": 0.04303809627890587,
+          "increment_output_gradient_norm": 0.023194314732222596,
+          "increment_parameter_gradient_norm": 4.285122006905548,
+          "windows": {
+            "0": {
+              "waypoint_loss": 11.015565872192383,
+              "raw_output_gradient_norm": 9.052475764105349,
+              "weighted_output_gradient_norm": 0.027157427292316048,
+              "weighted_to_increment_output_gradient_ratio": 1.1708656886761875,
+              "output_gradient_cosine": 0.6557949136484447,
+              "raw_parameter_gradient_norm": 1846.3596449059319,
+              "weighted_parameter_gradient_norm": 5.5390789347177956,
+              "weighted_to_increment_parameter_gradient_ratio": 1.2926303908713626,
+              "parameter_gradient_cosine": 0.9407948497516768
+            },
+            "10": {
+              "waypoint_loss": 11.015565872192383,
+              "raw_output_gradient_norm": 1.7775990682454985,
+              "weighted_output_gradient_norm": 0.005332797204736495,
+              "weighted_to_increment_output_gradient_ratio": 0.22991829102534042,
+              "output_gradient_cosine": 0.8319424105166295,
+              "raw_parameter_gradient_norm": 318.17441852673164,
+              "weighted_parameter_gradient_norm": 0.9545232555801949,
+              "weighted_to_increment_parameter_gradient_ratio": 0.22275287705740102,
+              "parameter_gradient_cosine": 0.9399494538839068
+            }
+          }
+        },
+        {
+          "batch_index": 63,
+          "scene_count": 4,
+          "scene_names": [
+            "us-nv-las-vegas-strip_14fc7781eb495ebc.npz",
+            "us-nv-las-vegas-strip_1575ec100543505a.npz",
+            "us-nv-las-vegas-strip_1677e89ec9d25562.npz",
+            "us-nv-las-vegas-strip_16efd2b0d302531d.npz"
+          ],
+          "diffusion_time_mean": 0.42892763018608093,
+          "increment_loss": 0.034147098660469055,
+          "increment_output_gradient_norm": 0.02066007695173451,
+          "increment_parameter_gradient_norm": 3.900441426518181,
+          "windows": {
+            "0": {
+              "waypoint_loss": 5.292618751525879,
+              "raw_output_gradient_norm": 5.705152067890018,
+              "weighted_output_gradient_norm": 0.017115456203670054,
+              "weighted_to_increment_output_gradient_ratio": 0.828431386952464,
+              "output_gradient_cosine": 0.5612819933780497,
+              "raw_parameter_gradient_norm": 1383.3787865651632,
+              "weighted_parameter_gradient_norm": 4.150136359695489,
+              "weighted_to_increment_parameter_gradient_ratio": 1.064017095982955,
+              "parameter_gradient_cosine": 0.9724197326697084
+            },
+            "10": {
+              "waypoint_loss": 5.292618751525879,
+              "raw_output_gradient_norm": 1.2179754003927985,
+              "weighted_output_gradient_norm": 0.0036539262011783956,
+              "weighted_to_increment_output_gradient_ratio": 0.17685927355036454,
+              "output_gradient_cosine": 0.8140337301283854,
+              "raw_parameter_gradient_norm": 235.43521410515177,
+              "weighted_parameter_gradient_norm": 0.7063056423154553,
+              "weighted_to_increment_parameter_gradient_ratio": 0.18108351467950523,
+              "parameter_gradient_cosine": 0.9624135172227468
+            }
+          }
+        }
+      ]
+    }
+  }
+}

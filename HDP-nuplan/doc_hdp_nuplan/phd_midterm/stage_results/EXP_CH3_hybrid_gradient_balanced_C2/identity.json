@@ -1,0 +1,7 @@
+{
+  "status": "passed",
+  "C0_initial_model_sha256": "0df19230ccd06ae4a25cf37013a662bcc1aa716f05a9150183b1224705262586",
+  "C2_initial_model_sha256": "0df19230ccd06ae4a25cf37013a662bcc1aa716f05a9150183b1224705262586",
+  "C2_checkpoint": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/chapter3_hybrid_c2_w10_lambda003_v1/training_log/chapter3-C2-gradient-balanced-hybrid-w10-lambda003/2026-10-04-15:16:34/model_epoch_10_trainloss_0.0047.pth",
+  "C2_checkpoint_sha256": "28599d229bbb176eee6b14adb213841f02c363c9a2b16649cd0b318e3d7b3224"
+}

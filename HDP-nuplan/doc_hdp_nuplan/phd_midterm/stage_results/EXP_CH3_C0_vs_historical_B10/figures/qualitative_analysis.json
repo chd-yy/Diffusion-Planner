@@ -1,0 +1,219 @@
+{
+  "selection_contract": {
+    "selection_uses_three_repeat_means": true,
+    "dynamic_scene_rule": "expert 8 s endpoint distance >= 10 m",
+    "dynamic_scene_count": 511,
+    "typical_dynamic": "closest to dynamic-scene median B10-C0 8 s ADE",
+    "temporal_crossover": "among dynamic scenes with B10-C0 1 s ADE < 0 and 8 s ADE > 0, closest to candidate median 8 s delta",
+    "c0_advantage_p90": "closest to dynamic-scene P90 B10-C0 8 s ADE",
+    "b10_advantage_p10": "closest to dynamic-scene P10 B10-C0 8 s ADE",
+    "display_repeat": "repeat whose B10-C0 8 s ADE is closest to the scene three-repeat mean",
+    "manual_outcome_selection": false
+  },
+  "inputs": {
+    "paired_metrics_npz": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/chapter3_hybrid_ablation_v1/post_c0/clustered_open_loop_recalculation/paired_per_scene_metrics.npz",
+    "data_dir": "/home/yanjun/NewDisk/Diffusion-Planner/HDP-nuplan/tmp/mini_val_balanced_1000_seed3407_v1/cache"
+  },
+  "cases": [
+    {
+      "key": "typical_dynamic",
+      "label": "动态场景中位案例",
+      "scene_index": 471,
+      "scene": "us-nv-las-vegas-strip_67483ca79fa25c5d.npz",
+      "log_name": "2021.06.07.12.54.00_veh-35_01843_02314",
+      "map_name": "us-nv-las-vegas-strip",
+      "scenario_type": "unknown",
+      "expert_endpoint_distance_m": 70.47894262285064,
+      "display_repeat_index_zero_based": 2,
+      "display_repeat_index_one_based": 3,
+      "selection_value_b10_minus_c0_8s_ade_m": 0.088206946849823,
+      "b10_minus_c0_1s_ade_m": -0.05428770184516907,
+      "metrics_are_three_repeat_means": true,
+      "metrics": {
+        "ade_1s_m": {
+          "delta": 0.1855347752571106,
+          "delta_recon": 0.13124705851078033
+        },
+        "fde_1s_m": {
+          "delta": 0.36587223410606384,
+          "delta_recon": 0.27072760462760925
+        },
+        "ade_3s_m": {
+          "delta": 0.6570773720741272,
+          "delta_recon": 0.504783570766449
+        },
+        "fde_3s_m": {
+          "delta": 1.1199567317962646,
+          "delta_recon": 0.8160404562950134
+        },
+        "ade_5s_m": {
+          "delta": 0.7142429947853088,
+          "delta_recon": 0.4656338691711426
+        },
+        "fde_5s_m": {
+          "delta": 0.3761429488658905,
+          "delta_recon": 0.12012685090303421
+        },
+        "ade_8s_m": {
+          "delta": 0.9210427403450012,
+          "delta_recon": 1.0092496871948242
+        },
+        "fde_8s_m": {
+          "delta": 3.7519500255584717,
+          "delta_recon": 4.87388277053833
+        }
+      },
+      "scene_context_figure": "qualitative_scene_context_typical_dynamic_songti.png"
+    },
+    {
+      "key": "temporal_crossover",
+      "label": "短期/长期交叉案例",
+      "scene_index": 297,
+      "scene": "us-nv-las-vegas-strip_26243ae5c0935e9d.npz",
+      "log_name": "2021.06.08.12.54.54_veh-26_04262_04732",
+      "map_name": "us-nv-las-vegas-strip",
+      "scenario_type": "unknown",
+      "expert_endpoint_distance_m": 51.4289905139131,
+      "display_repeat_index_zero_based": 2,
+      "display_repeat_index_one_based": 3,
+      "selection_value_b10_minus_c0_8s_ade_m": 0.456845760345459,
+      "b10_minus_c0_1s_ade_m": -0.17255502939224243,
+      "metrics_are_three_repeat_means": true,
+      "metrics": {
+        "ade_1s_m": {
+          "delta": 0.45084241032600403,
+          "delta_recon": 0.2782873809337616
+        },
+        "fde_1s_m": {
+          "delta": 1.0175119638442993,
+          "delta_recon": 0.6542458534240723
+        },
+        "ade_3s_m": {
+          "delta": 1.927625060081482,
+          "delta_recon": 1.521893858909607
+        },
+        "fde_3s_m": {
+          "delta": 3.9418537616729736,
+          "delta_recon": 3.5174102783203125
+        },
+        "ade_5s_m": {
+          "delta": 3.1018259525299072,
+          "delta_recon": 2.9162495136260986
+        },
+        "fde_5s_m": {
+          "delta": 5.6761627197265625,
+          "delta_recon": 6.441079616546631
+        },
+        "ade_8s_m": {
+          "delta": 4.868231773376465,
+          "delta_recon": 5.325077533721924
+        },
+        "fde_8s_m": {
+          "delta": 9.982306480407715,
+          "delta_recon": 11.842192649841309
+        }
+      },
+      "scene_context_figure": "qualitative_scene_context_temporal_crossover_songti.png"
+    },
+    {
+      "key": "c0_advantage_p90",
+      "label": "Delta长时优势P90案例",
+      "scene_index": 643,
+      "scene": "us-nv-las-vegas-strip_a7dba56182eb533d.npz",
+      "log_name": "2021.07.24.23.50.16_veh-17_01696_02071",
+      "map_name": "us-nv-las-vegas-strip",
+      "scenario_type": "stationary",
+      "expert_endpoint_distance_m": 62.25567103875643,
+      "display_repeat_index_zero_based": 1,
+      "display_repeat_index_one_based": 2,
+      "selection_value_b10_minus_c0_8s_ade_m": 1.4005006551742554,
+      "b10_minus_c0_1s_ade_m": -0.003135075094178319,
+      "metrics_are_three_repeat_means": true,
+      "metrics": {
+        "ade_1s_m": {
+          "delta": 0.16042131185531616,
+          "delta_recon": 0.15728622674942017
+        },
+        "fde_1s_m": {
+          "delta": 0.3407018184661865,
+          "delta_recon": 0.3814544379711151
+        },
+        "ade_3s_m": {
+          "delta": 0.6821141242980957,
+          "delta_recon": 0.9663568139076233
+        },
+        "fde_3s_m": {
+          "delta": 1.5241775512695312,
+          "delta_recon": 2.3209943771362305
+        },
+        "ade_5s_m": {
+          "delta": 1.3330016136169434,
+          "delta_recon": 1.9830917119979858
+        },
+        "fde_5s_m": {
+          "delta": 3.035480260848999,
+          "delta_recon": 4.634645938873291
+        },
+        "ade_8s_m": {
+          "delta": 2.4961793422698975,
+          "delta_recon": 3.8966801166534424
+        },
+        "fde_8s_m": {
+          "delta": 6.344979763031006,
+          "delta_recon": 10.249016761779785
+        }
+      },
+      "scene_context_figure": "qualitative_scene_context_c0_advantage_p90_songti.png"
+    },
+    {
+      "key": "b10_advantage_p10",
+      "label": "Delta-Recon长时优势P10案例",
+      "scene_index": 99,
+      "scene": "sg-one-north_fd60e1ef1c785a25.npz",
+      "log_name": "2021.10.05.07.10.04_veh-52_01442_01802",
+      "map_name": "sg-one-north",
+      "scenario_type": "medium_magnitude_speed",
+      "expert_endpoint_distance_m": 58.948355224185576,
+      "display_repeat_index_zero_based": 1,
+      "display_repeat_index_one_based": 2,
+      "selection_value_b10_minus_c0_8s_ade_m": -1.2757724523544312,
+      "b10_minus_c0_1s_ade_m": -0.04774649813771248,
+      "metrics_are_three_repeat_means": true,
+      "metrics": {
+        "ade_1s_m": {
+          "delta": 0.1670849323272705,
+          "delta_recon": 0.11933842301368713
+        },
+        "fde_1s_m": {
+          "delta": 0.33505865931510925,
+          "delta_recon": 0.3001753091812134
+        },
+        "ade_3s_m": {
+          "delta": 0.8912823796272278,
+          "delta_recon": 0.9109997153282166
+        },
+        "fde_3s_m": {
+          "delta": 2.2687084674835205,
+          "delta_recon": 2.405935049057007
+        },
+        "ade_5s_m": {
+          "delta": 2.2018325328826904,
+          "delta_recon": 2.194549798965454
+        },
+        "fde_5s_m": {
+          "delta": 6.354222774505615,
+          "delta_recon": 5.753292083740234
+        },
+        "ade_8s_m": {
+          "delta": 5.6195855140686035,
+          "delta_recon": 4.343813419342041
+        },
+        "fde_8s_m": {
+          "delta": 16.101343154907227,
+          "delta_recon": 9.655403137207031
+        }
+      },
+      "scene_context_figure": "qualitative_scene_context_b10_advantage_p10_songti.png"
+    }
+  ]
+}
